@@ -1,0 +1,198 @@
+<div class="calendar-container page-container">
+  <div class="calendar-layout">
+    <!-- LEFT SIDEBAR: View Mode & Categories -->
+    <aside class="sidebar">
+      <!-- View Mode Section -->
+      <mat-card class="sidebar-card">
+        <h4>View Mode</h4>
+        <div class="view-mode-buttons">
+          <button mat-button 
+                  class="view-btn"
+                  [class.active]="viewMode() === 'daily'"
+                  (click)="setViewMode('daily')">Daily</button>
+          <button mat-button 
+                  class="view-btn"
+                  [class.active]="viewMode() === 'weekly'"
+                  (click)="setViewMode('weekly')">Weekly</button>
+          <button mat-button 
+                  class="view-btn"
+                  [class.active]="viewMode() === 'monthly'"
+                  (click)="setViewMode('monthly')">Monthly</button>
+        </div>
+      </mat-card>
+
+      <!-- Categories Section -->
+      <mat-card class="sidebar-card">
+        <h4>Categories</h4>
+        <div class="categories-list">
+          <button *ngFor="let cat of categories" 
+                  mat-button 
+                  class="category-btn"
+                  [class.active]="selectedCategory() === cat.id"
+                  (click)="selectCategory(cat.id)">
+            <span *ngIf="cat.id !== 'all'" class="category-dot" [style.background]="cat.color"></span>
+            {{ cat.name }}
+          </button>
+        </div>
+      </mat-card>
+    </aside>
+
+    <!-- CENTER: Calendar Views -->
+    <main class="main-calendar">
+      <mat-card class="calendar-card">
+        <!-- DAILY VIEW -->
+        <div *ngIf="viewMode() === 'daily'" class="daily-view">
+          <div class="calendar-header">
+            <h3>{{ selectedDate() | date: 'MMMM d, yyyy' }}</h3>
+            <div class="header-controls">
+              <button mat-button (click)="goToToday()">Today</button>
+              <button mat-icon-button (click)="previousDay()">
+                <mat-icon>chevron_left</mat-icon>
+              </button>
+              <button mat-icon-button (click)="nextDay()">
+                <mat-icon>chevron_right</mat-icon>
+              </button>
+            </div>
+          </div>
+
+          <!-- Time Slots Grid -->
+          <div class="time-grid">
+            <div class="time-label"></div>
+            <div class="time-slots">
+              <div *ngFor="let time of timeSlots()" class="time-slot">
+                <span class="time-text">{{ time }}</span>
+              </div>
+            </div>
+
+            <!-- Events overlay on time grid -->
+            <div class="events-overlay">
+              <div *ngFor="let event of filteredEvents()" 
+                   class="event-block"
+                   [style.top.%]="getEventTopPosition(event.time)"
+                   [style.background]="getCategoryColor(event.category!)">
+                <span class="event-title">{{ event.title }}</span>
+                <span class="event-time">{{ event.time }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- WEEKLY VIEW -->
+        <div *ngIf="viewMode() === 'weekly'" class="weekly-view">
+          <div class="calendar-header">
+            <h3>Week of {{ selectedDate() | date: 'MMM d, yyyy' }}</h3>
+            <div class="header-controls">
+              <button mat-button (click)="goToToday()">Today</button>
+              <button mat-icon-button (click)="previousWeek()">
+                <mat-icon>chevron_left</mat-icon>
+              </button>
+              <button mat-icon-button (click)="nextWeek()">
+                <mat-icon>chevron_right</mat-icon>
+              </button>
+            </div>
+          </div>
+
+          <!-- Week Grid with Days -->
+          <div class="week-grid">
+            <div class="week-days-header">
+              <div class="week-day-header" *ngFor="let day of weekDays()">
+                <div class="day-name">{{ ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][day.date.getDay()] }}</div>
+                <div class="day-number" [class.today]="day.isToday" [class.selected]="day.isSelected">
+                  {{ day.dayOfMonth }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Week Time Grid -->
+            <div class="week-time-grid">
+              <div class="week-times">
+                <div *ngFor="let time of timeSlots()" class="week-time-slot">
+                  <span>{{ time }}</span>
+                </div>
+              </div>
+
+              <!-- Events in week -->
+              <div class="week-events">
+                <div class="week-day-column" *ngFor="let day of weekDays()">
+                  <div *ngFor="let event of filteredEvents()" 
+                       class="week-event"
+                       [style.background]="getCategoryColor(event.category!)"
+                       [style.top.%]="getEventTopPosition(event.time)">
+                    <small>{{ event.time }}</small>
+                    <small>{{ event.title }}</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- MONTHLY VIEW -->
+        <div *ngIf="viewMode() === 'monthly'" class="monthly-view">
+          <div class="calendar-header">
+            <h3>{{ monthYearLabel() }}</h3>
+            <div class="header-controls">
+              <button mat-button (click)="goToToday()">Today</button>
+              <button mat-icon-button (click)="previousMonth()">
+                <mat-icon>chevron_left</mat-icon>
+              </button>
+              <button mat-icon-button (click)="nextMonth()">
+                <mat-icon>chevron_right</mat-icon>
+              </button>
+            </div>
+          </div>
+
+          <!-- Month Calendar Grid -->
+          <div class="month-calendar">
+            <!-- Weekday Headers -->
+            <div class="weekday-headers">
+              <div class="weekday">Sun</div>
+              <div class="weekday">Mon</div>
+              <div class="weekday">Tue</div>
+              <div class="weekday">Wed</div>
+              <div class="weekday">Thu</div>
+              <div class="weekday">Fri</div>
+              <div class="weekday">Sat</div>
+            </div>
+
+            <!-- Days Grid -->
+            <div class="days-grid">
+              <div *ngFor="let day of calendarDays()" 
+                   class="day-cell"
+                   [class.other-month]="!day.isCurrentMonth"
+                   [class.today]="day.isToday"
+                   [class.selected]="day.isSelected"
+                   (click)="selectDate(day.date)">
+                <div class="day-number">{{ day.dayOfMonth }}</div>
+                <div class="day-events">
+                  <span *ngFor="let event of filteredEvents() | slice:0:2" 
+                        class="day-event-dot"
+                        [style.background]="getCategoryColor(event.category!)"></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </mat-card>
+    </main>
+  </div>
+
+  <!-- BOTTOM: Today's Events List -->
+  <mat-card class="events-list-card">
+    <h4>{{ viewMode() === 'daily' ? "Today's Events" : viewMode() === 'weekly' ? "This Week's Events" : "This Month's Events" }}</h4>
+    <div *ngIf="todaysEvents().length > 0; else noEvents" class="events-list">
+      <div *ngFor="let event of todaysEvents()" 
+           class="event-item"
+           [style.border-left]="'4px solid ' + getCategoryColor(event.category!)">
+        <div class="event-time">{{ event.time }}</div>
+        <div class="event-info">
+          <div class="event-title">{{ event.title }}</div>
+          <div class="event-category">{{ getCategoryName(event.category) }}</div>
+        </div>
+      </div>
+    </div>
+    <ng-template #noEvents>
+      <div class="no-events">No events scheduled for this period</div>
+    </ng-template>
+  </mat-card>
+</div>

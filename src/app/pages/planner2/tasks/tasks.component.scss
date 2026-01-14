@@ -1,0 +1,83 @@
+.planner-page {
+  padding: 24px;
+  font-family: 'Poppins', sans-serif;
+
+  .welcome {
+    padding: 20px;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 6px 20px rgba(15,23,42,0.04);
+    margin-bottom: 18px;
+  }
+  .welcome h2 { margin:0; font-size:1.25rem; }
+  .welcome .subtitle { margin-top:6px; color:#6b7280; }
+
+  .ai-suggestion {
+    padding: 18px;
+    border-radius: 12px;
+    margin: 12px 0;
+    background: linear-gradient(90deg,#6d28d9,#a855f7);
+    color: #fff;
+
+    .ai-left { display:flex; gap:12px; align-items:center; }
+    mat-icon { font-size:28px; }
+    .ai-desc { opacity:0.95; }
+  }
+
+  .add-task {
+    margin: 12px 0;
+    padding: 18px;
+    background: #fff;
+    border-radius: 12px;
+
+    .add-btn { width: 100%; justify-content:center; color:#6d28d9; }
+
+    .new-task {
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+
+      .row { display:flex; gap:12px; }
+      .col { flex:1; }
+      .time-col { max-width:160px; }
+
+      label { font-size:13px; color:#374151; }
+
+      .actions { display:flex; gap:12px; align-items:center; }
+      .actions .full { flex:1; background: linear-gradient(90deg,#6d28d9,#8b5cf6); color:#fff; }
+    }
+  }
+
+  .tasks {
+    padding:18px;
+    background:#fff;
+    border-radius:12px;
+
+    h3 { margin:0 0 12px 0; }
+    .tasks-list { display:flex; flex-direction:column; gap:12px; }
+
+    .task-row {
+      display:flex; align-items:center; gap:12px;
+      padding:14px; border-radius:10px;
+      background:#fbfbfd;
+    }
+
+    .task-main { flex:1; }
+    .task-title { font-weight:600; }
+    .task-title.done { text-decoration: line-through; color:#6b7280; }
+    .task-meta { color:#6b7280; font-size:13px; }
+
+    .task-right { display:flex; align-items:center; gap:8px; }
+    .badge {
+      padding:6px 10px; border-radius:999px; font-size:12px; text-transform:lowercase;
+    }
+    .badge.high { background:#ffe6e6; color:#e11d48; }
+    .badge.medium { background:#fff6e5; color:#b45309; }
+    .badge.low { background:#e6fff3; color:#059669; }
+  }
+
+  @media (max-width: 700px) {
+    .ai-suggestion { font-size:14px; }
+    .task-row { padding:10px; }
+  }
+}

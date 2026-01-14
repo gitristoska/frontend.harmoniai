@@ -1,0 +1,35 @@
+<div class="login-container">
+  <div class="icon-wrapper">
+    <img src="assets/logo-icon.svg" alt="app icon" />
+  </div>
+
+  <h2>Welcome Back</h2>
+  <p class="subtitle">Sign in to continue your journey with HarmoniAI</p>
+
+  <div class="card">
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <label>Email Address</label>
+      <div class="input-wrapper">
+        <i class="fi fi-rr-envelope"></i>
+        <input type="email" formControlName="email" placeholder="you@example.com" />
+      </div>
+
+      <label>Password</label>
+      <div class="input-wrapper">
+        <i class="fi fi-rr-lock"></i>
+        <input type="password" formControlName="password" placeholder="Enter your password" />
+      </div>
+
+      <button type="submit" class="btn" [disabled]="form.invalid">Sign In</button>
+    </form>
+
+    <p class="signup">
+      Don't have an account?
+      <a routerLink="/signup">Sign up</a>
+    </p>
+  </div>
+
+  <div class="demo-note">
+    <strong>Demo:</strong> Use any email and a password with 6+ characters
+  </div>
+</div>
