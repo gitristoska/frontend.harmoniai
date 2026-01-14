@@ -1,0 +1,65 @@
+<section class="homepage page-container">
+  <mat-card class="welcome-card">
+    <div class="welcome-left">
+      <h2>{{ greeting() }}</h2>
+      <p class="subtitle">Here's your overview for Friday, November 21</p>
+    </div>
+  </mat-card>
+
+  <div class="overview-cards">
+    <mat-card class="overview small blue">
+      <div class="card-top"><div>Tasks Today</div><mat-icon>check_circle</mat-icon></div>
+      <div class="card-body"><div class="big">{{ 2 - tasksCount }}</div><div class="sub">1 / 3 completed</div></div>
+    </mat-card>
+
+    <mat-card class="overview small purple">
+      <div class="card-top"><div>Habits</div><mat-icon>local_fire_department</mat-icon></div>
+      <div class="card-body"><div class="big">{{ habitCompletionPercent }}%</div><div class="sub">completion rate</div></div>
+    </mat-card>
+
+    <mat-card class="overview small pink">
+      <div class="card-top"><div>Productivity</div><mat-icon>trending_up</mat-icon></div>
+      <div class="card-body"><div class="big">Good momentum</div><div class="sub"> </div></div>
+    </mat-card>
+  </div>
+
+  <mat-card class="tasks-card">
+    <h3>Today's Tasks</h3>
+    <div class="task-list">
+      <div *ngFor="let t of tasksToday(); let i = index" class="task-item">
+        <button mat-icon-button (click)="toggleTaskDone(i)">
+          <mat-icon *ngIf="t.done">check_circle</mat-icon>
+          <mat-icon *ngIf="!t.done">radio_button_unchecked</mat-icon>
+        </button>
+        <div class="task-main">
+          <div class="task-title">{{ t.title }}</div>
+          <div class="task-meta">{{ t.time }} • {{ t.tag }}</div>
+        </div>
+        <div class="task-badge" [class.high]="t.priority==='high'" [class.medium]="t.priority==='medium'">{{ t.priority }}</div>
+      </div>
+    </div>
+  </mat-card>
+
+  <mat-card class="habit-progress">
+    <h3>Habit Progress</h3>
+    <div class="habit-grid">
+      <div *ngFor="let h of habits(); let i = index" class="habit-row">
+        <button mat-icon-button (click)="toggleHabit(i)"><mat-icon *ngIf="h.done">check_circle</mat-icon><mat-icon *ngIf="!h.done">radio_button_unchecked</mat-icon></button>
+        <div class="habit-name">{{ h.name }}</div>
+      </div>
+    </div>
+  </mat-card>
+
+  <mat-card class="ai-recs">
+    <h3>AI Recommendations</h3>
+    <div class="rec-list">
+      <div *ngFor="let r of aiRecommendations()" class="rec-item">
+        <div class="rec-icon"><mat-icon>{{ r.icon }}</mat-icon></div>
+        <div class="rec-body">
+          <div class="rec-title">{{ r.title }}</div>
+          <div class="rec-desc">{{ r.desc }}</div>
+        </div>
+      </div>
+    </div>
+  </mat-card>
+</section>

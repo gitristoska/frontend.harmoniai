@@ -1,0 +1,81 @@
+<section class="goals-page page-container">
+  <!-- Header -->
+  <mat-card class="welcome">
+    <h2>{{ heading() }}</h2>
+    <p class="subtitle">{{ subtitle() }}</p>
+  </mat-card>
+
+  <!-- Add Goal -->
+  <mat-card class="add-goal">
+    <ng-container *ngIf="!showForm">
+      <button mat-button class="add-btn" (click)="addNewGoal()">
+        <mat-icon>add</mat-icon> Add New Goal
+      </button>
+    </ng-container>
+
+    <ng-container *ngIf="showForm">
+      <div class="new-goal">
+        <label>Goal Title</label>
+        <mat-form-field appearance="outline" style="width:100%">
+          <input matInput placeholder="Enter goal title" [(ngModel)]="newGoal.title">
+        </mat-form-field>
+
+        <div class="row">
+          <div class="col">
+            <label>Category</label>
+            <mat-form-field appearance="outline" style="width:100%">
+              <mat-select [(ngModel)]="newGoal.category">
+                <mat-option value="Work">Work</mat-option>
+                <mat-option value="Study">Study</mat-option>
+                <mat-option value="Health">Health</mat-option>
+                <mat-option value="Personal">Personal</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div class="col">
+            <label>Priority</label>
+            <mat-form-field appearance="outline" style="width:100%">
+              <mat-select [(ngModel)]="newGoal.priority">
+                <mat-option value="low">Low</mat-option>
+                <mat-option value="medium">Medium</mat-option>
+                <mat-option value="high">High</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <div class="col">
+            <label>Deadline</label>
+            <mat-form-field appearance="outline" style="width:100%">
+              <input matInput [matDatepicker]="picker" [(ngModel)]="newGoal.deadline">
+              <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+              <mat-datepicker #picker></mat-datepicker>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button mat-button color="primary" class="full" (click)="submitAddGoal()">Add Goal</button>
+          <button mat-button (click)="cancelNewGoal()">Cancel</button>
+        </div>
+      </div>
+    </ng-container>
+  </mat-card>
+
+  <!-- Goals list -->
+  <mat-card class="goals-list">
+    <h3>Your Goals ({{ goals().length }})</h3>
+    <div *ngFor="let g of goals(); let i = index" class="goal-row">
+      <button mat-icon-button (click)="toggleCompleted(i)">
+        <mat-icon *ngIf="g.completed">check_circle</mat-icon>
+        <mat-icon *ngIf="!g.completed">radio_button_unchecked</mat-icon>
+      </button>
+      <div class="goal-main">
+        <div class="goal-title" [class.done]="g.completed">{{ g.title }}</div>
+        <div class="goal-meta">{{ g.deadline }} • {{ g.category }}</div>
+      </div>
+      <div class="goal-right">
+        <div class="badge" [class.high]="g.priority==='high'" [class.medium]="g.priority==='medium'" [class.low]="g.priority==='low'">{{ g.priority }}</div>
+        <button mat-icon-button color="warn" (click)="deleteGoal(i)"><mat-icon>delete</mat-icon></button>
+      </div>
+    </div>
+  </mat-card>
+</section>

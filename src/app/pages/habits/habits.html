@@ -1,0 +1,89 @@
+<section class="habits-page page-container">
+  <div class="header-card">
+    <h1>Habit Tracker</h1>
+    <p class="subtitle">Build consistency with your daily habits</p>
+  </div>
+
+  <button mat-raised-button color="primary" (click)="startAdd()">
+  <mat-icon>add</mat-icon> Add Habit
+</button>
+
+<!-- SIMPLE FORM -->
+<div *ngIf="showForm" class="habit-form">
+  <mat-form-field appearance="outline">
+    <mat-label>Habit name</mat-label>
+    <input matInput [(ngModel)]="formName">
+  </mat-form-field>
+
+  <div class="form-buttons">
+    <button mat-button color="primary" (click)="saveHabit()">Save</button>
+    <button mat-button (click)="cancelForm()">Cancel</button>
+  </div>
+</div>
+
+
+  <mat-card class="overview-card">
+    <div class="overview-top">
+      <div>
+        <div class="label">Weekly Completion Rate</div>
+        <div class="percent">{{ weeklyCompletionPercent() }}%</div>
+      </div>
+      <mat-icon class="trend">trending_up</mat-icon>
+    </div>
+
+    <mat-progress-bar mode="determinate" [value]="weeklyCompletionPercent()" color="primary"></mat-progress-bar>
+  </mat-card>
+
+  <mat-card class="tracker-card">
+    <div class="tracker-header">
+      <div class="col-habit">Habit</div>
+      <div class="col-days">
+        <span *ngFor="let d of days" class="day-label">{{ d }}</span>
+      </div>
+    </div>
+
+    <div class="tracker-body">
+      <div *ngFor="let h of habits; let i = index" class="tracker-row">
+        <div class="actions">
+          <button mat-icon-button (click)="startEdit(h)">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button mat-icon-button color="warn" (click)="deleteHabit(h.id)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+
+        <div class="col-habit">{{ h.name }}</div>
+        <div class="col-days">
+          <button mat-icon-button class="day-bubble" *ngFor="let done of h.days; let di = index" (click)="toggleDay(i, di)">
+            <mat-icon *ngIf="done" class="done">check_circle</mat-icon>
+            <mat-icon *ngIf="!done" class="not-done">radio_button_unchecked</mat-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+  </mat-card>
+
+  <mat-card class="stats-card">
+    <h3>Habit Statistics</h3>
+    <div class="stats-grid">
+      <div *ngFor="let h of habits" class="stat-item">
+        <div class="stat-top">
+          <div class="stat-name">{{ h.name }}</div>
+          <div class="stat-days">{{ daysDone(h) }}/{{ h.days.length }} days</div>
+        </div>
+        <mat-progress-bar mode="determinate" [value]="habitCompletion(h) * 100"></mat-progress-bar>
+        <div class="stat-footer">{{ (habitCompletion(h) * 100) | number:'1.0-0' }}% completion this week</div>
+      </div>
+    </div>
+  </mat-card>
+
+  <mat-card class="ai-card">
+    <h3>AI Suggestions for Improvement</h3>
+    <ul>
+      <li>Try habit stacking: Pair a new habit with an existing one (e.g., meditate right after morning exercise)</li>
+      <li>Your consistency is building. Focus on completing just one habit daily to build momentum.</li>
+      <li>Set a reminder for your least completed habit to improve overall consistency</li>
+    </ul>
+  </mat-card>
+</section>

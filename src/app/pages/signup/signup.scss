@@ -1,0 +1,127 @@
+.signup-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 16px;
+  background: #f7f5ff;
+  min-height: 100vh;
+}
+
+.logo-section {
+  text-align: center;
+  margin-bottom: 24px;
+
+  .icon-box {
+    width: 72px;
+    height: 72px;
+    background: linear-gradient(135deg, #8b5cf6, #6366f1);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px auto;
+
+    img {
+      width: 36px;
+      height: 36px;
+    }
+  }
+
+  h2 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 600;
+  }
+
+  p {
+    margin: 4px 0 0;
+    color: #555;
+  }
+}
+
+.card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 28px;
+  width: 100%;
+  max-width: 420px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  margin-bottom: 20px;
+}
+
+label {
+  font-weight: 500;
+  margin-top: 14px;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.input-wrap {
+  input {
+    width: 100%;
+    padding: 14px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    font-size: 15px;
+
+    &:focus {
+      outline: none;
+      border-color: #7c3aed;
+    }
+  }
+}
+
+.btn-create {
+  width: 100%;
+  margin-top: 24px;
+  padding: 14px;
+  background: linear-gradient(135deg, #8b5cf6, #6366f1);
+  color: white;
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.signin-text {
+  margin-top: 16px;
+  text-align: center;
+  font-size: 14px;
+
+  a {
+    color: #6366f1;
+    text-decoration: none;
+  }
+}
+
+.benefits-card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 20px;
+  max-width: 420px;
+  width: 100%;
+  box-shadow: 0px 10px 30px rgba(0, 0, 0, 0.05);
+
+  h4 {
+    margin-top: 0;
+    margin-bottom: 16px;
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+
+    li {
+      margin-bottom: 10px;
+      padding-left: 22px;
+      position: relative;
+
+      &::before {
+        content: '✔';
+        color: #6366f1;
+        position: absolute;
+        left: 0;
+      }
+    }
+  }
+}

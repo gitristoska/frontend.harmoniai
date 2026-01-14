@@ -1,0 +1,72 @@
+
+// Include theming for Angular Material with `mat.theme()`.
+// This Sass mixin will define CSS variables that are used for styling Angular Material
+// components according to the Material 3 design spec.
+// Learn more about theming and how to use it for your application's
+// custom components at https://material.angular.dev/guide/theming
+@use '@angular/material' as mat;
+
+html {
+  @include mat.theme((
+    color: (
+      primary: mat.$azure-palette,
+      tertiary: mat.$blue-palette,
+    ),
+    typography: Roboto,
+    density: 0,
+  ));
+}
+
+body {
+  // Default the application to a light color theme. This can be changed to
+  // `dark` to enable the dark color theme, or to `light dark` to defer to the
+  // user's system settings.
+  color-scheme: light;
+
+  // Set a default background, font and text colors for the application using
+  // Angular Material's system-level CSS variables. Learn more about these
+  // variables at https://material.angular.dev/guide/system-variables
+  background-color: var(--mat-sys-surface);
+  color: var(--mat-sys-on-surface);
+  font: var(--mat-sys-body-medium);
+
+  // Reset the user agent margin.
+  margin: 0;
+}
+/* You can add global styles to this file, and also import other style files */
+
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+/* Page container utility used across pages to keep content centered with horizontal gutters */
+.page-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 20px; /* horizontal and vertical padding */
+  box-sizing: border-box;
+}
+
+/* Make section elements that represent pages use consistent spacing by default */
+section[class$="-page"] {
+  display: block;
+  padding-top: 8px;
+  padding-bottom: 32px;
+}
+
+/* Default: make page headings non-bold to match the requested style
+   (most headings should be normal weight except a few page-title exceptions) */
+.page-container h1,
+.page-container h2,
+.page-container h3,
+.page-container h4,
+.page-container h5,
+.page-container h6 {
+  font-weight: 400; /* normal */
+}
+
+/* Exceptions: keep these page titles bold */
+.homepage .welcome-card h2,
+.planner-page .welcome h2,
+.journal-page .header-card h1 {
+  font-weight: 700; /* bold */
+}

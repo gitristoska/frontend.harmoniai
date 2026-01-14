@@ -1,0 +1,54 @@
+<div class="signup-container">
+
+  <div class="logo-section">
+    <div class="icon-box">
+      <img src="assets/icon.svg" alt="logo" />
+    </div>
+    <h2>Join HarmoniAI</h2>
+    <p>Start your journey to better productivity and wellness</p>
+  </div>
+
+  <div class="card">
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+
+      <label>Full Name</label>
+      <div class="input-wrap">
+        <input type="text" placeholder="John Doe" formControlName="fullName" />
+      </div>
+
+      <label>Email Address</label>
+      <div class="input-wrap">
+        <input type="email" placeholder="you@example.com" formControlName="email" />
+      </div>
+
+      <label>Password</label>
+      <div class="input-wrap">
+        <input type="password" placeholder="Create a password" formControlName="password" />
+      </div>
+
+      <label>Confirm Password</label>
+      <div class="input-wrap">
+        <input type="password" placeholder="Confirm your password" formControlName="confirmPassword" />
+      </div>
+
+      <button class="btn-create" type="submit">Create Account</button>
+
+      <div class="signin-text">
+        Already have an account?
+        <a href="#">Sign in</a>
+      </div>
+
+    </form>
+  </div>
+
+  <div class="benefits-card">
+    <h4>What you'll get:</h4>
+
+    <ul>
+      <li>AI-powered task optimization</li>
+      <li>Habit tracking with insights</li>
+      <li>Digital journal with mood analysis</li>
+    </ul>
+  </div>
+
+</div>

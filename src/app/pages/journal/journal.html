@@ -1,0 +1,69 @@
+<section class="journal-page page-container">
+  <div class="header-card">
+    <h1>Digital Journal</h1>
+    <p class="subtitle">Record your thoughts and let AI help you understand your patterns</p>
+  </div>
+
+  <div class="write-bar">
+    <ng-container *ngIf="!showForm">
+      <button mat-button class="write-btn" (click)="createNewEntry()">
+        <mat-icon>add</mat-icon>
+        <span>Write New Entry</span>
+      </button>
+    </ng-container>
+
+    <ng-container *ngIf="showForm">
+      <mat-card class="new-entry-card">
+        <h3>New Journal Entry</h3>
+        <div class="entry-date">{{ todayDate }}</div>
+
+        <mat-slide-toggle [(ngModel)]="useAiAnalysis">Use AI Analysis</mat-slide-toggle>
+
+        <mat-form-field appearance="outline" style="width:100%">
+          <textarea matInput rows="8" placeholder="How was your day? What are you thinking about?" [(ngModel)]="newEntryText"></textarea>
+        </mat-form-field>
+
+        <mat-card class="ai-note">
+          <mat-icon>auto_awesome</mat-icon>
+          <div>AI will analyze your entry to detect emotional patterns and suggest helpful activities.</div>
+        </mat-card>
+
+        <div class="entry-actions">
+          <button mat-button class="save" (click)="saveEntry()">Save Entry</button>
+          <button mat-button (click)="cancelEntry()">Cancel</button>
+        </div>
+      </mat-card>
+    </ng-container>
+  </div>
+
+  <div class="entries">
+    <mat-card class="entry" *ngFor="let e of entries">
+      <div class="entry-header">
+  <div class="date">{{ e.date }}</div>
+  
+  
+  <div class="sentiment" *ngIf="e.sentiment">
+    <mat-icon>{{ getSentimentIcon(e.sentiment) }}</mat-icon> {{ e.sentiment }}
+  </div>
+ 
+</div>
+ <div class="entry-actions-icons" style="display: flex;justify-content: end;">
+    <button mat-icon-button color="primary" (click)="editEntry(e)">
+      <mat-icon>edit</mat-icon>
+    </button>
+    <button mat-icon-button color="warn" (click)="deleteEntry(e)">
+      <mat-icon>delete</mat-icon>
+    </button>
+  </div>
+
+      <div class="entry-body">
+        <p>{{ e.text }}</p>
+
+        <mat-card class="ai-card" *ngIf="e.aiAnalysis">
+          <div class="ai-title"><mat-icon>auto_awesome</mat-icon> AI Analysis</div>
+          <div class="ai-content">{{ e.aiAnalysis }}</div>
+        </mat-card>
+      </div>
+    </mat-card>
+  </div>
+</section>
