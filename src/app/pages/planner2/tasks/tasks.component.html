@@ -5,47 +5,34 @@
     <p class="subtitle">{{ subtitle() }}</p>
   </mat-card>
 
-  <!-- AI suggestion card -->
-  <mat-card class="ai-suggestion">
-    <div class="ai-left">
-      <mat-icon>sparkles</mat-icon>
-      <div>
-        <div class="ai-title">{{ aiSuggestion().title }}</div>
-        <div class="ai-desc">{{ aiSuggestion().desc }}</div>
-      </div>
-    </div>
-  </mat-card>
+  <div class="planner-grid">
+    <!-- Add Task card (Left) -->
+    <mat-card class="add-task">
+      <ng-container *ngIf="!showForm">
+        <button mat-button class="add-btn" (click)="addNewTask()">
+          <mat-icon>add</mat-icon> Add New Task
+        </button>
+      </ng-container>
 
-  <!-- Add Task card -->
-  <mat-card class="add-task">
-    <ng-container *ngIf="!showForm">
-      <button mat-button class="add-btn" (click)="addNewTask()">
-        <mat-icon>add</mat-icon> Add New Task
-      </button>
-    </ng-container>
+      <ng-container *ngIf="showForm">
+        <div class="new-task">
+          <mat-form-field appearance="outline" style="width:100%">
+            <mat-label>Task Title</mat-label>
+            <input matInput placeholder="What do you need to do?" [(ngModel)]="newTask.title" />
+          </mat-form-field>
 
-    <ng-container *ngIf="showForm">
-      <div class="new-task">
-        <label>Task Title</label>
-        <mat-form-field appearance="outline" style="width:100%">
-          <input matInput placeholder="What do you need to do?" [(ngModel)]="newTask.title" />
-        </mat-form-field>
-
-        <div class="row">
-          <div class="col">
-            <label>Priority</label>
-            <mat-form-field appearance="outline" style="width:100%">
+          <div class="row">
+            <mat-form-field appearance="outline" class="col">
+              <mat-label>Priority</mat-label>
               <mat-select [(ngModel)]="newTask.priority">
-                <mat-option value="low">Low</mat-option>
-                <mat-option value="medium">Medium</mat-option>
-                <mat-option value="high">High</mat-option>
+                <mat-option [value]="0">Low</mat-option>
+                <mat-option [value]="1">Medium</mat-option>
+                <mat-option [value]="2">High</mat-option>
               </mat-select>
             </mat-form-field>
-          </div>
 
-          <div class="col">
-            <label>Category</label>
-            <mat-form-field appearance="outline" style="width:100%">
+            <mat-form-field appearance="outline" class="col">
+              <mat-label>Category</mat-label>
               <mat-select [(ngModel)]="newTask.category">
                 <mat-option value="work">Work</mat-option>
                 <mat-option value="study">Study</mat-option>
@@ -54,59 +41,54 @@
               </mat-select>
             </mat-form-field>
           </div>
-        </div>
 
-        <div class="row">
-          <div class="col time-col">
-            <label>Date</label>
-            <mat-form-field appearance="outline" style="width:100%">
+          <div class="row">
+            <mat-form-field appearance="outline" class="col time-col">
+              <mat-label>Date</mat-label>
               <input matInput type="date" [(ngModel)]="newTask.date" />
             </mat-form-field>
-          </div>
 
-          <div class="col time-col">
-            <label>Time (optional)</label>
-            <mat-form-field appearance="outline" style="width:100%">
+            <mat-form-field appearance="outline" class="col time-col">
+              <mat-label>Time (optional)</mat-label>
               <input matInput type="time" [(ngModel)]="newTask.time" />
             </mat-form-field>
           </div>
-        </div>
 
-        <div class="actions">
-          <button mat-button color="primary" class="full" (click)="submitAddTask()">Add Task</button>
-          <button mat-button (click)="cancelNewTask()">Cancel</button>
-        </div>
-      </div>
-    </ng-container>
-  </mat-card>
-
-  <!-- Tasks list -->
-  <mat-card class="tasks">
-    <h3>Your Tasks ({{ tasks().length }})</h3>
-    <div class="tasks-list">
-      <div *ngFor="let t of tasks(); let i = index" class="task-row">
-        <button mat-icon-button (click)="toggleDone(i)">
-          <mat-icon *ngIf="t.isDone">check_circle</mat-icon>
-          <mat-icon *ngIf="!t.isDone">radio_button_unchecked</mat-icon>
-        </button>
-        <div class="task-main">
-          <div class="task-title" [class.done]="t.isDone">{{ t.title }}</div>
-          <div class="task-meta">{{ t.time }}</div>
-        </div>
-        <div class="task-right">
-          <div
-            class="badge"
-            [class.high]="t.priority===2"
-            [class.medium]="t.priority===1"
-            [class.low]="t.priority===0"
-          >
-            {{ t.priority === 0 ? 'low' : t.priority === 1 ? 'medium' : 'high' }}
+          <div class="actions">
+            <button mat-button color="primary" class="full" (click)="submitAddTask()">Add Task</button>
+            <button mat-button (click)="cancelNewTask()">Cancel</button>
           </div>
-          <button mat-icon-button color="warn" (click)="deleteTask(i)">
-            <mat-icon>delete</mat-icon>
-          </button>
+        </div>
+      </ng-container>
+    </mat-card>
+
+    <!-- Tasks list (Right) -->
+    <mat-card class="tasks">
+      <h3>Your Tasks ({{ tasks().length }})</h3>
+      <div class="tasks-list">
+        <div *ngFor="let t of tasks(); let i = index" class="task-row">
+          <div class="task-main">
+            <div class="task-title">{{ t.title }}</div>
+            <div class="task-meta">
+              {{ t.scheduledAt ? (t.scheduledAt | date:'medium') : '' }}
+              • {{ t.category }}
+            </div>
+          </div>
+          <div class="task-right">
+            <div
+              class="badge"
+              [class.high]="t.priority===2"
+              [class.medium]="t.priority===1"
+              [class.low]="t.priority===0"
+            >
+              {{ t.priority === 0 ? 'low' : t.priority === 1 ? 'medium' : 'high' }}
+            </div>
+            <button mat-icon-button color="warn" (click)="deleteTask(i)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
         </div>
       </div>
-    </div>
-  </mat-card>
+    </mat-card>
+  </div>
 </section>

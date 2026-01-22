@@ -1,3 +1,4 @@
+// tasks.component.ts
 import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -7,6 +8,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
+import { HttpErrorResponse } from '@angular/common/http';
+
 import { PlannerService } from '../../../services/task.service';
 import { PlannerTask, PlannerTaskCreateDto } from '../../../models/api';
 
@@ -24,80 +27,84 @@ import { PlannerTask, PlannerTaskCreateDto } from '../../../models/api';
     MatSelectModule
   ],
   templateUrl: './tasks.component.html',
-  styleUrls: ['./tasks.component.scss']
+  styleUrls: ['./tasks.component.scss'],
+  providers: [PlannerService] // <-- injection fixed
 })
 export class TasksComponent {
-  protected readonly heading = signal('Daily Planner');
-  protected readonly subtitle = signal('Organize and prioritize your tasks for maximum productivity');
+  heading = signal('Daily Planner');
+  subtitle = signal('Organize and prioritize your tasks for maximum productivity');
 
-  protected readonly aiSuggestion = signal({
-    title: 'AI Schedule Optimization',
-    desc: 'Based on your tasks, I recommend tackling high-priority items first thing in the morning when energy levels are highest.'
-  });
+  tasks = signal<PlannerTask[]>([]);
 
-  constructor(private plannerService: PlannerService) {
+  showForm = false;
+  newTask: { title: string; time: string; date: string; category: string; priority: number } = {
+    title: '',
+    time: '',
+    date: '',
+    category: 'work',
+    priority: 1
+  };
+
+  constructor(private readonly plannerService: PlannerService) {
     this.loadTasks();
   }
 
-  protected readonly tasks = signal<PlannerTask[]>([]);
-
-  private loadTasks() {
-    this.plannerService.getTasks().subscribe({
-      next: (response) => {
-        if (response && response.plannerTasks) {
-          this.tasks.set(response.plannerTasks);
-        }
-      },
-      error: (err) => console.error('Error loading tasks:', err)
-    });
+  private loadTasks(): void {
+    this.plannerService.getTasksForMonth(2026, 1).subscribe({
+     next: (tasks) => this.tasks.set(tasks),
+     error: (err) => console.error(err) });
   }
 
-  // New task form state
-  showForm = false;
-  newTask: any = { title: '', time: '', date: '', category: 'work', priority: 1, isDone: false };
+  addNewTask(): void {
+    this.showForm = true;
+  }
 
-  addNewTask() { this.showForm = true; }
+  submitAddTask(): void {
+    if (!this.newTask.title?.trim() || !this.newTask.date) return;
 
-  submitAddTask() {
-    if (!this.newTask.title || !this.newTask.title.trim()) return;
-    if (!this.newTask.date) return;
-    
+    const scheduledAt = this.newTask.time
+      ? `${this.newTask.date}T${this.newTask.time}:00.000Z`
+      : `${this.newTask.date}T00:00:00.000Z`;
+
     const taskToAdd: PlannerTaskCreateDto = {
       title: this.newTask.title,
-      time: this.newTask.time || '',
-      date: this.newTask.date,
-      category: this.newTask.category,
-      priority: typeof this.newTask.priority === 'string' ? (this.newTask.priority === 'low' ? 0 : this.newTask.priority === 'medium' ? 1 : 2) : this.newTask.priority,
-      done: false
+      description: '',
+      scheduledAt,
+      priority: this.newTask.priority,
+      category: this.newTask.category
     };
-    
+
     this.plannerService.addTask(taskToAdd).subscribe({
-      next: (response) => {
+      next: (response: PlannerTask) => {
         const t = this.tasks();
-        t.push({ ...this.newTask });
+        t.push(response);
         this.tasks.set([...t]);
         this.resetForm();
       },
-      error: (err) => console.error('Error adding task:', err)
+      error: (err: HttpErrorResponse) => console.error('Error adding task:', err)
     });
   }
 
-  cancelNewTask() { this.resetForm(); }
+  cancelNewTask(): void {
+    this.resetForm();
+  }
 
-  private resetForm() {
-    this.newTask = { title: '', time: '', date: '', category: 'work', priority: 1, isDone: false };
+  private resetForm(): void {
+    this.newTask = { title: '', time: '', date: '', category: 'work', priority: 1 };
     this.showForm = false;
   }
 
-  deleteTask(i: number) {
+  deleteTask(i: number): void {
     const t = this.tasks();
-    t.splice(i, 1);
-    this.tasks.set([...t]);
-  }
+    const task = t[i];
+    if (!task.id) return;
 
-  toggleDone(i: number) {
-    const t = this.tasks();
-    t[i].isDone = !t[i].isDone;
-    this.tasks.set([...t]);
+    this.plannerService.deleteTask(task.id).subscribe({
+      next: () => {
+        t.splice(i, 1);
+        this.tasks.set([...t]);
+      },
+      error: (err: HttpErrorResponse) => console.error('Error deleting task:', err)
+    });
   }
 }

@@ -14,7 +14,17 @@ import { PlannerTask, PlannerTaskCreateDto } from '../../models/api';
 @Component({
   selector: 'app-planner',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatCardModule, MatIconModule, MatButtonModule, MatListModule, MatFormFieldModule, MatInputModule, MatSelectModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    MatCardModule,
+    MatIconModule,
+    MatButtonModule,
+    MatListModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule
+  ],
   templateUrl: './planner.html',
   styleUrls: ['./planner.scss']
 })
@@ -27,49 +37,60 @@ export class Planner {
     desc: 'Based on your tasks, I recommend tackling high-priority items first thing in the morning when energy levels are highest.'
   });
 
+  protected readonly tasks = signal<PlannerTask[]>([]);
+
+  // New task form state
+  showForm = false;
+  newTask: {
+    title: string;
+    description: string;
+    date: string;
+    time: string;
+    category: string;
+    priority: 'low' | 'medium' | 'high';
+  } = {
+    title: '',
+    description: '',
+    date: '',
+    time: '',
+    category: 'work',
+    priority: 'medium'
+  };
+
   constructor(private plannerService: PlannerService) {
     this.loadTasks();
   }
 
-  protected readonly tasks = signal<PlannerTask[]>([]);
-
   private loadTasks() {
-    this.plannerService.getTasks().subscribe({
-      next: (response) => {
-        if (response && response.plannerTasks) {
-          this.tasks.set(response.plannerTasks);
-        }
-      },
+    this.plannerService.getTasksForMonth(2026, 1).subscribe({
+      next: (tasks) => this.tasks.set(tasks),
       error: (err) => console.error('Error loading tasks:', err)
     });
   }
 
-  // New task form state
-  showForm = false;
-  newTask: any = { title: '', time: '', date: '', category: 'work', priority: 'medium', done: false };
-
   addNewTask() {
-    // open the form
     this.showForm = true;
   }
 
   submitAddTask() {
-    if (!this.newTask.title || !this.newTask.title.trim()) return;
-    if (!this.newTask.date) return;
-    
+    if (!this.newTask.title?.trim() || !this.newTask.date) return;
+
+    const scheduledAt = this.newTask.time
+      ? `${this.newTask.date}T${this.newTask.time}`
+      : `${this.newTask.date}T00:00`;
+
     const taskToAdd: PlannerTaskCreateDto = {
       title: this.newTask.title,
-      time: this.newTask.time || '',
-      date: this.newTask.date,
-      category: this.newTask.category,
+      description: this.newTask.description,
+      scheduledAt,
       priority: this.newTask.priority === 'low' ? 0 : this.newTask.priority === 'medium' ? 1 : 2,
-      done: false
+      category: this.newTask.category
     };
-    
+
     this.plannerService.addTask(taskToAdd).subscribe({
       next: (response) => {
         const t = this.tasks();
-        t.push({ ...this.newTask });
+        t.push(response);
         this.tasks.set([...t]);
         this.resetForm();
       },
@@ -82,14 +103,27 @@ export class Planner {
   }
 
   private resetForm() {
-    this.newTask = { title: '', time: '', date: '', category: 'work', priority: 'medium', done: false };
+    this.newTask = {
+      title: '',
+      description: '',
+      date: '',
+      time: '',
+      category: 'work',
+      priority: 'medium'
+    };
     this.showForm = false;
   }
 
   deleteTask(i: number) {
     const t = this.tasks();
-    t.splice(i, 1);
-    this.tasks.set([...t]);
+    const task = t[i];
+    this.plannerService.deleteTask(task.id as number).subscribe({
+      next: () => {
+        t.splice(i, 1);
+        this.tasks.set([...t]);
+      },
+      error: (err) => console.error('Error deleting task:', err)
+    });
   }
 
   toggleDone(i: number) {
