@@ -1,0 +1,27 @@
+<mat-card class="monthly-view-card">
+  <mat-card-content class="calendar-grid">
+    <div class="weekday-headers">
+      <div class="weekday-header">Sun</div>
+      <div class="weekday-header">Mon</div>
+      <div class="weekday-header">Tue</div>
+      <div class="weekday-header">Wed</div>
+      <div class="weekday-header">Thu</div>
+      <div class="weekday-header">Fri</div>
+      <div class="weekday-header">Sat</div>
+    </div>
+
+    <div class="days-grid">
+      <div *ngFor="let day of getCalendarDays()"
+        class="calendar-day"
+        [class.other-month]="!day.isCurrentMonth"
+        [class.today]="day.isToday"
+        [class.selected]="day.isSelected"
+        (click)="onDayClick(day)">
+        <div class="day-number">{{ day.dayOfMonth }}</div>
+        <div class="day-events">
+          <div class="event-indicator">{{ day.dayOfMonth % 7 }} events</div>
+        </div>
+      </div>
+    </div>
+  </mat-card-content>
+</mat-card>

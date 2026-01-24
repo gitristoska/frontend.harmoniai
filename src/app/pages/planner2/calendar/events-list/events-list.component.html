@@ -1,0 +1,13 @@
+<mat-card>
+  <h4>{{ headerTitle() }}</h4>
+  <div *ngIf="events().length > 0; else noEvents">
+    <div *ngFor="let e of events()" 
+         class="event-item" 
+         [style.border-left]="'4px solid ' + getCategoryColor(e.category)"
+         (click)="onEventClick(e)">
+      <div>{{e.time}}</div>
+      <div>{{e.title}} ({{getCategoryName(e.category)}})</div>
+    </div>
+  </div>
+  <ng-template #noEvents>No events</ng-template>
+</mat-card>

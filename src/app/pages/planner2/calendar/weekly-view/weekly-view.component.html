@@ -1,0 +1,18 @@
+<mat-card class="weekly-view-card">
+  <mat-card-header class="week-header">
+    <h2>Weekly View</h2>
+  </mat-card-header>
+
+  <mat-card-content class="week-grid">
+    <div *ngFor="let day of getWeekDays()" class="week-day">
+      <div class="day-header">
+        <div class="day-name">{{ day.date | date:'EEE' }}</div>
+        <div class="day-date" [class.today]="day.isToday">{{ day.date | date:'d' }}</div>
+      </div>
+      <div class="day-events-placeholder">
+        <!-- Events would be displayed here -->
+        <p>No events</p>
+      </div>
+    </div>
+  </mat-card-content>
+</mat-card>

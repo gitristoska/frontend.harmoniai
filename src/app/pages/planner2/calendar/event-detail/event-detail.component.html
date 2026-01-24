@@ -1,0 +1,74 @@
+<mat-card class="event-detail-card">
+  <div class="detail-header">
+    <h3>Event Details</h3>
+    <button mat-icon-button (click)="close()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div *ngIf="!isEditing" class="detail-view">
+    <div class="event-info">
+      <div class="info-row">
+        <mat-icon>schedule</mat-icon>
+        <span>{{ event().time }}</span>
+      </div>
+      <div class="info-row">
+        <mat-icon>event</mat-icon>
+        <span>{{ event().date | date:'EEEE, MMMM d, yyyy' }}</span>
+      </div>
+      <div class="info-row">
+        <mat-icon>label</mat-icon>
+        <span class="category-badge" [style.background]="getCategoryColor(event().category)">
+          {{ getCategoryName(event().category) }}
+        </span>
+      </div>
+    </div>
+
+    <div class="event-title-display">
+      <h4>{{ event().title }}</h4>
+    </div>
+
+    <div class="detail-actions">
+      <button mat-raised-button color="primary" (click)="startEdit()">
+        <mat-icon>edit</mat-icon>
+        Edit
+      </button>
+      <button mat-raised-button color="warn" (click)="deleteEvent()">
+        <mat-icon>delete</mat-icon>
+        Delete
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="isEditing" class="detail-edit">
+    <mat-form-field appearance="outline" style="width:100%">
+      <mat-label>Event Title</mat-label>
+      <input matInput [(ngModel)]="editTitle" placeholder="Enter event title">
+    </mat-form-field>
+
+    <div class="form-row">
+      <mat-form-field appearance="outline" style="flex:1">
+        <mat-label>Time</mat-label>
+        <input matInput type="time" [(ngModel)]="editTime">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" style="flex:1">
+        <mat-label>Category</mat-label>
+        <mat-select [(ngModel)]="editCategory">
+          <mat-option *ngFor="let cat of categories()" [value]="cat.id">
+            <span *ngIf="cat.id !== 'all'" class="dot" [style.background]="cat.color"></span>
+            {{ cat.name }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <div class="edit-actions">
+      <button mat-raised-button color="primary" (click)="saveEdit()">
+        <mat-icon>save</mat-icon>
+        Save
+      </button>
+      <button mat-button (click)="cancelEdit()">Cancel</button>
+    </div>
+  </div>
+</mat-card>

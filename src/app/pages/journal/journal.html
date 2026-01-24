@@ -39,30 +39,22 @@
   <div class="entries">
     <mat-card class="entry" *ngFor="let e of entries">
       <div class="entry-header">
-  <div class="date">{{ e.date }}</div>
-  
-  
-  <div class="sentiment" *ngIf="e.sentiment">
-    <mat-icon>{{ getSentimentIcon(e.sentiment) }}</mat-icon> {{ e.sentiment }}
-  </div>
- 
-</div>
- <div class="entry-actions-icons" style="display: flex;justify-content: end;">
-    <button mat-icon-button color="primary" (click)="editEntry(e)">
-      <mat-icon>edit</mat-icon>
-    </button>
-    <button mat-icon-button color="warn" (click)="deleteEntry(e)">
-      <mat-icon>delete</mat-icon>
-    </button>
-  </div>
+        <div class="sentiment" *ngIf="e.sentiment">
+          <mat-icon>{{ getSentimentIcon(e.sentiment) }}</mat-icon> {{ e.sentiment }}
+        </div>
+        <div class="date">{{ e.date | date:'dd-MM-yyyy' }}</div>
+      </div>
 
       <div class="entry-body">
         <p>{{ e.text }}</p>
-
-        <mat-card class="ai-card" *ngIf="e.aiAnalysis">
-          <div class="ai-title"><mat-icon>auto_awesome</mat-icon> AI Analysis</div>
-          <div class="ai-content">{{ e.aiAnalysis }}</div>
-        </mat-card>
+        <div class="entry-actions-icons" style="display: flex; justify-content: flex-end; margin-top: 8px;">
+          <button mat-icon-button color="primary" (click)="editEntry(e)">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button mat-icon-button color="warn" (click)="deleteEntry(e)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
       </div>
     </mat-card>
   </div>

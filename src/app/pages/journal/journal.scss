@@ -34,7 +34,12 @@
       h3 { margin: 0 0 6px 0 }
       .entry-date { color: #6b7280; margin-bottom: 8px }
 
-      mat-form-field { --outline-color: #8b5cf6 }
+      mat-form-field { --outline-color: #8b5cf6;
+
+        ::ng-deep .mat-form-field-label {
+          color: #6d28d9 !important; // Placeholder color
+        }
+      }
 
       .ai-note {
         margin-top: 12px;

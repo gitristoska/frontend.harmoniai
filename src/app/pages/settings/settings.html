@@ -2,7 +2,7 @@
   <mat-card class="header-card">
     <div class="header-content">
       <h1>Settings</h1>
-      <p class="subtitle">Customize your DaySync AI experience</p>
+      <p class="subtitle">Customize your HarmoniAI experience</p>
     </div>
   </mat-card>
 
@@ -35,25 +35,28 @@
       </div>
 
       <div class="section-body modules-list">
-        <div class="module-row">
+        <div class="module-row" style="display: flex;
+    gap: 40px;">
           <div class="module-info">
-            <div class="module-title">Planner</div>
+            <div class="module-title" style="color: blue;">Planner</div>
             <div class="module-desc">Create and manage daily tasks</div>
           </div>
           <mat-checkbox class="module-check" [(ngModel)]="modules.planner"></mat-checkbox>
         </div>
 
-        <div class="module-row">
+        <div class="module-row" style="display: flex;
+    gap: 40px;">
           <div class="module-info">
-            <div class="module-title">Journal</div>
+            <div class="module-title" style="color: blue;">Journal</div>
             <div class="module-desc">Digital journal with AI analysis</div>
           </div>
           <mat-checkbox class="module-check" [(ngModel)]="modules.journal"></mat-checkbox>
         </div>
 
-        <div class="module-row">
+        <div class="module-row" style="display: flex;
+    gap: 40px;  ">
           <div class="module-info">
-            <div class="module-title">Habit Tracker</div>
+            <div class="module-title" style="color: blue;">Habit Tracker</div>
             <div class="module-desc">Track daily habits and progress</div>
           </div>
           <mat-checkbox class="module-check" [(ngModel)]="modules.habits"></mat-checkbox>
@@ -67,7 +70,8 @@
         <h3>Notifications</h3>
       </div>
       <div class="section-body">
-        <div class="module-row single">
+        <div class="module-row single row" style="display: flex;
+    gap: 40px;">
           <div class="module-info">
             <div class="module-title">Enable Notifications</div>
             <div class="module-desc">Receive reminders and updates</div>
@@ -80,10 +84,10 @@
     <mat-card class="section-card about">
       <div class="section-head">
         <mat-icon>info</mat-icon>
-        <h3>About DaySync AI</h3>
+        <h3>About HarmoniAI</h3>
       </div>
       <div class="section-body small">
-        <p>DaySync AI is your intelligent companion for productivity, wellness, and personal growth.</p>
+        <p>HarmoniAI is your intelligent companion for productivity, wellness, and personal growth.</p>
         <p class="muted">Version 1.0.0 • Made with care for your daily journey</p>
       </div>
     </mat-card>

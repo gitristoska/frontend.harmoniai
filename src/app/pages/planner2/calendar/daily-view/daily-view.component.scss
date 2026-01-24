@@ -1,0 +1,506 @@
+.daily-view-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+// TOP SECTION: Calendar + Notes Side by Side
+.calendar-notes-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  align-items: start;
+
+  .notes-side {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .calendar-side {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+}
+
+// BOTTOM SECTION: Life Balance Full Width
+.life-balance-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+
+  .full-width {
+    width: 100%;
+  }
+}
+
+// OTHER CARDS: Calls/Emails, Notes for Tomorrow
+.other-cards-container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+}
+
+.daily-view-card {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+  .date-header {
+    padding: 16px 20px;
+    border-bottom: 2px solid #e2e8f0;
+
+    h2 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 600;
+      color: #0f172a;
+    }
+  }
+
+  .time-grid {
+    padding: 0;
+    max-height: 600px;
+    overflow-y: auto;
+
+    &::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+
+      &:hover {
+        background: #94a3b8;
+      }
+    }
+
+    .time-slot {
+      display: grid;
+      grid-template-columns: 60px 1fr;
+      border-bottom: 1px solid #e2e8f0;
+      min-height: 60px;
+
+      &:last-child {
+        border-bottom: none;
+      }
+
+      .time-label {
+        padding: 12px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #64748b;
+        background: #f8fafc;
+        border-right: 1px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+      }
+
+      .events-container {
+        padding: 8px 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        position: relative;
+
+        .event-item {
+          padding: 8px 12px;
+          border-radius: 6px;
+          font-size: 13px;
+          font-weight: 500;
+          color: white;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          display: flex;
+          gap: 8px;
+          align-items: center;
+
+          &:hover {
+            transform: translateX(2px);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+          }
+
+          .event-time {
+            font-size: 11px;
+            opacity: 0.9;
+            min-width: 40px;
+          }
+
+          .event-title {
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          }
+        }
+      }
+    }
+  }
+}
+
+.notes-card {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+
+  mat-card-header {
+    padding: 16px 20px;
+    border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+
+    h3 {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 600;
+      font-style: italic;
+      color: #0f172a;
+    }
+  }
+
+  mat-card-content {
+    padding: 16px 20px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+
+    p {
+      margin: 0;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .note-textarea {
+      width: 100%;
+      min-height: 80px;
+      padding: 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font-family: 'Poppins', sans-serif;
+      font-size: 13px;
+      line-height: 1.5;
+      resize: vertical;
+      background: rgba(255, 255, 255, 0.7);
+      transition: all 0.2s ease;
+
+      &:focus {
+        outline: none;
+        border-color: #64748b;
+        background: white;
+        box-shadow: 0 0 0 3px rgba(100, 116, 139, 0.1);
+      }
+
+      &::placeholder {
+        color: #cbd5e1;
+      }
+    }
+
+    .note-items {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+
+      .note-item {
+        display: flex;
+        align-items: center;
+
+        mat-checkbox {
+          margin-right: 8px;
+        }
+
+        span {
+          font-size: 13px;
+
+          &.completed {
+            text-decoration: line-through;
+            opacity: 0.6;
+            color: #64748b;
+          }
+        }
+      }
+
+      .add-item-input {
+        padding: 8px 12px;
+        border: 1px dashed #cbd5e1;
+        border-radius: 6px;
+        font-size: 12px;
+        font-family: 'Poppins', sans-serif;
+        background: #f8fafc;
+        transition: all 0.2s ease;
+
+        &:focus {
+          outline: none;
+          border-color: #64748b;
+          background: white;
+        }
+
+        &::placeholder {
+          color: #cbd5e1;
+        }
+      }
+    }
+  }
+
+  &.personal-notes {
+    background: #f0fdf4;
+    border: 1px solid #d1fae5;
+
+    mat-card-header {
+      background: #ecfdf5;
+      border-bottom-color: #a7f3d0;
+    }
+  }
+
+  &.grateful-for {
+    background: #fef3c7;
+    border: 1px solid #fcd34d;
+
+    mat-card-header {
+      background: #fef08a;
+      border-bottom-color: #fbbf24;
+    }
+  }
+
+  &.inspiration {
+    background: #e0e7ff;
+    border: 1px solid #c7d2fe;
+
+    mat-card-header {
+      background: #ede9fe;
+      border-bottom-color: #ddd6fe;
+    }
+  }
+
+  &.life-balance {
+    background: #fdf2f8;
+    border: 1px solid #fbcfe8;
+
+    mat-card-header {
+      background: #fce7f3;
+      border-bottom-color: #f472b6;
+    }
+
+    .life-balance-tabs {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1px;
+      background: #e9d5ff;
+      border-radius: 6px;
+      overflow: hidden;
+      margin-bottom: 16px;
+
+      .tab-button {
+        background: #f3e8ff;
+        border: none;
+        padding: 12px 8px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #a855f7;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border-bottom: 2px solid transparent;
+
+        &:hover {
+          background: #ede9fe;
+        }
+
+        &.active {
+          background: white;
+          color: #a855f7;
+          border-bottom-color: #a855f7;
+          font-weight: 700;
+        }
+      }
+    }
+  }
+
+  &.calls-emails {
+    background: #fffbeb;
+    border: 1px solid #fef3c7;
+
+    mat-card-header {
+      background: #fef9e7;
+      border-bottom-color: #fbbf24;
+    }
+  }
+
+  &.notes-tomorrow {
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+
+    mat-card-header {
+      background: #e0f2fe;
+      border-bottom-color: #7dd3fc;
+    }
+  }
+}
+
+.rate-day-card {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background: #f0f9ff;
+  border: 1px solid #bfdbfe;
+
+  mat-card-header {
+    padding: 16px 20px;
+    border-bottom: 2px solid #7dd3fc;
+
+    h3 {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 600;
+      font-style: italic;
+      color: #0f172a;
+    }
+  }
+
+  mat-card-content {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+
+    .rating-section {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+
+      label {
+        font-size: 13px;
+        font-weight: 600;
+        color: #64748b;
+        text-align: center;
+      }
+
+      .rating-stars,
+      .rating-moods,
+      .rating-hearts {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+
+        span {
+          font-size: 24px;
+          cursor: pointer;
+          opacity: 0.3;
+          transition: all 0.2s ease;
+
+          &:hover {
+            opacity: 0.6;
+            transform: scale(1.1);
+          }
+
+          &.filled {
+            opacity: 1;
+          }
+        }
+      }
+    }
+  }
+}
+
+.ai-recommendations-card {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background: #faf5ff;
+  border: 1px solid #e9d5ff;
+
+  mat-card-header {
+    padding: 16px 20px;
+    border-bottom: 2px solid #d8b4fe;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    .ai-icon {
+      color: #a855f7;
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+
+    h3 {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 600;
+      font-style: italic;
+      color: #0f172a;
+    }
+  }
+
+  mat-card-content {
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    .recommendation-item {
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+
+      .recommendation-text {
+        margin: 0;
+        font-size: 13px;
+        color: #ef4444;
+        flex: 1;
+        line-height: 1.4;
+      }
+
+      .recommendation-actions {
+        display: flex;
+        gap: 6px;
+        flex-shrink: 0;
+
+        button {
+          border: 1px solid #cbd5e1;
+          background: white;
+          padding: 6px 10px;
+          border-radius: 6px;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          font-size: 12px;
+          transition: all 0.2s ease;
+
+          mat-icon {
+            font-size: 14px;
+            width: 14px;
+            height: 14px;
+          }
+
+          &:hover {
+            background: #f8fafc;
+            border-color: #64748b;
+          }
+
+          &.add-btn:hover {
+            background: #f0fdf4;
+            border-color: #10b981;
+            color: #10b981;
+          }
+
+          &.remove-btn {
+            padding: 6px 8px;
+
+            &:hover {
+              background: #fef2f2;
+              border-color: #ef4444;
+              color: #ef4444;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+

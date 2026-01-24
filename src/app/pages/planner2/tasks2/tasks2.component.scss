@@ -1,0 +1,228 @@
+.tasks2-page {
+  .header-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+    gap: 2rem;
+
+    .welcome {
+      flex: 1;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+
+      h2 {
+        margin: 0 0 0.5rem 0;
+        font-size: 2rem;
+        font-weight: 700;
+      }
+
+      .subtitle {
+        margin: 0;
+        opacity: 0.9;
+        font-size: 1rem;
+      }
+    }
+
+    .login-section {
+      .login-btn {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        border-radius: 12px;
+        padding: 1rem 2rem;
+        font-weight: 600;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+
+        &:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        mat-icon {
+          font-size: 1.25rem;
+        }
+      }
+    }
+  }
+
+  .planner-grid {
+    display: flex;
+    gap: 18px;
+
+    .add-task {
+      flex: 1;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+
+      .add-btn {
+        width: 100%;
+        padding: 2rem;
+        font-size: 1.25rem;
+        font-weight: 600;
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        color: white;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        transition: all 0.3s ease;
+
+        &:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 25px rgba(59, 130, 246, 0.3);
+        }
+
+        mat-icon {
+          font-size: 1.5rem;
+        }
+      }
+
+      .new-task {
+        .row {
+          display: flex;
+          gap: 12px;
+          margin-bottom: 16px;
+
+          .col {
+            flex: 1;
+
+            &.time-col {
+              flex: 1;
+            }
+          }
+        }
+
+        .actions {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+          margin-top: 20px;
+
+          button {
+            border-radius: 8px;
+            padding: 12px;
+            font-weight: 500;
+
+            &.full {
+              background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+              color: white;
+
+              &:hover {
+                background: linear-gradient(135deg, #059669 0%, #047857 100%);
+              }
+            }
+          }
+        }
+      }
+    }
+
+    .tasks {
+      flex: 1;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+
+      h3 {
+        margin: 0 0 1.5rem 0;
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #1f2937;
+      }
+
+      .tasks-list {
+        .task-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 16px;
+          border-bottom: 1px solid #e5e7eb;
+          transition: background-color 0.2s ease;
+
+          &:hover {
+            background-color: #f9fafb;
+          }
+
+          &:last-child {
+            border-bottom: none;
+          }
+
+          .task-main {
+            flex: 1;
+
+            .task-title {
+              font-weight: 600;
+              font-size: 1rem;
+              color: #1f2937;
+              margin-bottom: 4px;
+            }
+
+            .task-meta {
+              font-size: 0.875rem;
+              color: #6b7280;
+            }
+          }
+
+          .task-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+
+            .badge {
+              padding: 4px 12px;
+              border-radius: 20px;
+              font-size: 0.75rem;
+              font-weight: 500;
+              text-transform: uppercase;
+
+              &.low {
+                background-color: #dbeafe;
+                color: #1e40af;
+              }
+
+              &.medium {
+                background-color: #fef3c7;
+                color: #92400e;
+              }
+
+              &.high {
+                background-color: #fee2e2;
+                color: #dc2626;
+              }
+            }
+
+            button {
+              color: #dc2626;
+
+              &:hover {
+                background-color: #fef2f2;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  @media (max-width: 800px) {
+    .header-section {
+      flex-direction: column;
+      align-items: stretch;
+
+      .login-section {
+        display: flex;
+        justify-content: center;
+      }
+    }
+
+    .planner-grid {
+      flex-direction: column;
+    }
+  }
+}

@@ -1,0 +1,30 @@
+<mat-card class="task-form-card">
+  <h3>Add New Task</h3>
+  <div class="task-date">{{ selectedDate() | date:'EEEE, MMMM d, yyyy' }}</div>
+
+  <mat-form-field appearance="outline" style="width:100%">
+    <mat-label>Task Title</mat-label>
+    <input matInput [(ngModel)]="newTaskTitle" placeholder="Enter task title">
+  </mat-form-field>
+
+  <div class="form-row">
+    <mat-form-field appearance="outline" style="flex:1">
+      <mat-label>Time</mat-label>
+      <input matInput type="time" [(ngModel)]="newTaskTime">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" style="flex:1">
+      <mat-label>Category</mat-label>
+      <mat-select [(ngModel)]="newTaskCategory">
+        <mat-option *ngFor="let cat of categories()" [value]="cat.id">
+          <span *ngIf="cat.id !== 'all'" class="dot" [style.background]="cat.color"></span> {{cat.name}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  <div class="form-actions">
+    <button mat-button class="save-btn" (click)="onSave()">Save Task</button>
+    <button mat-button (click)="onCancel()">Cancel</button>
+  </div>
+</mat-card>

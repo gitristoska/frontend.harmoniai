@@ -1,0 +1,8 @@
+<mat-form-field appearance="outline" class="control-select">
+  <mat-label>Categories</mat-label>
+  <mat-select [value]="selectedCategory()" (selectionChange)="onCategoryChange($event.value)">
+    <mat-option *ngFor="let cat of categories()" [value]="cat.id">
+      <span *ngIf="cat.id !== 'all'" class="dot" [style.background]="cat.color"></span> {{cat.name}}
+    </mat-option>
+  </mat-select>
+</mat-form-field>

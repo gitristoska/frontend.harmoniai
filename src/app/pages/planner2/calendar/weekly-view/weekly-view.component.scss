@@ -1,0 +1,67 @@
+.weekly-view-card {
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+  .week-header {
+    padding: 16px 20px;
+    border-bottom: 2px solid #e2e8f0;
+
+    h2 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 600;
+      color: #0f172a;
+    }
+  }
+
+  .week-grid {
+    padding: 16px;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 12px;
+
+    .week-day {
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      overflow: hidden;
+
+      .day-header {
+        background: #f8fafc;
+        padding: 12px;
+        text-align: center;
+        border-bottom: 1px solid #e2e8f0;
+
+        .day-name {
+          font-size: 12px;
+          font-weight: 600;
+          color: #64748b;
+          text-transform: uppercase;
+        }
+
+        .day-date {
+          font-size: 18px;
+          font-weight: 600;
+          color: #0f172a;
+          margin-top: 4px;
+
+          &.today {
+            color: #3b82f6;
+          }
+        }
+      }
+
+      .day-events-placeholder {
+        padding: 12px;
+        min-height: 150px;
+        background: white;
+
+        p {
+          margin: 0;
+          text-align: center;
+          color: #cbd5e1;
+          font-size: 12px;
+        }
+      }
+    }
+  }
+}

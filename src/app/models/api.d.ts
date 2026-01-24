@@ -36,3 +36,54 @@ export interface SettingsUpdateDto {
   modulesJson?: string | null;
   enableNotifications?: boolean | null;
 }
+export interface CallAndEmailItem {
+  id?: string;
+  text?: string;
+  isDone: boolean;
+}
+
+export interface LifeBalanceItem {
+  id?: string;
+  category?: string;
+  text?: string;
+  isDone: boolean;
+}
+
+export interface Rating {
+  productivity: number; // 1-5
+  mood: number;         // 1-5
+  health: number;       // 1-5
+}
+
+export interface DailyEntry {
+  id: string;
+  date: string;
+  gratefulFor?: string;
+  inspirationOrMotivation?: string;
+  personalNotes?: string;
+  notesForTomorrow?: string;
+  lifeBalanceToDoList?: LifeBalanceItem[];
+  callsAndEmailsChecklist?: CallAndEmailItem[];
+  rating: Rating;
+}
+
+export interface DailyEntryCreateDto {
+  date: string;
+  gratefulFor?: string;
+  inspirationOrMotivation?: string;
+  personalNotes?: string;
+  notesForTomorrow?: string;
+  lifeBalanceToDoList?: LifeBalanceItem[];
+  callsAndEmailsChecklist?: CallAndEmailItem[];
+  rating: Rating;
+}
+
+export interface DailyEntryUpdateDto {
+  gratefulFor?: string;
+  inspirationOrMotivation?: string;
+  personalNotes?: string;
+  notesForTomorrow?: string;
+  lifeBalanceToDoList?: LifeBalanceItem[];
+  callsAndEmailsChecklist?: CallAndEmailItem[];
+  rating?: Rating;
+}

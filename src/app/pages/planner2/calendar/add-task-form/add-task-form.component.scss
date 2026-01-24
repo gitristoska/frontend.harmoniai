@@ -1,0 +1,133 @@
+.task-form-card {
+  padding: 2rem;
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border: 2px solid #e5e7eb;
+  animation: slideDown 0.3s ease-out;
+
+  h3 {
+    margin: 0 0 0.75rem 0;
+    font-weight: 800;
+    font-size: 1.5rem;
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .task-date {
+    color: #6b7280;
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-bottom: 1.5rem;
+    padding: 0.5rem 1rem;
+    background: #f3f4f6;
+    border-radius: 8px;
+    display: inline-block;
+  }
+
+  ::ng-deep .mat-mdc-text-field-wrapper {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    transition: all 0.3s ease;
+
+    &:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      transform: translateY(-1px);
+    }
+  }
+
+  ::ng-deep .mdc-notched-outline {
+    .mdc-notched-outline__leading,
+    .mdc-notched-outline__notch,
+    .mdc-notched-outline__trailing {
+      border-color: #e5e7eb !important;
+      border-width: 2px;
+    }
+  }
+
+  ::ng-deep .mat-mdc-form-field.mat-focused {
+    .mat-mdc-text-field-wrapper {
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1), 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .mdc-notched-outline {
+      .mdc-notched-outline__leading,
+      .mdc-notched-outline__notch,
+      .mdc-notched-outline__trailing {
+        border-color: #3b82f6 !important;
+        border-width: 2px;
+      }
+    }
+  }
+
+  ::ng-deep .mdc-floating-label {
+    color: #6b7280 !important;
+    font-weight: 500;
+  }
+
+  ::ng-deep .mat-mdc-input-element {
+    color: #111827;
+    font-weight: 500;
+    font-size: 1rem;
+  }
+
+  .form-row {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+
+    mat-form-field {
+      flex: 1;
+
+      ::ng-deep .mat-form-field-label {
+        color: #6d28d9 !important; // Placeholder color
+      }
+    }
+
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+  }
+
+  .form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+
+    .save-btn {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      border-radius: 8px;
+      padding: 0.5rem 1.5rem;
+      font-weight: 500;
+
+      &:hover {
+        background: linear-gradient(135deg, #059669 0%, #047857 100%);
+      }
+    }
+
+    button:last-child {
+      border-radius: 8px;
+      padding: 0.5rem 1.5rem;
+    }
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

@@ -1,11 +1,24 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, signal, computed, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { DragDropModule, CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
+import { PlannerService } from '../../../services/task.service';
+import { PlannerTask } from '../../../models/api';
+import { Observable } from 'rxjs';
+import { EventsListComponent } from './events-list/events-list.component';
+import { ViewModeSelectorComponent } from './view-mode-selector/view-mode-selector.component';
+import { CategorySelectorComponent } from './category-selector/category-selector.component';
+import { AddTaskFormComponent, NewTaskData } from './add-task-form/add-task-form.component';
+import { AddTaskButtonComponent } from './add-task-button/add-task-button.component';
+import { EventDetailComponent, EventUpdateData } from './event-detail/event-detail.component';
+import { DailyViewComponent } from './daily-view/daily-view.component';
+import { WeeklyViewComponent } from './weekly-view/weekly-view.component';
+import { MonthlyViewComponent } from './monthly-view/monthly-view.component';
 
 export interface CalendarEvent {
+  id?: string | number;
   title: string;
   time: string;
   date?: Date;
@@ -31,7 +44,22 @@ export interface WeekDay {
 @Component({
   selector: 'app-calendar',
   standalone: true,
-  imports: [CommonModule, MatCardModule, MatIconModule, MatButtonModule, DragDropModule],
+  imports: [
+    CommonModule, 
+    MatCardModule, 
+    MatIconModule, 
+    MatButtonModule, 
+    DragDropModule,
+    EventsListComponent,
+    ViewModeSelectorComponent,
+    CategorySelectorComponent,
+    AddTaskButtonComponent,
+    EventDetailComponent,
+    DailyViewComponent,
+    WeeklyViewComponent,
+    MonthlyViewComponent
+  ],
+  providers: [PlannerService],
   templateUrl: './calendar.component.html',
   styleUrls: ['./calendar.component.scss']
 })
@@ -41,7 +69,16 @@ export class CalendarComponent {
   selectedDate = signal(new Date());
   selectedCategory = signal('all');
 
-  // Define categories with colors
+  // Time range settings (hardcoded for now - 8 AM to 10 PM)
+  startHour = 8;
+  endHour = 22;
+
+  // Add task form properties
+  showAddTaskForm = false;
+  
+  // Selected event for detail view
+  selectedEvent = signal<CalendarEvent | null>(null);
+
   categories = [
     { id: 'all', name: 'All Categories', color: '#e5e7eb' },
     { id: 'study', name: 'Study', color: '#3b82f6' },
@@ -52,40 +89,107 @@ export class CalendarComponent {
     { id: 'meals', name: 'Meals', color: '#f97316' }
   ];
 
-  // Sample events with times and categories
-  allEvents = signal<CalendarEvent[]>([
-    { title: 'Morning meeting', time: '09:00', category: 'work' },
-    { title: 'Lunch break', time: '12:30', category: 'meals' },
-    { title: 'Project work', time: '14:00', category: 'work' },
-    { title: 'Doctor appointment', time: '16:00', category: 'doctor' },
-    { title: 'Gym session', time: '18:00', category: 'activities' },
-    { title: 'Study time', time: '20:00', category: 'study' },
-  ]);
+  allEvents = signal<CalendarEvent[]>([]);
+  todaysEvents = signal<CalendarEvent[]>([]);
 
-  // Generate hourly time slots (00:00 to 23:00)
+  constructor(private plannerService: PlannerService) {
+    this.loadTasks();
+  }
+
+  ngOnInit() {
+    this.loadTodaysEvents();
+  }
+
+  private loadTasks() {
+    const view = this.viewMode();
+    let tasksObs: Observable<PlannerTask[]>;
+
+    if (view === 'daily') {
+      const dateStr = this.selectedDate().toISOString().split('T')[0];
+      tasksObs = this.plannerService.getTasksForDay(dateStr);
+    } else {
+      // For weekly and monthly, load the full month to ensure all events are available
+      const year = this.currentDate().getFullYear();
+      const month = this.currentDate().getMonth() + 1;
+      tasksObs = this.plannerService.getTasksForMonth(year, month);
+    }
+
+    tasksObs.subscribe({
+      next: (tasks: PlannerTask[]) => {
+        const events = tasks.map(t => ({
+          id: t.id,
+          title: t.title,
+          time: t.scheduledAt ? t.scheduledAt.split('T')[1]?.slice(0,5) ?? '00:00' : '00:00',
+          date: t.scheduledAt ? new Date(t.scheduledAt) : undefined,
+          category: t.category
+        }));
+        this.allEvents.set(events);
+      },
+      error: err => console.error('Error loading calendar tasks:', err)
+    });
+  }
+
+  private loadTodaysEvents() {
+    const today = new Date();
+    const dateStr = today.toISOString().split('T')[0];
+    this.plannerService.getTasksForDay(dateStr).subscribe((tasks: PlannerTask[]) => {
+      this.todaysEvents.set(tasks.map((task: PlannerTask) => ({
+        id: task.id,
+        title: task.title,
+        time: task.scheduledAt ? task.scheduledAt.split('T')[1]?.slice(0, 5) ?? '00:00' : '00:00',
+        date: task.scheduledAt ? new Date(task.scheduledAt) : undefined,
+        category: task.category
+      })));
+    });
+  }
+
   timeSlots = computed(() => {
     const slots = [];
-    for (let i = 0; i < 24; i++) {
-      slots.push(String(i).padStart(2, '0') + ':00');
+    for (let i = this.startHour; i < this.endHour; i++) {
+      slots.push(`${i.toString().padStart(2, '0')}:00`);
     }
     return slots;
   });
 
-  // Filtered events based on selected category
+  topPriorities = computed(() => {
+    // Get top 3 priority tasks from today's events
+    return this.todaysEvents()
+      .slice(0, 3)
+      .sort((a, b) => {
+        // Sort by time to show earliest tasks first
+        const timeA = a.time || '23:59';
+        const timeB = b.time || '23:59';
+        return timeA.localeCompare(timeB);
+      })
+      .slice(0, 3);
+  });
+
   filteredEvents = computed(() => {
     const category = this.selectedCategory();
-    if (category === 'all') {
-      return this.allEvents();
+    const view = this.viewMode();
+    let events = category === 'all' ? this.allEvents() : this.allEvents().filter(e => e.category === category);
+
+    // Filter by date based on view mode
+    if (view === 'daily') {
+      events = events.filter(e => e.date && this.isSameDay(e.date, this.selectedDate()));
+    } else if (view === 'weekly') {
+      const startOfWeek = new Date(this.selectedDate());
+      startOfWeek.setDate(this.selectedDate().getDate() - this.selectedDate().getDay());
+      const endOfWeek = new Date(startOfWeek);
+      endOfWeek.setDate(startOfWeek.getDate() + 6);
+      events = events.filter(e => e.date && e.date >= startOfWeek && e.date <= endOfWeek);
+    } else if (view === 'monthly') {
+      events = events.filter(e => e.date && e.date.getMonth() === this.currentDate().getMonth() && e.date.getFullYear() === this.currentDate().getFullYear());
     }
-    return this.allEvents().filter(e => e.category === category);
+
+    return events;
   });
 
-  // Today's events
-  todaysEvents = computed(() => {
-    return this.filteredEvents();
-  });
+  /** Events for daily, weekly, monthly */
+  dailyEvents = (date: Date) => this.filteredEvents().filter(e => e.date && this.isSameDay(e.date, date));
+  weeklyEvents = (day: WeekDay) => this.filteredEvents().filter(e => e.date && this.isSameDay(e.date, day.date));
+  monthlyEvents = (day: DayCell) => this.filteredEvents().filter(e => e.date && this.isSameDay(e.date, day.date));
 
-  // Monthly view calendar grid
   calendarDays = computed(() => {
     const date = this.currentDate();
     const year = date.getFullYear();
@@ -95,166 +199,185 @@ export class CalendarComponent {
 
     const firstDay = new Date(year, month, 1);
     const lastDay = new Date(year, month + 1, 0);
-    const daysInMonth = lastDay.getDate();
     const startingDayOfWeek = firstDay.getDay();
-
     const days: DayCell[] = [];
 
-    // Previous month trailing days
     const prevMonthLastDay = new Date(year, month, 0).getDate();
     for (let i = startingDayOfWeek - 1; i >= 0; i--) {
-      const date = new Date(year, month - 1, prevMonthLastDay - i);
-      days.push({
-        date,
-        dayOfMonth: date.getDate(),
-        isCurrentMonth: false,
-        isToday: this.isSameDay(date, today),
-        isSelected: this.isSameDay(date, selected)
-      });
+      const d = new Date(year, month - 1, prevMonthLastDay - i);
+      days.push({ date: d, dayOfMonth: d.getDate(), isCurrentMonth: false, isToday: this.isSameDay(d,today), isSelected: this.isSameDay(d,selected) });
     }
 
-    // Current month days
-    for (let d = 1; d <= daysInMonth; d++) {
-      const date = new Date(year, month, d);
-      days.push({
-        date,
-        dayOfMonth: d,
-        isCurrentMonth: true,
-        isToday: this.isSameDay(date, today),
-        isSelected: this.isSameDay(date, selected)
-      });
+    for (let d = 1; d <= lastDay.getDate(); d++) {
+      const dayDate = new Date(year, month, d);
+      days.push({ date: dayDate, dayOfMonth: d, isCurrentMonth: true, isToday: this.isSameDay(dayDate,today), isSelected: this.isSameDay(dayDate,selected) });
     }
 
-    // Next month leading days
-    const remainingDays = 42 - days.length;
-    for (let d = 1; d <= remainingDays; d++) {
-      const date = new Date(year, month + 1, d);
-      days.push({
-        date,
-        dayOfMonth: d,
-        isCurrentMonth: false,
-        isToday: this.isSameDay(date, today),
-        isSelected: this.isSameDay(date, selected)
-      });
+    const remaining = 42 - days.length;
+    for (let d = 1; d <= remaining; d++) {
+      const dayDate = new Date(year, month + 1, d);
+      days.push({ date: dayDate, dayOfMonth: d, isCurrentMonth: false, isToday: this.isSameDay(dayDate,today), isSelected: this.isSameDay(dayDate,selected) });
     }
 
     return days;
   });
 
-  // Weekly view
   weekDays = computed(() => {
     const selected = this.selectedDate();
     const dayOfWeek = selected.getDay();
     const startOfWeek = new Date(selected);
     startOfWeek.setDate(selected.getDate() - dayOfWeek);
-
-    const days: WeekDay[] = [];
     const today = new Date();
-
-    for (let i = 0; i < 7; i++) {
+    return Array.from({length:7}, (_, i) => {
       const date = new Date(startOfWeek);
       date.setDate(startOfWeek.getDate() + i);
-      days.push({
+      return {
         date,
         dayOfMonth: date.getDate(),
-        isCurrentMonth: date.getMonth() === new Date().getMonth(),
-        isToday: this.isSameDay(date, today),
-        isSelected: this.isSameDay(date, selected)
-      });
-    }
-
-    return days;
+        isCurrentMonth: date.getMonth() === this.currentDate().getMonth(),
+        isToday: this.isSameDay(date,today),
+        isSelected: this.isSameDay(date,selected)
+      };
+    });
   });
 
-  monthYearLabel = computed(() => {
-    const date = this.currentDate();
-    return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-  });
+  monthYearLabel = computed(() => this.currentDate().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }));
 
-  // Helper methods
   private isSameDay(d1: Date, d2: Date): boolean {
-    return d1.getFullYear() === d2.getFullYear() &&
-           d1.getMonth() === d2.getMonth() &&
-           d1.getDate() === d2.getDate();
+    return d1.getFullYear()===d2.getFullYear() && d1.getMonth()===d2.getMonth() && d1.getDate()===d2.getDate();
   }
 
-  getCategoryColor(categoryId: string | undefined): string {
-    if (!categoryId) return '#e5e7eb';
-    const cat = this.categories.find(c => c.id === categoryId);
-    return cat ? cat.color : '#e5e7eb';
+  getCategoryColor(categoryId?: string): string {
+    return this.categories.find(c=>c.id===categoryId)?.color ?? '#e5e7eb';
   }
 
-  getCategoryName(categoryId: string | undefined): string {
-    if (!categoryId) return '';
-    const cat = this.categories.find(c => c.id === categoryId);
-    return cat ? cat.name : '';
+  getCategoryName(categoryId?: string): string {
+    return this.categories.find(c=>c.id===categoryId)?.name ?? '';
   }
 
   getEventTopPosition(time: string): number {
-    const hour = parseInt(time.split(':')[0], 10);
-    return (hour / 24) * 100;
+    const [hours, minutes] = time.split(':').map(Number);
+    const totalMinutes = hours * 60 + minutes;
+    return totalMinutes;
   }
 
-  selectDate(date: Date) {
-    this.selectedDate.set(new Date(date));
+  getEventHour(time: string): number {
+    return parseInt(time.split(':')[0], 10);
   }
 
-  selectCategory(categoryId: string) {
-    this.selectedCategory.set(categoryId);
-  }
+  selectDate(date: Date) { this.selectedDate.set(new Date(date)); this.loadTasks(); }
+  selectCategory(categoryId: string) { this.selectedCategory.set(categoryId); }
+  setViewMode(mode: 'daily' | 'weekly' | 'monthly') { this.viewMode.set(mode); this.loadTasks(); }
 
-  setViewMode(mode: 'daily' | 'weekly' | 'monthly') {
-    this.viewMode.set(mode);
+  previousDay() { const d=this.selectedDate(); d.setDate(d.getDate()-1); this.selectedDate.set(new Date(d)); this.updateCurrentDateIfNeeded(); this.loadTasks(); }
+  nextDay() { const d=this.selectedDate(); d.setDate(d.getDate()+1); this.selectedDate.set(new Date(d)); this.updateCurrentDateIfNeeded(); this.loadTasks(); }
+  previousWeek() { 
+    const d = this.selectedDate(); 
+    d.setDate(d.getDate() - 7); 
+    this.selectedDate.set(new Date(d)); 
+    this.updateCurrentDateIfNeeded();
+    this.loadTasks(); 
   }
-
-  // Navigation methods
-  previousDay() {
-    const current = this.selectedDate();
-    const newDate = new Date(current);
-    newDate.setDate(current.getDate() - 1);
-    this.selectedDate.set(newDate);
+  nextWeek() { 
+    const d = this.selectedDate(); 
+    d.setDate(d.getDate() + 7); 
+    this.selectedDate.set(new Date(d)); 
+    this.updateCurrentDateIfNeeded();
+    this.loadTasks(); 
   }
+  previousMonth() { const d=this.currentDate(); this.currentDate.set(new Date(d.getFullYear(), d.getMonth()-1,1)); this.loadTasks(); }
+  nextMonth() { const d=this.currentDate(); this.currentDate.set(new Date(d.getFullYear(), d.getMonth()+1,1)); this.loadTasks(); }
+  goToToday() { const t=new Date(); this.selectedDate.set(t); this.currentDate.set(new Date(t.getFullYear(), t.getMonth(),1)); this.loadTasks(); }
 
-  nextDay() {
-    const current = this.selectedDate();
-    const newDate = new Date(current);
-    newDate.setDate(current.getDate() + 1);
-    this.selectedDate.set(newDate);
-  }
-
-  previousWeek() {
-    const current = this.selectedDate();
-    const newDate = new Date(current);
-    newDate.setDate(current.getDate() - 7);
-    this.selectedDate.set(newDate);
-  }
-
-  nextWeek() {
-    const current = this.selectedDate();
-    const newDate = new Date(current);
-    newDate.setDate(current.getDate() + 7);
-    this.selectedDate.set(newDate);
-  }
-
-  previousMonth() {
+  private updateCurrentDateIfNeeded() {
+    const selected = this.selectedDate();
     const current = this.currentDate();
-    this.currentDate.set(new Date(current.getFullYear(), current.getMonth() - 1, 1));
-  }
-
-  nextMonth() {
-    const current = this.currentDate();
-    this.currentDate.set(new Date(current.getFullYear(), current.getMonth() + 1, 1));
-  }
-
-  goToToday() {
-    const today = new Date();
-    this.selectedDate.set(new Date(today));
-    this.currentDate.set(new Date(today.getFullYear(), today.getMonth(), 1));
+    if (selected.getFullYear() !== current.getFullYear() || selected.getMonth() !== current.getMonth()) {
+      this.currentDate.set(new Date(selected.getFullYear(), selected.getMonth(), 1));
+    }
   }
 
   drop(event: CdkDragDrop<CalendarEvent[]>) {
     const arr = [...this.allEvents()];
     moveItemInArray(arr, event.previousIndex, event.currentIndex);
     this.allEvents.set(arr);
+  }
+
+  // Add task methods
+  onTaskSave(taskData: NewTaskData) {
+    const taskDate = new Date(this.selectedDate());
+    const [hours, minutes] = taskData.time.split(':');
+    taskDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+
+    const newTask = {
+      title: taskData.title.trim(),
+      scheduledAt: taskDate.toISOString(),
+      category: taskData.category,
+      description: '',
+      priority: 1 // medium priority
+    };
+
+    this.plannerService.addTask(newTask).subscribe({
+      next: (createdTask) => {
+        this.loadTasks();
+        this.showAddTaskForm = false;
+      },
+      error: (err) => console.error('Error creating task:', err)
+    });
+  }
+
+  onTaskCancel() {
+    this.showAddTaskForm = false;
+  }
+
+  onAddTaskClick() {
+    this.showAddTaskForm = !this.showAddTaskForm;
+  }
+
+  // Event detail methods
+  onEventClick(event: CalendarEvent) {
+    this.selectedEvent.set(event);
+  }
+
+  onEventUpdate(updateData: EventUpdateData) {
+    const event = this.selectedEvent();
+    if (!event || !event.id) return;
+
+    const taskDate = event.date ? new Date(event.date) : new Date();
+    const [hours, minutes] = updateData.time.split(':');
+    taskDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+
+    const updatedTask = {
+      title: updateData.title,
+      scheduledAt: taskDate.toISOString(),
+      category: updateData.category,
+      description: '',
+      priority: 1
+    };
+
+    this.plannerService.updateTask(event.id, updatedTask).subscribe({
+      next: () => {
+        this.loadTasks();
+        this.selectedEvent.set(null);
+      },
+      error: (err) => console.error('Error updating task:', err)
+    });
+  }
+
+  onEventDelete() {
+    const event = this.selectedEvent();
+    if (!event || !event.id) return;
+
+    this.plannerService.deleteTask(event.id).subscribe({
+      next: () => {
+        this.loadTasks();
+        this.selectedEvent.set(null);
+      },
+      error: (err) => console.error('Error deleting task:', err)
+    });
+  }
+
+  onEventDetailClose() {
+    this.selectedEvent.set(null);
   }
 }

@@ -1,0 +1,90 @@
+<section class="tasks2-page page-container">
+  <!-- Header with Login Button -->
+  <div class="header-section">
+    <mat-card class="welcome">
+      <h2>{{ heading() }}</h2>
+      <p class="subtitle">{{ subtitle() }}</p>
+    </mat-card>
+
+    <div class="login-section">
+      <button mat-button class="login-btn" (click)="login()">
+        <mat-icon>login</mat-icon>
+        Login
+      </button>
+    </div>
+  </div>
+
+  <div class="planner-grid">
+    <!-- Add Task card (Left) -->
+    <mat-card class="add-task">
+      <button mat-button class="add-task-btn" (click)="showAddTaskForm = !showAddTaskForm">
+        <mat-icon>add</mat-icon>
+        <span>Add New Task</span>
+      </button>
+
+      <div *ngIf="showAddTaskForm" class="add-task-form">
+        <mat-card class="task-form-card">
+          <h3>Add New Task</h3>
+          <div class="task-date">{{ selectedDate() | date:'EEEE, MMMM d, yyyy' }}</div>
+
+          <mat-form-field appearance="outline" style="width:100%">
+            <mat-label>Task Title</mat-label>
+            <input matInput [(ngModel)]="newTaskTitle" placeholder="Enter task title">
+          </mat-form-field>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline" style="flex:1">
+              <mat-label>Time</mat-label>
+              <input matInput type="time" [(ngModel)]="newTaskTime">
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" style="flex:1">
+              <mat-label>Category</mat-label>
+              <mat-select [(ngModel)]="newTaskCategory">
+              <ng-container *ngFor="let cat of categories">
+                <mat-option *ngIf="cat.id !== 'all'" [value]="cat.id">
+                  <span class="dot" [style.background]="cat.color"></span> {{cat.name}}
+                </mat-option>
+              </ng-container>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="form-actions">
+            <button mat-button class="save-btn" (click)="saveNewTask()">Save Task</button>
+            <button mat-button (click)="cancelAddTask()">Cancel</button>
+          </div>
+        </mat-card>
+      </div>
+    </mat-card>
+
+    <!-- Tasks list (Right) -->
+    <mat-card class="tasks">
+      <h3>Your Tasks ({{ tasks().length }})</h3>
+      <div class="tasks-list">
+        <div *ngFor="let t of tasks(); let i = index" class="task-row">
+          <div class="task-main">
+            <div class="task-title">{{ t.title }}</div>
+            <div class="task-meta">
+              {{ t.scheduledAt ? (t.scheduledAt | date:'medium') : '' }}
+              • {{ t.category }}
+            </div>
+          </div>
+          <div class="task-right">
+            <div
+              class="badge"
+              [class.high]="t.priority===2"
+              [class.medium]="t.priority===1"
+              [class.low]="t.priority===0"
+            >
+              {{ t.priority === 0 ? 'low' : t.priority === 1 ? 'medium' : 'high' }}
+            </div>
+            <button mat-icon-button color="warn" (click)="deleteTask(i)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+    </mat-card>
+  </div>
+</section>

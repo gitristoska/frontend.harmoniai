@@ -1,7 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { Homepage } from './pages/homepage/homepage';
-import { Planner } from './pages/planner/planner';
 import { Settings } from './pages/settings/settings';
 import { Ai } from './pages/ai/ai';
 import { JournalComponent } from './pages/journal/journal';

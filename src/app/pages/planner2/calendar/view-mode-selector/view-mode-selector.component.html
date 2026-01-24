@@ -1,0 +1,8 @@
+<mat-form-field appearance="outline" class="control-select">
+  <mat-label>View Mode</mat-label>
+  <mat-select [value]="viewMode()" (selectionChange)="onViewModeChange($event.value)">
+    <mat-option value="daily">Daily</mat-option>
+    <mat-option value="weekly">Weekly</mat-option>
+    <mat-option value="monthly">Monthly</mat-option>
+  </mat-select>
+</mat-form-field>

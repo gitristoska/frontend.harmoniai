@@ -58,18 +58,21 @@ saveEntry() {
 
   if (this.editingEntryId !== null) {
     const index = this.entries.findIndex(e => e.id === this.editingEntryId);
-    this.journalService.updateEntry(this.editingEntryId,this.entries[index])
-      .subscribe(updatedEntry => {
-        // Замени ја постоечката entry во масивата
-        const index = this.entries.findIndex(e => e.id === updatedEntry.id);
-        if (index >= 0) this.entries[index] = updatedEntry;
+    if (index >= 0) {
+      this.entries[index].text = text; // Update the text property
+      this.journalService.updateEntry(this.editingEntryId, this.entries[index])
+        .subscribe(updatedEntry => {
+          // Replace the existing entry in the array
+          const index = this.entries.findIndex(e => e.id === updatedEntry.id);
+          if (index >= 0) this.entries[index] = updatedEntry;
 
-        this.newEntryText = '';
-        this.showForm = false;
-        this.editingEntryId = null;
-      });
+          this.newEntryText = '';
+          this.showForm = false;
+          this.editingEntryId = null;
+        });
+    }
   } else {
-    // Креирање нов entry
+    // Create a new entry
     this.journalService.createEntry({ text, useAi: this.useAiAnalysis })
       .subscribe(entry => {
         this.entries.unshift(entry);
