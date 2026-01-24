@@ -4,10 +4,10 @@
   gap: 1.5rem;
 }
 
-// TOP SECTION: Calendar + Notes Side by Side
+// TOP SECTION: Calendar + Notes Side by Side (3 columns)
 .calendar-notes-container {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 1.5fr 1fr;
   gap: 1.5rem;
   align-items: start;
 
@@ -22,17 +22,31 @@
     flex-direction: column;
     gap: 1.5rem;
   }
+
+  .events-side {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .vertical-divider {
+    width: 2px;
+    height: 400px;
+    background: repeating-linear-gradient(
+      to bottom,
+      #0f172a 0 2px,
+      #e5e7eb 2px 4px
+    );
+    margin: 1rem 0;
+    opacity: 0.6;
+  }
 }
 
-// BOTTOM SECTION: Life Balance Full Width
-.life-balance-container {
-  display: flex;
-  flex-direction: column;
+// BOTTOM SECTION: Life Balance + AI Recommendations (2 columns)
+.bottom-cards-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 1.5rem;
-
-  .full-width {
-    width: 100%;
-  }
 }
 
 // OTHER CARDS: Calls/Emails, Notes for Tomorrow
@@ -41,6 +55,8 @@
   grid-template-columns: repeat(2, 1fr);
   gap: 1.5rem;
 }
+
+
 
 .daily-view-card {
   border-radius: 12px;

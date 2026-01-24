@@ -9,7 +9,7 @@
     <p>{{ error() }}</p>
   </div>
 
-  <!-- TOP SECTION: CALENDAR (50vw right) + NOTES (50vw left) -->
+  <!-- TOP SECTION: LEFT NOTES + CENTER CALENDAR + RIGHT NOTES -->
   <div class="calendar-notes-container" *ngIf="!isLoading()">
     <!-- LEFT SIDE: GRATEFUL, MOTIVATION, PERSONAL NOTES -->
     <div class="notes-side">
@@ -50,7 +50,7 @@
       </mat-card>
     </div>
 
-    <!-- RIGHT SIDE: CALENDAR (50vw) -->
+    <!-- CENTER: CALENDAR -->
     <div class="calendar-side">
       <!-- TIME GRID CALENDAR -->
       <mat-card class="daily-view-card">
@@ -75,12 +75,94 @@
         </mat-card-content>
       </mat-card>
     </div>
+
+    <!-- RIGHT SIDE: CALLS/EMAILS, NOTES FOR TOMORROW -->
+    <div class="events-side">
+      <!-- Calls/Emails -->
+      <mat-card class="notes-card calls-emails">
+        <mat-card-header>
+          <h3>Calls/Emails</h3>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="note-items">
+            <div *ngFor="let item of dailyEntry()?.callsAndEmailsChecklist || []" class="note-item">
+              <mat-checkbox 
+                [checked]="item.isDone"
+                (change)="toggleNoteItem(item)">
+                <span [class.completed]="item.isDone">{{ item.text }}</span>
+              </mat-checkbox>
+            </div>
+            <input #callsEmailsInput type="text" class="add-item-input" placeholder="Add item..."
+              (keyup.enter)="addAndClearNoteItem('callsEmails', callsEmailsInput)" />
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Notes for Tomorrow -->
+      <mat-card class="notes-card notes-tomorrow">
+        <mat-card-header>
+          <h3>Notes for Tomorrow</h3>
+        </mat-card-header>
+        <mat-card-content>
+          <textarea class="note-textarea" placeholder="Write notes for tomorrow..."
+            [(ngModel)]="dailyEntry()!.notesForTomorrow"
+            (blur)="saveDailyEntry()"></textarea>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- VERTICAL DIVIDER -->
+      <!-- <div class="vertical-divider"></div> -->
+
+      <!-- RATE YOUR DAY -->
+      <mat-card class="rate-day-card" *ngIf="!isLoading()">
+        <mat-card-header>
+          <h3>Rate your Day</h3>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="rating-section">
+            <label>Productivity</label>
+            <div class="rating-stars">
+              <span *ngFor="let i of [1,2,3,4,5]"
+                class="star"
+                [class.filled]="(dayRating().productivity || 1) >= i"
+                (click)="setProductivityRating(i)">
+                ★
+              </span>
+            </div>
+          </div>
+
+          <div class="rating-section">
+            <label>Mood</label>
+            <div class="rating-moods">
+              <span *ngFor="let i of [1,2,3,4,5]"
+                class="mood"
+                [class.filled]="(dayRating().mood || 1) >= i"
+                (click)="setMoodRating(i)">
+                😊
+              </span>
+            </div>
+          </div>
+
+          <div class="rating-section">
+            <label>Health</label>
+            <div class="rating-hearts">
+              <span *ngFor="let i of [1,2,3,4,5]"
+                class="heart"
+                [class.filled]="(dayRating().health || 1) >= i"
+                (click)="setHealthRating(i)">
+                ❤️
+              </span>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
   </div>
 
-  <!-- BOTTOM SECTION: LIFE BALANCE (FULL WIDTH) -->
-  <div class="life-balance-container" *ngIf="!isLoading()">
+  <!-- BOTTOM SECTION: LIFE BALANCE + AI RECOMMENDATIONS (SIDE BY SIDE) -->
+  <div class="bottom-cards-container" *ngIf="!isLoading()">
     <!-- Life Balance -->
-    <mat-card class="notes-card life-balance full-width">
+    <mat-card class="notes-card life-balance">
       <mat-card-header>
         <h3>Life Balance To-Do List</h3>
       </mat-card-header>
@@ -106,106 +188,27 @@
         </div>
       </mat-card-content>
     </mat-card>
-  </div>
 
-  <!-- BOTTOM SECTIONS: CALLS/EMAILS, NOTES FOR TOMORROW, RATE DAY, AI RECOMMENDATIONS -->
-  <div class="other-cards-container" *ngIf="!isLoading()">
-    <!-- Calls/Emails -->
-    <mat-card class="notes-card calls-emails">
+    <!-- AI RECOMMENDATIONS -->
+    <mat-card class="ai-recommendations-card">
       <mat-card-header>
-        <h3>Calls/Emails</h3>
+        <mat-icon class="ai-icon">sparkles</mat-icon>
+        <h3>AI Recommendations</h3>
       </mat-card-header>
       <mat-card-content>
-        <div class="note-items">
-          <div *ngFor="let item of dailyEntry()?.callsAndEmailsChecklist || []" class="note-item">
-            <mat-checkbox 
-              [checked]="item.isDone"
-              (change)="toggleNoteItem(item)">
-              <span [class.completed]="item.isDone">{{ item.text }}</span>
-            </mat-checkbox>
+        <div *ngFor="let rec of aiRecommendations()" class="recommendation-item">
+          <p class="recommendation-text">{{ rec.text }}</p>
+          <div class="recommendation-actions">
+            <button class="add-btn" (click)="toggleRecommendation(rec)">
+              <mat-icon>{{ rec.added ? 'check' : 'add' }}</mat-icon>
+              {{ rec.added ? 'Added' : 'Add' }}
+            </button>
+            <button class="remove-btn" (click)="removeRecommendation(rec.id)">
+              <mat-icon>close</mat-icon>
+            </button>
           </div>
-          <input #callsEmailsInput type="text" class="add-item-input" placeholder="Add item..."
-            (keyup.enter)="addAndClearNoteItem('callsEmails', callsEmailsInput)" />
         </div>
-      </mat-card-content>
-    </mat-card>
-
-    <!-- Notes for Tomorrow -->
-    <mat-card class="notes-card notes-tomorrow">
-      <mat-card-header>
-        <h3>Notes for Tomorrow</h3>
-      </mat-card-header>
-      <mat-card-content>
-        <textarea class="note-textarea" placeholder="Write notes for tomorrow..."
-          [(ngModel)]="dailyEntry()!.notesForTomorrow"
-          (blur)="saveDailyEntry()"></textarea>
       </mat-card-content>
     </mat-card>
   </div>
-
-  <!-- RATE YOUR DAY -->
-  <mat-card class="rate-day-card" *ngIf="!isLoading()">
-    <mat-card-header>
-      <h3>Rate your Day</h3>
-    </mat-card-header>
-    <mat-card-content>
-      <div class="rating-section">
-        <label>Productivity</label>
-        <div class="rating-stars">
-          <span *ngFor="let i of [1,2,3,4,5]"
-            class="star"
-            [class.filled]="(dayRating().productivity || 1) >= i"
-            (click)="setProductivityRating(i)">
-            ★
-          </span>
-        </div>
-      </div>
-
-      <div class="rating-section">
-        <label>Mood</label>
-        <div class="rating-moods">
-          <span *ngFor="let i of [1,2,3,4,5]"
-            class="mood"
-            [class.filled]="(dayRating().mood || 1) >= i"
-            (click)="setMoodRating(i)">
-            😊
-          </span>
-        </div>
-      </div>
-
-      <div class="rating-section">
-        <label>Health</label>
-        <div class="rating-hearts">
-          <span *ngFor="let i of [1,2,3,4,5]"
-            class="heart"
-            [class.filled]="(dayRating().health || 1) >= i"
-            (click)="setHealthRating(i)">
-            ❤️
-          </span>
-        </div>
-      </div>
-    </mat-card-content>
-  </mat-card>
-
-  <!-- AI RECOMMENDATIONS -->
-  <mat-card class="ai-recommendations-card" *ngIf="!isLoading()">
-    <mat-card-header>
-      <mat-icon class="ai-icon">sparkles</mat-icon>
-      <h3>AI Recommendations</h3>
-    </mat-card-header>
-    <mat-card-content>
-      <div *ngFor="let rec of aiRecommendations()" class="recommendation-item">
-        <p class="recommendation-text">{{ rec.text }}</p>
-        <div class="recommendation-actions">
-          <button class="add-btn" (click)="toggleRecommendation(rec)">
-            <mat-icon>{{ rec.added ? 'check' : 'add' }}</mat-icon>
-            {{ rec.added ? 'Added' : 'Add' }}
-          </button>
-          <button class="remove-btn" (click)="removeRecommendation(rec.id)">
-            <mat-icon>close</mat-icon>
-          </button>
-        </div>
-      </div>
-    </mat-card-content>
-  </mat-card>
 </div>

@@ -19,42 +19,16 @@
   </div>
 
   <div class="main-content">
-    <!-- LEFT SIDE: TODAY'S EVENTS -->
-    <div class="events-sidebar">
-      <!-- TOP PRIORITIES BOX (Daily view only) -->
-      <mat-card class="priorities-box" *ngIf="viewMode() === 'daily'">
-        <mat-card-header class="priorities-header">
-          <h3>Top Priorities</h3>
-        </mat-card-header>
-        <mat-card-content class="priorities-content">
-          <div *ngIf="topPriorities().length > 0; else noPriorities" class="priorities-list">
-            <div *ngFor="let task of topPriorities()" class="priority-item">
-              <div class="priority-indicator" [style.background-color]="getCategoryColor(task.category)"></div>
-              <div class="priority-task-info">
-                <div class="priority-title">{{ task.title }}</div>
-                <div class="priority-time">{{ task.time }}</div>
-              </div>
-            </div>
-          </div>
-          <ng-template #noPriorities>
-            <p class="no-priorities">No priority tasks for today</p>
-          </ng-template>
-        </mat-card-content>
-      </mat-card>
-
-      <!-- TODAY'S EVENTS LIST -->
-      <app-events-list
-        [events]="todaysEvents()"
-        [viewMode]="viewMode()"
-        [categories]="categories"
-        (eventClick)="onEventClick($event)">
-      </app-events-list>
-    </div>
+    <!-- LEFT SIDE: NOTES -->
+      <!-- This section can contain daily view notes if needed -->
+    <!-- <div class="notes-sidebar">
+     
+    </div> -->
 
     <!-- SPIRAL DIVIDER -->
-    <div class="spiral-divider"></div>
+    <!-- <div class="spiral-divider"></div> -->
 
-    <!-- RIGHT SIDE: CALENDAR -->
+    <!-- CENTER: CALENDAR -->
     <div class="calendar-column">
       <!-- EVENT DETAIL -->
       <app-event-detail
@@ -87,6 +61,41 @@
         [categories]="categories"
         (eventClick)="onEventClick($event)">
       </app-calendar-monthly>
+    </div>
+
+    <!-- SPIRAL DIVIDER -->
+    <div class="spiral-divider"></div>
+
+    <!-- RIGHT SIDE: TOP PRIORITIES + TODAY'S EVENTS -->
+    <div class="events-sidebar">
+      <!-- TOP PRIORITIES BOX (Daily view only) -->
+      <mat-card class="priorities-box" *ngIf="viewMode() === 'daily'">
+        <mat-card-header class="priorities-header">
+          <h3>Top Priorities</h3>
+        </mat-card-header>
+        <mat-card-content class="priorities-content">
+          <div *ngIf="topPriorities().length > 0; else noPriorities" class="priorities-list">
+            <div *ngFor="let task of topPriorities()" class="priority-item">
+              <div class="priority-indicator" [style.background-color]="getCategoryColor(task.category)"></div>
+              <div class="priority-task-info">
+                <div class="priority-title">{{ task.title }}</div>
+                <div class="priority-time">{{ task.time }}</div>
+              </div>
+            </div>
+          </div>
+          <ng-template #noPriorities>
+            <p class="no-priorities">No priority tasks for today</p>
+          </ng-template>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- TODAY'S EVENTS LIST -->
+      <app-events-list
+        [events]="todaysEvents()"
+        [viewMode]="viewMode()"
+        [categories]="categories"
+        (eventClick)="onEventClick($event)">
+      </app-events-list>
     </div>
   </div>
 </div>
