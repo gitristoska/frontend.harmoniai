@@ -61,12 +61,17 @@
         <mat-card-content class="time-grid">
           <div *ngFor="let slot of getTimeSlots()" class="time-slot">
             <div class="time-label">{{ slot }}</div>
-            <div class="events-container" cdkDropList (cdkDropListDropped)="drop($event)">
+            <div class="events-container" 
+              cdkDropList 
+              cdkDropListGroup="calendar-drop-group"
+              [cdkDropListData]="+slot.split(':')[0]"
+              (cdkDropListDropped)="drop($event)">
               <div *ngFor="let event of getEventsByHour(+slot.split(':')[0])"
                 class="event-item"
                 [style.background-color]="getCategoryColor(event.category)"
                 (click)="onEventClick(event)"
-                cdkDrag>
+                cdkDrag
+                [cdkDragData]="event">
                 <span class="event-time">{{ event.time }}</span>
                 <span class="event-title">{{ event.title }}</span>
               </div>

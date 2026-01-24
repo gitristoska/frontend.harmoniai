@@ -54,6 +54,7 @@ export interface WeekDay {
     ViewModeSelectorComponent,
     CategorySelectorComponent,
     AddTaskButtonComponent,
+    AddTaskFormComponent,
     EventDetailComponent,
     DailyViewComponent,
     WeeklyViewComponent,
@@ -74,7 +75,7 @@ export class CalendarComponent {
   endHour = 22;
 
   // Add task form properties
-  showAddTaskForm = false;
+  showAddTaskForm = signal(false);
   
   // Selected event for detail view
   selectedEvent = signal<CalendarEvent | null>(null);
@@ -318,20 +319,47 @@ export class CalendarComponent {
     };
 
     this.plannerService.addTask(newTask).subscribe({
-      next: (createdTask) => {
+      next: () => {
         this.loadTasks();
-        this.showAddTaskForm = false;
+        this.loadTodaysEvents();
+        this.showAddTaskForm.set(false);
       },
-      error: (err) => console.error('Error creating task:', err)
+      error: (err: any) => console.error('Error creating task:', err)
     });
   }
 
   onTaskCancel() {
-    this.showAddTaskForm = false;
+    this.showAddTaskForm.set(false);
   }
 
   onAddTaskClick() {
-    this.showAddTaskForm = !this.showAddTaskForm;
+    this.showAddTaskForm.update(value => !value);
+  }
+
+  onTaskAdded(taskData: NewTaskData) {
+    // Create a new task with the form data
+    const taskDate = new Date(this.selectedDate());
+    const [hours, minutes] = taskData.time.split(':');
+    taskDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+
+    const newTask = {
+      title: taskData.title.trim(),
+      scheduledAt: taskDate.toISOString(),
+      category: taskData.category,
+      description: '',
+      priority: 1 // medium priority
+    };
+
+    // Save to backend via service
+    this.plannerService.addTask(newTask).subscribe({
+      next: () => {
+        // Reload tasks to reflect the new one
+        this.loadTasks();
+        this.loadTodaysEvents();
+        this.showAddTaskForm.set(false);
+      },
+      error: (err: any) => console.error('Error creating task:', err)
+    });
   }
 
   // Event detail methods

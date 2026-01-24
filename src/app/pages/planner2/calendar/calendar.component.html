@@ -18,6 +18,17 @@
     </div>
   </div>
 
+  <!-- ADD TASK FORM MODAL -->
+  <div class="modal-overlay" *ngIf="showAddTaskForm()" (click)="onAddTaskClick()">
+    <app-add-task-form 
+      [categories]="categories"
+      [selectedDate]="selectedDate()"
+      (click)="$event.stopPropagation()"
+      (taskSave)="onTaskAdded($event)"
+      (taskCancel)="onAddTaskClick()">
+    </app-add-task-form>
+  </div>
+
   <div class="main-content">
     <!-- LEFT SIDE: NOTES -->
       <!-- This section can contain daily view notes if needed -->

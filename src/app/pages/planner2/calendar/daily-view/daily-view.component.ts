@@ -4,9 +4,10 @@ import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { DragDropModule, CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
+import { DragDropModule, CdkDragDrop } from '@angular/cdk/drag-drop';
 import { CalendarEvent } from '../calendar.component';
 import { DailyEntryService } from '../../../../services/dailyentry.service';
+import { PlannerService } from '../../../../services/task.service';
 import { DailyEntry, LifeBalanceItem, CallAndEmailItem, Rating } from '../../../../models/api';
 
 interface NoteItem {
@@ -62,7 +63,7 @@ export class DailyViewComponent {
   isLoading = signal(false);
   error = signal<string | null>(null);
 
-  constructor(private dailyEntryService: DailyEntryService) {
+  constructor(private dailyEntryService: DailyEntryService, private plannerService: PlannerService) {
     // Load daily entry when selected date changes
     effect(() => {
       this.loadDailyEntry(this.selectedDate());
@@ -211,8 +212,41 @@ export class DailyViewComponent {
     this.eventClick.emit(event);
   }
 
-  drop(event: CdkDragDrop<CalendarEvent[]>) {
-    // Handle drag and drop
+  drop(event: CdkDragDrop<any>) {
+    // Handle drops from the sidebar to calendar (different containers)
+    // or drops within the calendar itself (time change)
+    const droppedEvent = event.item.data as CalendarEvent;
+    const targetHour = event.container.data as number;
+    
+    // Only process if we have valid event and target hour
+    if (!droppedEvent || typeof targetHour !== 'number') {
+      console.log('Invalid drop data:', droppedEvent, targetHour);
+      return;
+    }
+    
+    const newTime = `${targetHour.toString().padStart(2, '0')}:00`;
+    
+    // Update the event time
+    droppedEvent.time = newTime;
+    
+    // Update via API
+    if (droppedEvent.id) {
+      const taskDate = new Date(this.selectedDate());
+      taskDate.setHours(targetHour, 0, 0, 0);
+      
+      const updateData = {
+        title: droppedEvent.title,
+        category: droppedEvent.category,
+        scheduledAt: taskDate.toISOString()
+      };
+      
+      this.plannerService.updateTask(droppedEvent.id.toString(), updateData).subscribe({
+        next: () => {
+          console.log('Task updated successfully');
+        },
+        error: (err: any) => console.error('Error updating task time:', err)
+      });
+    }
   }
 
   getTimeSlots() {
