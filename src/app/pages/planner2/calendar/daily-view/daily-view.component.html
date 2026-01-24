@@ -9,7 +9,7 @@
     <p>{{ error() }}</p>
   </div>
 
-  <!-- TOP SECTION: LEFT NOTES + CENTER CALENDAR + RIGHT NOTES -->
+  <!-- TOP SECTION: LEFT NOTES + SEPARATOR + CENTER CALENDAR + SEPARATOR + RIGHT NOTES -->
   <div class="calendar-notes-container" *ngIf="!isLoading()">
     <!-- LEFT SIDE: GRATEFUL, MOTIVATION, PERSONAL NOTES -->
     <div class="notes-side">
@@ -79,6 +79,11 @@
           </div>
         </mat-card-content>
       </mat-card>
+    </div>
+
+    <!-- RIGHT SEPARATOR -->
+    <div class="vertical-separator">
+      <img src="/Screenshot 2026-01-24 175116.png" alt="separator" class="separator-image">
     </div>
 
     <!-- RIGHT SIDE: CALLS/EMAILS, NOTES FOR TOMORROW -->

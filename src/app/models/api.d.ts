@@ -1,10 +1,20 @@
 // src/app/models/api.ts
+export enum TaskStatus {
+  NotStarted = 0,
+  InProgress = 1,
+  Completed = 2,
+  OnHold = 3,
+  Cancelled = 4
+}
+
 export interface PlannerTask {
   id?: string | number;
   title: string;
   description?: string;
-  scheduledAt: string;       // ISO string: YYYY-MM-DDTHH:MM:SSZ
+  startDate?: string;        // ISO string
+  endDate?: string;          // ISO string
   priority: number;          // 0 = low, 1 = medium, 2 = high
+  status: TaskStatus;        // Task status
   category?: string;
   isDone?: boolean;
   createdAt?: string;
@@ -15,20 +25,23 @@ export interface PlannerTask {
 }
 
 export interface PlannerTaskCreateDto {
-  title: string;
-  description: string;
-  scheduledAt: string;       // ISO string
-  priority: number;          // 0 = low, 1 = medium, 2 = high
-  category: string;
+  title?: string;
+  description?: string;
+  startDate?: string;        // ISO string
+  endDate?: string;          // ISO string
+  priority?: number;         // 0 = low, 1 = medium, 2 = high
+  status?: TaskStatus;       // Task status
+  category?: string;
 }
 
 export interface PlannerTaskUpdateDto {
   title?: string;
   description?: string;
-  scheduledAt?: string;      // ISO string
+  startDate?: string;        // ISO string
+  endDate?: string;          // ISO string
   priority?: number;         // 0 = low, 1 = medium, 2 = high
+  status?: TaskStatus;       // Task status
   category?: string;
-  isDone?: boolean;
 }
 
 export interface SettingsUpdateDto {

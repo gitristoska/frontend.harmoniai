@@ -11,6 +11,7 @@ import { EventsListComponent } from './events-list/events-list.component';
 import { ViewModeSelectorComponent } from './view-mode-selector/view-mode-selector.component';
 import { CategorySelectorComponent } from './category-selector/category-selector.component';
 import { AddTaskFormComponent, NewTaskData } from './add-task-form/add-task-form.component';
+import { EditTaskFormComponent, EditTaskData } from './edit-task-form/edit-task-form.component';
 import { AddTaskButtonComponent } from './add-task-button/add-task-button.component';
 import { EventDetailComponent, EventUpdateData } from './event-detail/event-detail.component';
 import { DailyViewComponent } from './daily-view/daily-view.component';
@@ -23,6 +24,7 @@ export interface CalendarEvent {
   time: string;
   date?: Date;
   category?: string;
+  description?: string;
 }
 
 export interface DayCell {
@@ -55,6 +57,7 @@ export interface WeekDay {
     CategorySelectorComponent,
     AddTaskButtonComponent,
     AddTaskFormComponent,
+    EditTaskFormComponent,
     EventDetailComponent,
     DailyViewComponent,
     WeeklyViewComponent,
@@ -76,6 +79,10 @@ export class CalendarComponent {
 
   // Add task form properties
   showAddTaskForm = signal(false);
+  
+  // Edit task form properties
+  showEditTaskForm = signal(false);
+  editingTask = signal<CalendarEvent | null>(null);
   
   // Selected event for detail view
   selectedEvent = signal<CalendarEvent | null>(null);
@@ -117,13 +124,29 @@ export class CalendarComponent {
 
     tasksObs.subscribe({
       next: (tasks: PlannerTask[]) => {
-        const events = tasks.map(t => ({
-          id: t.id,
-          title: t.title,
-          time: t.scheduledAt ? t.scheduledAt.split('T')[1]?.slice(0,5) ?? '00:00' : '00:00',
-          date: t.scheduledAt ? new Date(t.scheduledAt) : undefined,
-          category: t.category
-        }));
+        const events = tasks.map(t => {
+          let timeStr = '00:00';
+          let dateObj: Date | undefined;
+          
+          if (t.startDate) {
+            // Extract time from ISO string (before the 'T')
+            const timePart = t.startDate.split('T')[1];
+            timeStr = timePart?.slice(0, 5) ?? '00:00';
+            
+            // Create date from ISO string
+            dateObj = new Date(t.startDate);
+            console.log('Task:', t.title, 'startDate:', t.startDate, 'extracted time:', timeStr, 'date:', dateObj);
+          }
+          
+          return {
+            id: t.id,
+            title: t.title,
+            time: timeStr,
+            date: dateObj,
+            category: t.category,
+            description: t.description
+          };
+        });
         this.allEvents.set(events);
       },
       error: err => console.error('Error loading calendar tasks:', err)
@@ -134,13 +157,24 @@ export class CalendarComponent {
     const today = new Date();
     const dateStr = today.toISOString().split('T')[0];
     this.plannerService.getTasksForDay(dateStr).subscribe((tasks: PlannerTask[]) => {
-      this.todaysEvents.set(tasks.map((task: PlannerTask) => ({
-        id: task.id,
-        title: task.title,
-        time: task.scheduledAt ? task.scheduledAt.split('T')[1]?.slice(0, 5) ?? '00:00' : '00:00',
-        date: task.scheduledAt ? new Date(task.scheduledAt) : undefined,
-        category: task.category
-      })));
+      this.todaysEvents.set(tasks.map((task: PlannerTask) => {
+        let timeStr = '00:00';
+        let dateObj: Date | undefined;
+        
+        if (task.startDate) {
+          const timePart = task.startDate.split('T')[1];
+          timeStr = timePart?.slice(0, 5) ?? '00:00';
+          dateObj = new Date(task.startDate);
+        }
+        
+        return {
+          id: task.id,
+          title: task.title,
+          time: timeStr,
+          date: dateObj,
+          category: task.category
+        };
+      }));
     });
   }
 
@@ -312,10 +346,10 @@ export class CalendarComponent {
 
     const newTask = {
       title: taskData.title.trim(),
-      scheduledAt: taskDate.toISOString(),
+      startDate: taskDate.toISOString(),
       category: taskData.category,
-      description: '',
-      priority: 1 // medium priority
+      description: taskData.description,
+      priority: taskData.priority 
     };
 
     this.plannerService.addTask(newTask).subscribe({
@@ -344,10 +378,10 @@ export class CalendarComponent {
 
     const newTask = {
       title: taskData.title.trim(),
-      scheduledAt: taskDate.toISOString(),
+      startDate: taskDate.toISOString(),
       category: taskData.category,
-      description: '',
-      priority: 1 // medium priority
+      description: taskData.description,
+      priority: taskData.priority // medium priority
     };
 
     // Save to backend via service
@@ -364,7 +398,52 @@ export class CalendarComponent {
 
   // Event detail methods
   onEventClick(event: CalendarEvent) {
-    this.selectedEvent.set(event);
+    // Open edit form instead of detail view
+    this.editingTask.set(event);
+    this.showEditTaskForm.set(true);
+  }
+
+  onTaskUpdated(taskData: EditTaskData) {
+    const taskDate = new Date(this.selectedDate());
+    const [hours, minutes] = taskData.time.split(':');
+    taskDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+
+    const updatePayload = {
+      title: taskData.title,
+      description: taskData.description,
+      startDate: taskData.startDate || taskDate.toISOString(),
+      endDate: taskData.endDate,
+      priority: taskData.priority,
+      status: taskData.status,
+      category: taskData.category
+    };
+
+    this.plannerService.updateTask(taskData.id.toString(), updatePayload).subscribe({
+      next: () => {
+        this.loadTasks();
+        this.loadTodaysEvents();
+        this.showEditTaskForm.set(false);
+        this.editingTask.set(null);
+      },
+      error: (err: any) => console.error('Error updating task:', err)
+    });
+  }
+
+  onTaskDeleted(taskId: string | number) {
+    this.plannerService.deleteTask(taskId.toString()).subscribe({
+      next: () => {
+        this.loadTasks();
+        this.loadTodaysEvents();
+        this.showEditTaskForm.set(false);
+        this.editingTask.set(null);
+      },
+      error: (err: any) => console.error('Error deleting task:', err)
+    });
+  }
+
+  onEditTaskCancel() {
+    this.showEditTaskForm.set(false);
+    this.editingTask.set(null);
   }
 
   onEventUpdate(updateData: EventUpdateData) {
@@ -377,10 +456,10 @@ export class CalendarComponent {
 
     const updatedTask = {
       title: updateData.title,
-      scheduledAt: taskDate.toISOString(),
+      startDate: taskDate.toISOString(),
       category: updateData.category,
-      description: '',
-      priority: 1
+      description: updateData.description,
+      priority: updateData.priority
     };
 
     this.plannerService.updateTask(event.id, updatedTask).subscribe({

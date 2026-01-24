@@ -20,4 +20,4 @@
 - **Gotchas**:
   - Router provided twice (module vs standalone); the live config is the one in `bootstrapApplication`.
   - Services are `providedIn: 'root'` but some components list them in `providers` to force fresh instances; be mindful when sharing state.
-  - Backend expects ISO-like date strings for planner tasks (see `scheduledAt` notes in [src/app/models/api.d.ts](src/app/models/api.d.ts)).
+  - Backend expects ISO-like date strings for planner tasks (see `startDate` notes in [src/app/models/api.d.ts](src/app/models/api.d.ts)).

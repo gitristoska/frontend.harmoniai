@@ -40,6 +40,7 @@ export class Tasks2Component {
   newTaskTitle = '';
   newTaskTime = '09:00';
   newTaskCategory = 'study';
+  newTaskDescription = '';
 
   categories = [
     { id: 'all', name: 'All Categories', color: '#e5e7eb' },
@@ -59,7 +60,10 @@ export class Tasks2Component {
 
   private loadTasks(): void {
     this.plannerService.getTasksForMonth(2026, 1).subscribe({
-     next: (tasks) => this.tasks.set(tasks),
+     next: (tasks) => {
+       console.log('Loaded tasks (tasks2):', tasks);
+       this.tasks.set(tasks);
+     },
      error: (err) => console.error(err) });
   }
 
@@ -88,14 +92,14 @@ export class Tasks2Component {
     if (!this.newTaskTitle?.trim()) return;
 
     const dateStr = this.selectedDate().toISOString().split('T')[0];
-    const scheduledAt = this.newTaskTime
+    const startDateTime = this.newTaskTime
       ? `${dateStr}T${this.newTaskTime}:00.000Z`
       : `${dateStr}T00:00:00.000Z`;
 
     const taskToAdd: PlannerTaskCreateDto = {
       title: this.newTaskTitle,
-      description: '',
-      scheduledAt,
+      description: this.newTaskDescription,
+      startDate: startDateTime,
       priority: 1, // default
       category: this.newTaskCategory
     };
@@ -116,5 +120,6 @@ export class Tasks2Component {
     this.newTaskTitle = '';
     this.newTaskTime = '09:00';
     this.newTaskCategory = 'study';
+    this.newTaskDescription = '';
   }
 }

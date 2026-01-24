@@ -4,11 +4,11 @@
   gap: 1.5rem;
 }
 
-// TOP SECTION: Calendar + Notes Side by Side (3 columns)
+// TOP SECTION: Calendar + Notes Side by Side (4 columns with right separator)
 .calendar-notes-container {
   display: grid;
-  grid-template-columns: 1fr 1.5fr 1fr;
-  gap: 1.5rem;
+  grid-template-columns: 1fr 1.5fr auto 1fr;
+  gap: 0;
   align-items: start;
 
   .notes-side {
@@ -17,16 +17,32 @@
     gap: 1.5rem;
   }
 
+  .vertical-separator {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 1.5rem 0.5rem;
+    
+    .separator-image {
+      width: 82px;
+      height: 852px;
+      object-fit: contain;
+      opacity: 0.8;
+    }
+  }
+
   .calendar-side {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
+    padding: 0 1rem;
   }
 
   .events-side {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
+    padding-left: 1rem;
   }
 
   .vertical-divider {

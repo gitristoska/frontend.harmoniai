@@ -13,6 +13,8 @@ export interface EventUpdateData {
   title: string;
   time: string;
   category: string;
+    description?: string;
+    priority?: number;
 }
 
 @Component({
@@ -43,6 +45,7 @@ export class EventDetailComponent implements OnInit {
   editTitle = '';
   editTime = '';
   editCategory = '';
+  editDescription = '';
 
   ngOnInit() {
     this.resetEditForm();
@@ -64,7 +67,8 @@ export class EventDetailComponent implements OnInit {
     this.eventUpdate.emit({
       title: this.editTitle,
       time: this.editTime,
-      category: this.editCategory
+      category: this.editCategory,
+      description: this.editDescription
     });
 
     this.isEditing = false;
@@ -93,5 +97,6 @@ export class EventDetailComponent implements OnInit {
     this.editTitle = evt.title;
     this.editTime = evt.time;
     this.editCategory = evt.category || 'study';
+    this.editDescription = evt.description || '';
   }
 }

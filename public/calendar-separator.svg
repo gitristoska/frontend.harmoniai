@@ -1,0 +1,21 @@
+<svg width="82" height="852" viewBox="0 0 82 852" xmlns="http://www.w3.org/2000/svg">
+  <!-- Vertical separator with repeating pattern -->
+  <defs>
+    <pattern id="separator-pattern" x="0" y="0" width="82" height="60" patternUnits="userSpaceOnUse">
+      <!-- Top bracket -->
+      <rect x="10" y="5" width="62" height="8" fill="none" stroke="#0f172a" stroke-width="2" rx="2"/>
+      <!-- Left bracket arm -->
+      <line x1="10" y1="13" x2="10" y2="45" stroke="#0f172a" stroke-width="2"/>
+      <!-- Right bracket arm -->
+      <line x1="72" y1="13" x2="72" y2="45" stroke="#0f172a" stroke-width="2"/>
+      <!-- Bottom bracket -->
+      <rect x="10" y="45" width="62" height="8" fill="none" stroke="#0f172a" stroke-width="2" rx="2"/>
+    </pattern>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="82" height="852" fill="#ffffff"/>
+  
+  <!-- Apply pattern -->
+  <rect width="82" height="852" fill="url(#separator-pattern)"/>
+</svg>

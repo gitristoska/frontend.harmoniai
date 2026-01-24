@@ -21,6 +21,11 @@
             <input matInput placeholder="What do you need to do?" [(ngModel)]="newTask.title" />
           </mat-form-field>
 
+          <mat-form-field appearance="outline" style="width:100%">
+            <mat-label>Description</mat-label>
+            <textarea matInput placeholder="Enter task description" [(ngModel)]="newTask.description" rows="3"></textarea>
+          </mat-form-field>
+
           <div class="row">
             <mat-form-field appearance="outline" class="col">
               <mat-label>Priority</mat-label>
@@ -70,9 +75,10 @@
           <div class="task-main">
             <div class="task-title">{{ t.title }}</div>
             <div class="task-meta">
-              {{ t.scheduledAt ? (t.scheduledAt | date:'medium') : '' }}
+              {{ t.startDate ? (t.startDate | date:'medium') : '' }}
               • {{ t.category }}
             </div>
+            <div class="task-desc" *ngIf="t.description">{{ t.description }}</div>
           </div>
           <div class="task-right">
             <div

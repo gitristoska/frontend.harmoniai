@@ -166,6 +166,18 @@
             .task-meta {
               font-size: 0.875rem;
               color: #6b7280;
+              margin-bottom: 6px;
+            }
+
+            .task-desc {
+              font-size: 0.875rem;
+              color: #555;
+              line-height: 1.4;
+              padding: 8px;
+              background: rgba(255, 255, 255, 0.7);
+              border-left: 3px solid #667eea;
+              padding-left: 12px;
+              margin-top: 4px;
             }
           }
 

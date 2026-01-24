@@ -1,29 +1,33 @@
 <mat-card class="task-form-card">
-  <h3>Add New Task</h3>
-  <div class="task-date">{{ selectedDate() | date:'EEEE, MMMM d, yyyy' }}</div>
+  <div class="form-header">
+    <h3>Edit Task</h3>
+    <button mat-icon-button class="delete-btn" (click)="onDelete()">
+      <mat-icon>delete</mat-icon>
+    </button>
+  </div>
 
   <mat-form-field appearance="outline" style="width:100%">
     <mat-label>Task Title</mat-label>
-    <input matInput [(ngModel)]="newTaskTitle" placeholder="Enter task title">
+    <input matInput [(ngModel)]="taskTitle" placeholder="Enter task title">
   </mat-form-field>
 
   <mat-form-field appearance="outline" style="width:100%">
     <mat-label>Description</mat-label>
-    <textarea matInput [(ngModel)]="newTaskDescription" placeholder="Enter task description" rows="3"></textarea>
+    <textarea matInput [(ngModel)]="taskDescription" placeholder="Enter task description" rows="3"></textarea>
   </mat-form-field>
 
   <div class="form-row">
     <mat-form-field appearance="outline" style="flex:1">
       <mat-label>Time</mat-label>
-      <input matInput type="time" [(ngModel)]="newTaskTime">
+      <input matInput type="time" [(ngModel)]="taskTime">
     </mat-form-field>
 
     <mat-form-field appearance="outline" style="flex:1">
       <mat-label>Priority</mat-label>
-      <mat-select [(ngModel)]="newTaskPriority">
-        <mat-option value="0">Low</mat-option>
-        <mat-option value="1">Medium</mat-option>
-        <mat-option value="2">High</mat-option>
+      <mat-select [(ngModel)]="taskPriority">
+        <mat-option [value]="0">Low</mat-option>
+        <mat-option [value]="1">Medium</mat-option>
+        <mat-option [value]="2">High</mat-option>
       </mat-select>
     </mat-form-field>
   </div>
@@ -31,7 +35,7 @@
   <div class="form-row">
     <mat-form-field appearance="outline" style="flex:1">
       <mat-label>Status</mat-label>
-      <mat-select [(ngModel)]="newTaskStatus">
+      <mat-select [(ngModel)]="taskStatus">
         <mat-option *ngFor="let option of taskStatusOptions" [value]="option.value">
           {{ option.label }}
         </mat-option>
@@ -40,7 +44,7 @@
 
     <mat-form-field appearance="outline" style="flex:1">
       <mat-label>Category</mat-label>
-      <mat-select [(ngModel)]="newTaskCategory">
+      <mat-select [(ngModel)]="taskCategory">
         <mat-option *ngFor="let cat of categories()" [value]="cat.id">
           <span *ngIf="cat.id !== 'all'" class="dot" [style.background]="cat.color"></span> {{cat.name}}
         </mat-option>
@@ -51,17 +55,17 @@
   <div class="form-row">
     <mat-form-field appearance="outline" style="flex:1">
       <mat-label>Start Date</mat-label>
-      <input matInput type="date" [(ngModel)]="newTaskStartDate">
+      <input matInput type="date" [(ngModel)]="taskStartDate">
     </mat-form-field>
 
     <mat-form-field appearance="outline" style="flex:1">
       <mat-label>End Date</mat-label>
-      <input matInput type="date" [(ngModel)]="newTaskEndDate">
+      <input matInput type="date" [(ngModel)]="taskEndDate">
     </mat-form-field>
   </div>
 
   <div class="form-actions">
-    <button mat-button class="save-btn" (click)="onSave()">Save Task</button>
+    <button mat-button class="save-btn" (click)="onUpdate()">Update Task</button>
     <button mat-button (click)="onCancel()">Cancel</button>
   </div>
 </mat-card>

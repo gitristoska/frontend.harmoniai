@@ -27,6 +27,10 @@
     <div class="event-title-display">
       <h4>{{ event().title }}</h4>
     </div>
+    <div class="event-description" *ngIf="event().description">
+      <strong>Description:</strong>
+      <span>{{ event().description }}</span>
+    </div>
 
     <div class="detail-actions">
       <button mat-raised-button color="primary" (click)="startEdit()">
@@ -41,9 +45,15 @@
   </div>
 
   <div *ngIf="isEditing" class="detail-edit">
+
     <mat-form-field appearance="outline" style="width:100%">
       <mat-label>Event Title</mat-label>
       <input matInput [(ngModel)]="editTitle" placeholder="Enter event title">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" style="width:100%">
+      <mat-label>Description</mat-label>
+      <textarea matInput [(ngModel)]="editDescription" placeholder="Enter event description" rows="3"></textarea>
     </mat-form-field>
 
     <div class="form-row">

@@ -237,7 +237,7 @@ export class DailyViewComponent {
       const updateData = {
         title: droppedEvent.title,
         category: droppedEvent.category,
-        scheduledAt: taskDate.toISOString()
+        startDate: taskDate.toISOString()
       };
       
       this.plannerService.updateTask(droppedEvent.id.toString(), updateData).subscribe({
@@ -275,23 +275,18 @@ export class DailyViewComponent {
     if (!entry || !title.trim()) return;
 
     if (category === 'lifeBalance') {
-      const selectedCategory = entry.lifeBalanceToDoList?.find(
-        item => item.category === this.selectedLifeBalanceCategory
-      );
-      if (selectedCategory) {
-        const newItem: LifeBalanceItem = {
-          id: Date.now().toString(),
-          text: title.trim(),
-          category: this.selectedLifeBalanceCategory,
-          isDone: false
-        };
-        if (!entry.lifeBalanceToDoList) {
-          entry.lifeBalanceToDoList = [];
-        }
-        entry.lifeBalanceToDoList.push(newItem);
-        this.dailyEntry.set({ ...entry });
-        this.saveDailyEntry();
+      const newItem: LifeBalanceItem = {
+        id: Date.now().toString(),
+        text: title.trim(),
+        category: this.selectedLifeBalanceCategory,
+        isDone: false
+      };
+      if (!entry.lifeBalanceToDoList) {
+        entry.lifeBalanceToDoList = [];
       }
+      entry.lifeBalanceToDoList.push(newItem);
+      this.dailyEntry.set({ ...entry });
+      this.saveDailyEntry();
     } else if (category === 'callsEmails') {
       const newItem: CallAndEmailItem = {
         id: Date.now().toString(),
@@ -317,13 +312,20 @@ export class DailyViewComponent {
       isDone: item.isDone
     })) || [];
 
+    // Prepare lifeBalanceToDoList - keep category field
+    const lifeBalance = entry.lifeBalanceToDoList?.map(item => ({
+      text: item.text,
+      category: item.category,
+      isDone: item.isDone
+    })) || [];
+
     const updateDto = {
       date: entry.date,
       gratefulFor: entry.gratefulFor,
       inspirationOrMotivation: entry.inspirationOrMotivation,
       personalNotes: entry.personalNotes,
       notesForTomorrow: entry.notesForTomorrow,
-      lifeBalanceToDoList: entry.lifeBalanceToDoList,
+      lifeBalanceToDoList: lifeBalance,
       callsAndEmailsChecklist: callsEmails,
       rating: entry.rating
     };

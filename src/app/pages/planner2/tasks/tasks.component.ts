@@ -37,11 +37,12 @@ export class TasksComponent {
   tasks = signal<PlannerTask[]>([]);
 
   showForm = false;
-  newTask: { title: string; time: string; date: string; category: string; priority: number } = {
+  newTask: { title: string; time: string; date: string; category: string; priority: number; description: string } = {
     title: '',
     time: '',
     date: '',
     category: 'work',
+    description: '',
     priority: 1
   };
 
@@ -51,7 +52,10 @@ export class TasksComponent {
 
   private loadTasks(): void {
     this.plannerService.getTasksForMonth(2026, 1).subscribe({
-     next: (tasks) => this.tasks.set(tasks),
+     next: (tasks) => {
+       console.log('Loaded tasks:', tasks);
+       this.tasks.set(tasks);
+     },
      error: (err) => console.error(err) });
   }
 
@@ -62,14 +66,14 @@ export class TasksComponent {
   submitAddTask(): void {
     if (!this.newTask.title?.trim() || !this.newTask.date) return;
 
-    const scheduledAt = this.newTask.time
+    const startDateTime = this.newTask.time
       ? `${this.newTask.date}T${this.newTask.time}:00.000Z`
       : `${this.newTask.date}T00:00:00.000Z`;
 
     const taskToAdd: PlannerTaskCreateDto = {
       title: this.newTask.title,
-      description: '',
-      scheduledAt,
+      description: this.newTask.description,
+      startDate: startDateTime,
       priority: this.newTask.priority,
       category: this.newTask.category
     };
@@ -90,7 +94,7 @@ export class TasksComponent {
   }
 
   private resetForm(): void {
-    this.newTask = { title: '', time: '', date: '', category: 'work', priority: 1 };
+    this.newTask = { title: '', time: '', date: '', category: 'work', priority: 1 , description: '' };
     this.showForm = false;
   }
 
