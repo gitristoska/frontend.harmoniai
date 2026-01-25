@@ -15,11 +15,19 @@
         class="calendar-day"
         [class.other-month]="!day.isCurrentMonth"
         [class.today]="day.isToday"
-        [class.selected]="day.isSelected"
+        [class.selected]="isDaySelected(day)"
         (click)="onDayClick(day)">
         <div class="day-number">{{ day.dayOfMonth }}</div>
         <div class="day-events">
-          <div class="event-indicator">{{ day.dayOfMonth % 7 }} events</div>
+          <div *ngFor="let event of getEventsByDay(day) | slice:0:2" 
+            class="event-dot"
+            [style.background-color]="getCategoryColor(event.category)"
+            [title]="event.title"
+            (click)="onEventClick(event); $event.stopPropagation()">
+          </div>
+          <div *ngIf="getEventsByDay(day).length > 2" class="event-overflow">
+            +{{ getEventsByDay(day).length - 2 }}
+          </div>
         </div>
       </div>
     </div>

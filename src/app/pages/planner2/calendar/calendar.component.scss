@@ -40,6 +40,33 @@
       align-items: center;
       flex-wrap: wrap;
     }
+
+    .date-navigation {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      background: #f9fafb;
+      border-radius: 8px;
+      padding: 0.5rem;
+
+      .date-label {
+        min-width: 180px;
+        text-align: center;
+        font-weight: 500;
+        font-size: 14px;
+        color: #374151;
+      }
+
+      button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        
+        &:hover {
+          background-color: #e5e7eb;
+        }
+      }
+    }
   }
 
   .main-content {
@@ -132,6 +159,40 @@
       height: 130vh;
       padding-left: 1.5rem;
       padding-right: 0.5rem;
+
+      .events-header-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        padding: 12px;
+        background: #f8fafc;
+        border-radius: 8px;
+        flex-shrink: 0;
+
+        h3 {
+          margin: 0;
+          font-size: 14px;
+          font-weight: 600;
+          color: #0f172a;
+        }
+
+        .show-all-btn {
+          font-size: 12px;
+          height: 32px;
+          color: #3b82f6;
+          
+          mat-icon {
+            width: 16px;
+            height: 16px;
+            font-size: 16px;
+            margin-right: 4px;
+          }
+
+          &:hover {
+            background-color: #e0e7ff;
+          }
+        }
+      }
 
       .priorities-box {
         border-radius: 12px;

@@ -72,6 +72,10 @@ export class CalendarComponent {
   currentDate = signal(new Date());
   selectedDate = signal(new Date());
   selectedCategory = signal('all');
+  
+  // For monthly view
+  monthlyViewMode = signal<'month' | 'day'>('month');
+  selectedMonthlyDay = signal<Date | null>(null);
 
   // Time range settings (hardcoded for now - 8 AM to 10 PM)
   startHour = 8;
@@ -98,14 +102,13 @@ export class CalendarComponent {
   ];
 
   allEvents = signal<CalendarEvent[]>([]);
-  todaysEvents = signal<CalendarEvent[]>([]);
 
   constructor(private plannerService: PlannerService) {
     this.loadTasks();
   }
 
   ngOnInit() {
-    this.loadTodaysEvents();
+    // No longer needed - events are computed from allEvents
   }
 
   private loadTasks() {
@@ -153,31 +156,6 @@ export class CalendarComponent {
     });
   }
 
-  private loadTodaysEvents() {
-    const today = new Date();
-    const dateStr = today.toISOString().split('T')[0];
-    this.plannerService.getTasksForDay(dateStr).subscribe((tasks: PlannerTask[]) => {
-      this.todaysEvents.set(tasks.map((task: PlannerTask) => {
-        let timeStr = '00:00';
-        let dateObj: Date | undefined;
-        
-        if (task.startDate) {
-          const timePart = task.startDate.split('T')[1];
-          timeStr = timePart?.slice(0, 5) ?? '00:00';
-          dateObj = new Date(task.startDate);
-        }
-        
-        return {
-          id: task.id,
-          title: task.title,
-          time: timeStr,
-          date: dateObj,
-          category: task.category
-        };
-      }));
-    });
-  }
-
   timeSlots = computed(() => {
     const slots = [];
     for (let i = this.startHour; i < this.endHour; i++) {
@@ -186,11 +164,34 @@ export class CalendarComponent {
     return slots;
   });
 
+  // Events for the selected period (day/week/month)
+  selectedPeriodEvents = computed(() => {
+    const view = this.viewMode();
+    const events = this.allEvents();
+    
+    if (view === 'daily') {
+      return events.filter(e => e.date && this.isSameDay(e.date, this.selectedDate()));
+    } else if (view === 'weekly') {
+      const startOfWeek = new Date(this.selectedDate());
+      startOfWeek.setDate(this.selectedDate().getDate() - this.selectedDate().getDay());
+      const endOfWeek = new Date(startOfWeek);
+      endOfWeek.setDate(startOfWeek.getDate() + 6);
+      return events.filter(e => e.date && e.date >= startOfWeek && e.date <= endOfWeek);
+    } else if (view === 'monthly') {
+      // Check if we're showing a specific day or the whole month
+      if (this.monthlyViewMode() === 'day' && this.selectedMonthlyDay()) {
+        return events.filter(e => e.date && this.isSameDay(e.date, this.selectedMonthlyDay()!));
+      }
+      // Show all month events
+      return events.filter(e => e.date && e.date.getMonth() === this.currentDate().getMonth() && e.date.getFullYear() === this.currentDate().getFullYear());
+    }
+    return [];
+  });
+
   topPriorities = computed(() => {
-    // Get top 3 priority tasks from today's events
-    return this.todaysEvents()
-      .slice(0, 3)
-      .sort((a, b) => {
+    // Get top 3 priority tasks from the selected period
+    return this.selectedPeriodEvents()
+      .sort((a: CalendarEvent, b: CalendarEvent) => {
         // Sort by time to show earliest tasks first
         const timeA = a.time || '23:59';
         const timeB = b.time || '23:59';
@@ -278,6 +279,25 @@ export class CalendarComponent {
 
   monthYearLabel = computed(() => this.currentDate().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }));
 
+  navigationLabel = computed(() => {
+    const view = this.viewMode();
+    const date = this.selectedDate();
+
+    if (view === 'daily') {
+      return date.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+    } else if (view === 'weekly') {
+      const startOfWeek = new Date(date);
+      startOfWeek.setDate(date.getDate() - date.getDay());
+      const endOfWeek = new Date(startOfWeek);
+      endOfWeek.setDate(startOfWeek.getDate() + 6);
+      const startStr = startOfWeek.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      const endStr = endOfWeek.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      return `${startStr} - ${endStr}`;
+    } else {
+      return this.currentDate().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    }
+  });
+
   private isSameDay(d1: Date, d2: Date): boolean {
     return d1.getFullYear()===d2.getFullYear() && d1.getMonth()===d2.getMonth() && d1.getDate()===d2.getDate();
   }
@@ -303,6 +323,16 @@ export class CalendarComponent {
   selectDate(date: Date) { this.selectedDate.set(new Date(date)); this.loadTasks(); }
   selectCategory(categoryId: string) { this.selectedCategory.set(categoryId); }
   setViewMode(mode: 'daily' | 'weekly' | 'monthly') { this.viewMode.set(mode); this.loadTasks(); }
+
+  selectMonthlyDay(date: Date) {
+    this.selectedMonthlyDay.set(date);
+    this.monthlyViewMode.set('day');
+  }
+
+  showAllMonth() {
+    this.monthlyViewMode.set('month');
+    this.selectedMonthlyDay.set(null);
+  }
 
   previousDay() { const d=this.selectedDate(); d.setDate(d.getDate()-1); this.selectedDate.set(new Date(d)); this.updateCurrentDateIfNeeded(); this.loadTasks(); }
   nextDay() { const d=this.selectedDate(); d.setDate(d.getDate()+1); this.selectedDate.set(new Date(d)); this.updateCurrentDateIfNeeded(); this.loadTasks(); }
@@ -355,7 +385,6 @@ export class CalendarComponent {
     this.plannerService.addTask(newTask).subscribe({
       next: () => {
         this.loadTasks();
-        this.loadTodaysEvents();
         this.showAddTaskForm.set(false);
       },
       error: (err: any) => console.error('Error creating task:', err)
@@ -389,7 +418,6 @@ export class CalendarComponent {
       next: () => {
         // Reload tasks to reflect the new one
         this.loadTasks();
-        this.loadTodaysEvents();
         this.showAddTaskForm.set(false);
       },
       error: (err: any) => console.error('Error creating task:', err)
@@ -421,7 +449,6 @@ export class CalendarComponent {
     this.plannerService.updateTask(taskData.id.toString(), updatePayload).subscribe({
       next: () => {
         this.loadTasks();
-        this.loadTodaysEvents();
         this.showEditTaskForm.set(false);
         this.editingTask.set(null);
       },
@@ -433,7 +460,6 @@ export class CalendarComponent {
     this.plannerService.deleteTask(taskId.toString()).subscribe({
       next: () => {
         this.loadTasks();
-        this.loadTodaysEvents();
         this.showEditTaskForm.set(false);
         this.editingTask.set(null);
       },

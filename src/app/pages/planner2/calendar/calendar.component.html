@@ -6,6 +6,19 @@
         (viewModeChange)="setViewMode($event)">
       </app-view-mode-selector>
 
+      <div class="date-navigation">
+        <button mat-icon-button (click)="viewMode() === 'daily' ? previousDay() : viewMode() === 'weekly' ? previousWeek() : previousMonth()" title="Previous">
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+        <span class="date-label">{{ navigationLabel() }}</span>
+        <button mat-icon-button (click)="viewMode() === 'daily' ? nextDay() : viewMode() === 'weekly' ? nextWeek() : nextMonth()" title="Next">
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+        <button mat-icon-button (click)="goToToday()" title="Today">
+          <mat-icon>today</mat-icon>
+        </button>
+      </div>
+
       <app-category-selector 
         [selectedCategory]="selectedCategory()" 
         [categories]="categories"
@@ -80,14 +93,18 @@
 
       <app-calendar-weekly *ngIf="viewMode() === 'weekly'"
         [weekDays]="weekDays()"
+        [events]="filteredEvents()"
         [categories]="categories"
         (eventClick)="onEventClick($event)">
       </app-calendar-weekly>
 
       <app-calendar-monthly *ngIf="viewMode() === 'monthly'"
         [calendarDays]="calendarDays()"
+        [events]="filteredEvents()"
+        [selectedDay]="selectedMonthlyDay()"
         [categories]="categories"
-        (eventClick)="onEventClick($event)">
+        (eventClick)="onEventClick($event)"
+        (dayClick)="selectMonthlyDay($event)">
       </app-calendar-monthly>
     </div>
 
@@ -112,14 +129,23 @@
             </div>
           </div>
           <ng-template #noPriorities>
-            <p class="no-priorities">No priority tasks for today</p>
+            <p class="no-priorities">No priority tasks for this day</p>
           </ng-template>
         </mat-card-content>
       </mat-card>
 
-      <!-- TODAY'S EVENTS LIST -->
+      <!-- EVENTS LIST HEADER WITH SHOW ALL MONTH BUTTON (Monthly view only) -->
+      <div *ngIf="viewMode() === 'monthly' && monthlyViewMode() === 'day'" class="events-header-actions">
+        <h3>{{ selectedMonthlyDay() | date:'EEEE, MMM d' }}</h3>
+        <button mat-button (click)="showAllMonth()" class="show-all-btn">
+          <mat-icon>calendar_month</mat-icon>
+          Show all month
+        </button>
+      </div>
+
+      <!-- EVENTS LIST FOR SELECTED PERIOD -->
       <app-events-list
-        [events]="todaysEvents()"
+        [events]="selectedPeriodEvents()"
         [viewMode]="viewMode()"
         [categories]="categories"
         (eventClick)="onEventClick($event)">

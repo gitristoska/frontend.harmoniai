@@ -9,9 +9,19 @@
         <div class="day-name">{{ day.date | date:'EEE' }}</div>
         <div class="day-date" [class.today]="day.isToday">{{ day.date | date:'d' }}</div>
       </div>
-      <div class="day-events-placeholder">
-        <!-- Events would be displayed here -->
-        <p>No events</p>
+      <div class="day-events">
+        <div *ngIf="getEventsByDay(day).length > 0; else noEvents" class="events-list">
+          <div *ngFor="let event of getEventsByDay(day)" 
+            class="event-item"
+            [style.background-color]="getCategoryColor(event.category)"
+            (click)="onEventClick(event)">
+            <div class="event-time">{{ event.time }}</div>
+            <div class="event-title">{{ event.title }}</div>
+          </div>
+        </div>
+        <ng-template #noEvents>
+          <p class="no-events">No events</p>
+        </ng-template>
       </div>
     </div>
   </mat-card-content>
