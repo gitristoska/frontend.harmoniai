@@ -1,106 +1,108 @@
 .daily-view-wrapper {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 2rem;
+  padding: 1rem 0;
 }
 
-// TOP SECTION: Calendar + Notes Side by Side (4 columns with right separator)
-.calendar-notes-container {
+.daily-view-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+// ============================================
+// TOP SECTION: Calendar (Main) + Sidebar (Tracking)
+// ============================================
+.top-section {
   display: grid;
-  grid-template-columns: 1fr 1.5fr auto 1fr;
-  gap: 0;
+  grid-template-columns: 1fr 320px;
+  gap: 2rem;
   align-items: start;
 
-  .notes-side {
+  .calendar-main {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .tracking-sidebar {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
-  }
-
-  .vertical-separator {
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    padding: 1.5rem 0.5rem;
-    
-    .separator-image {
-      width: 82px;
-      height: 852px;
-      object-fit: contain;
-      opacity: 0.8;
-    }
-  }
-
-  .calendar-side {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-    padding: 0 1rem;
-  }
-
-  .events-side {
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-    padding-left: 1rem;
-  }
-
-  .vertical-divider {
-    width: 2px;
-    height: 400px;
-    background: repeating-linear-gradient(
-      to bottom,
-      #0f172a 0 2px,
-      #e5e7eb 2px 4px
-    );
-    margin: 1rem 0;
-    opacity: 0.6;
   }
 }
 
-// BOTTOM SECTION: Life Balance + AI Recommendations (2 columns)
+// ============================================
+// MIDDLE SECTION: Daily Reflections Grid
+// ============================================
+.reflections-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+
+  .section-title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #1f2937;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 0 0.5rem;
+  }
+
+  .reflections-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+// ============================================
+// BOTTOM SECTION: Life Balance + AI Recommendations
+// ============================================
 .bottom-cards-container {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1.5rem;
+  gap: 2rem;
 }
 
-// OTHER CARDS: Calls/Emails, Notes for Tomorrow
-.other-cards-container {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1.5rem;
-}
-
-
+// ============================================
+// CARD STYLES
+// ============================================
 
 .daily-view-card {
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e5e7eb;
+  background: white;
+  overflow: hidden;
 
   .date-header {
-    padding: 16px 20px;
-    border-bottom: 2px solid #e2e8f0;
+    padding: 20px 24px;
+    border-bottom: 2px solid #f3f4f6;
+    background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
 
     h2 {
       margin: 0;
-      font-size: 18px;
-      font-weight: 600;
-      color: #0f172a;
+      font-size: 20px;
+      font-weight: 700;
+      color: #1f2937;
+      letter-spacing: -0.3px;
     }
   }
 
   .time-grid {
     padding: 0;
-    max-height: 600px;
+    max-height: calc(100vh - 300px);
     overflow-y: auto;
+    background: white;
 
     &::-webkit-scrollbar {
       width: 8px;
     }
 
     &::-webkit-scrollbar-track {
-      background: #f1f1f1;
+      background: #f9fafb;
     }
 
     &::-webkit-scrollbar-thumb {
@@ -114,53 +116,61 @@
 
     .time-slot {
       display: grid;
-      grid-template-columns: 60px 1fr;
-      border-bottom: 1px solid #e2e8f0;
-      min-height: 60px;
+      grid-template-columns: 70px 1fr;
+      border-bottom: 1px solid #f3f4f6;
+      min-height: 70px;
+      transition: background 0.1s ease;
+
+      &:hover {
+        background: #f9fafb;
+      }
 
       &:last-child {
         border-bottom: none;
       }
 
       .time-label {
-        padding: 12px;
+        padding: 12px 16px;
         font-size: 12px;
-        font-weight: 600;
-        color: #64748b;
-        background: #f8fafc;
-        border-right: 1px solid #e2e8f0;
+        font-weight: 700;
+        color: #6b7280;
+        background: #f9fafb;
+        border-right: 1px solid #e5e7eb;
         display: flex;
         align-items: center;
+        justify-content: center;
       }
 
       .events-container {
-        padding: 8px 12px;
+        padding: 8px 16px;
         display: flex;
         flex-direction: column;
         gap: 6px;
         position: relative;
 
         .event-item {
-          padding: 8px 12px;
-          border-radius: 6px;
+          padding: 10px 14px;
+          border-radius: 8px;
           font-size: 13px;
-          font-weight: 500;
+          font-weight: 600;
           color: white;
           cursor: pointer;
           transition: all 0.2s ease;
           display: flex;
-          gap: 8px;
+          gap: 10px;
           align-items: center;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
 
           &:hover {
-            transform: translateX(2px);
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+            transform: translateY(-1px);
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
           }
 
           .event-time {
             font-size: 11px;
-            opacity: 0.9;
-            min-width: 40px;
+            font-weight: 700;
+            opacity: 0.95;
+            min-width: 45px;
           }
 
           .event-title {
@@ -177,19 +187,28 @@
 
 .notes-card {
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e5e7eb;
+  background: white;
   overflow: hidden;
+  transition: all 0.2s ease;
+
+  &:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  }
 
   mat-card-header {
     padding: 16px 20px;
-    border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+    border-bottom: 2px solid #f3f4f6;
+    background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
 
     h3 {
       margin: 0;
-      font-size: 15px;
-      font-weight: 600;
-      font-style: italic;
-      color: #0f172a;
+      font-size: 14px;
+      font-weight: 700;
+      color: #1f2937;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
     }
   }
 
@@ -197,7 +216,7 @@
     padding: 16px 20px;
     font-family: 'Poppins', sans-serif;
     font-size: 14px;
-    line-height: 1.5;
+    line-height: 1.6;
 
     p {
       margin: 0;
@@ -207,185 +226,213 @@
 
     .note-textarea {
       width: 100%;
-      min-height: 80px;
-      padding: 12px;
-      border: 1px solid #cbd5e1;
-      border-radius: 6px;
+      min-height: 100px;
+      padding: 12px 14px;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
       font-family: 'Poppins', sans-serif;
       font-size: 13px;
-      line-height: 1.5;
+      line-height: 1.6;
       resize: vertical;
-      background: rgba(255, 255, 255, 0.7);
+      background: #fafbfc;
       transition: all 0.2s ease;
+      color: #374151;
 
       &:focus {
         outline: none;
-        border-color: #64748b;
+        border-color: #3b82f6;
         background: white;
-        box-shadow: 0 0 0 3px rgba(100, 116, 139, 0.1);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
       }
 
       &::placeholder {
-        color: #cbd5e1;
+        color: #d1d5db;
       }
     }
 
     .note-items {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 10px;
 
       .note-item {
         display: flex;
         align-items: center;
+        gap: 10px;
+        padding: 8px 0;
 
         mat-checkbox {
-          margin-right: 8px;
+          flex-shrink: 0;
         }
 
         span {
           font-size: 13px;
+          color: #374151;
+          flex: 1;
 
           &.completed {
             text-decoration: line-through;
-            opacity: 0.6;
-            color: #64748b;
+            opacity: 0.5;
+            color: #9ca3af;
           }
         }
       }
 
       .add-item-input {
-        padding: 8px 12px;
-        border: 1px dashed #cbd5e1;
-        border-radius: 6px;
-        font-size: 12px;
+        padding: 10px 12px;
+        border: 2px dashed #d1d5db;
+        border-radius: 8px;
+        font-size: 13px;
         font-family: 'Poppins', sans-serif;
-        background: #f8fafc;
+        background: #f9fafb;
+        color: #374151;
         transition: all 0.2s ease;
+        margin-top: 6px;
 
         &:focus {
           outline: none;
-          border-color: #64748b;
+          border-color: #3b82f6;
           background: white;
         }
 
         &::placeholder {
-          color: #cbd5e1;
+          color: #d1d5db;
         }
       }
     }
   }
 
-  &.personal-notes {
-    background: #f0fdf4;
-    border: 1px solid #d1fae5;
-
-    mat-card-header {
-      background: #ecfdf5;
-      border-bottom-color: #a7f3d0;
-    }
-  }
-
+  // Color variants
   &.grateful-for {
-    background: #fef3c7;
-    border: 1px solid #fcd34d;
+    border-top: 4px solid #f59e0b;
 
     mat-card-header {
-      background: #fef08a;
-      border-bottom-color: #fbbf24;
+      background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+
+      h3 {
+        color: #b45309;
+      }
     }
   }
 
   &.inspiration {
-    background: #e0e7ff;
-    border: 1px solid #c7d2fe;
+    border-top: 4px solid #8b5cf6;
 
     mat-card-header {
-      background: #ede9fe;
-      border-bottom-color: #ddd6fe;
+      background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
+
+      h3 {
+        color: #6d28d9;
+      }
+    }
+  }
+
+  &.personal-notes {
+    border-top: 4px solid #10b981;
+
+    mat-card-header {
+      background: linear-gradient(135deg, #f0fdf4 0%, #dbeafe 100%);
+
+      h3 {
+        color: #047857;
+      }
+    }
+  }
+
+  &.notes-tomorrow {
+    border-top: 4px solid #06b6d4;
+
+    mat-card-header {
+      background: linear-gradient(135deg, #ecf0ff 0%, #e0f2fe 100%);
+
+      h3 {
+        color: #0369a1;
+      }
+    }
+  }
+
+  &.calls-emails {
+    border-top: 4px solid #f97316;
+
+    mat-card-header {
+      background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+
+      h3 {
+        color: #b45309;
+      }
     }
   }
 
   &.life-balance {
-    background: #fdf2f8;
-    border: 1px solid #fbcfe8;
+    border-top: 4px solid #ec4899;
 
     mat-card-header {
-      background: #fce7f3;
-      border-bottom-color: #f472b6;
+      background: linear-gradient(135deg, #fdf2f8 0%, #fbcfe8 100%);
+
+      h3 {
+        color: #be123c;
+      }
     }
 
     .life-balance-tabs {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 1px;
-      background: #e9d5ff;
-      border-radius: 6px;
+      background: #e5e7eb;
+      border-radius: 8px;
       overflow: hidden;
       margin-bottom: 16px;
 
       .tab-button {
-        background: #f3e8ff;
+        background: #f3f4f6;
         border: none;
         padding: 12px 8px;
         font-size: 12px;
-        font-weight: 600;
-        color: #a855f7;
+        font-weight: 700;
+        color: #6b7280;
         cursor: pointer;
         transition: all 0.2s ease;
-        border-bottom: 2px solid transparent;
+        text-transform: capitalize;
 
         &:hover {
-          background: #ede9fe;
+          background: #e5e7eb;
+          color: #374151;
         }
 
         &.active {
           background: white;
-          color: #a855f7;
-          border-bottom-color: #a855f7;
+          color: #be123c;
           font-weight: 700;
         }
       }
     }
   }
 
-  &.calls-emails {
-    background: #fffbeb;
-    border: 1px solid #fef3c7;
-
-    mat-card-header {
-      background: #fef9e7;
-      border-bottom-color: #fbbf24;
-    }
-  }
-
-  &.notes-tomorrow {
-    background: #eff6ff;
-    border: 1px solid #bfdbfe;
-
-    mat-card-header {
-      background: #e0f2fe;
-      border-bottom-color: #7dd3fc;
-    }
+  &.full-width {
+    grid-column: 1 / -1;
   }
 }
 
 .rate-day-card {
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  background: #f0f9ff;
-  border: 1px solid #bfdbfe;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e5e7eb;
+  border-top: 4px solid #3b82f6;
+  background: white;
+  overflow: hidden;
 
   mat-card-header {
     padding: 16px 20px;
-    border-bottom: 2px solid #7dd3fc;
+    border-bottom: 2px solid #f3f4f6;
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
 
     h3 {
       margin: 0;
-      font-size: 15px;
-      font-weight: 600;
-      font-style: italic;
-      color: #0f172a;
+      font-size: 14px;
+      font-weight: 700;
+      color: #0c4a6e;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
     }
   }
 
@@ -393,17 +440,19 @@
     padding: 20px;
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 18px;
 
     .rating-section {
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 12px;
 
       label {
-        font-size: 13px;
-        font-weight: 600;
-        color: #64748b;
+        font-size: 12px;
+        font-weight: 700;
+        color: #6b7280;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
         text-align: center;
       }
 
@@ -413,20 +462,23 @@
         display: flex;
         justify-content: center;
         gap: 12px;
+        align-items: center;
 
         span {
-          font-size: 24px;
+          font-size: 28px;
           cursor: pointer;
-          opacity: 0.3;
+          opacity: 0.25;
           transition: all 0.2s ease;
+          user-select: none;
 
           &:hover {
-            opacity: 0.6;
-            transform: scale(1.1);
+            opacity: 0.5;
+            transform: scale(1.15);
           }
 
           &.filled {
             opacity: 1;
+            transform: scale(1.1);
           }
         }
       }
@@ -436,30 +488,35 @@
 
 .ai-recommendations-card {
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  background: #faf5ff;
-  border: 1px solid #e9d5ff;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e5e7eb;
+  border-top: 4px solid #a855f7;
+  background: white;
+  overflow: hidden;
 
   mat-card-header {
     padding: 16px 20px;
-    border-bottom: 2px solid #d8b4fe;
+    border-bottom: 2px solid #f3f4f6;
+    background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
 
     .ai-icon {
       color: #a855f7;
       font-size: 20px;
       width: 20px;
       height: 20px;
+      flex-shrink: 0;
     }
 
     h3 {
       margin: 0;
-      font-size: 15px;
-      font-weight: 600;
-      font-style: italic;
-      color: #0f172a;
+      font-size: 14px;
+      font-weight: 700;
+      color: #6d28d9;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
     }
   }
 
@@ -468,23 +525,33 @@
     display: flex;
     flex-direction: column;
     gap: 12px;
+    max-height: 300px;
+    overflow-y: auto;
 
     .recommendation-item {
-      background: white;
+      background: #fafbfc;
       border: 1px solid #e5e7eb;
       border-radius: 8px;
-      padding: 12px;
+      padding: 12px 14px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 12px;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: white;
+        border-color: #a855f7;
+        box-shadow: 0 2px 8px rgba(168, 85, 247, 0.1);
+      }
 
       .recommendation-text {
         margin: 0;
         font-size: 13px;
-        color: #ef4444;
+        color: #dc2626;
         flex: 1;
-        line-height: 1.4;
+        line-height: 1.5;
+        font-weight: 500;
       }
 
       .recommendation-actions {
@@ -493,7 +560,7 @@
         flex-shrink: 0;
 
         button {
-          border: 1px solid #cbd5e1;
+          border: 1px solid #e5e7eb;
           background: white;
           padding: 6px 10px;
           border-radius: 6px;
@@ -502,6 +569,7 @@
           align-items: center;
           gap: 4px;
           font-size: 12px;
+          font-weight: 600;
           transition: all 0.2s ease;
 
           mat-icon {
@@ -511,8 +579,8 @@
           }
 
           &:hover {
-            background: #f8fafc;
-            border-color: #64748b;
+            background: #f3f4f6;
+            border-color: #d1d5db;
           }
 
           &.add-btn:hover {
@@ -521,18 +589,43 @@
             color: #10b981;
           }
 
-          &.remove-btn {
-            padding: 6px 8px;
-
-            &:hover {
-              background: #fef2f2;
-              border-color: #ef4444;
-              color: #ef4444;
-            }
+          &.remove-btn:hover {
+            background: #fef2f2;
+            border-color: #ef4444;
+            color: #ef4444;
           }
         }
       }
     }
+  }
+}
+
+// ============================================
+// UTILITY & STATE CLASSES
+// ============================================
+
+.loading-state,
+.error-state {
+  padding: 2rem;
+  text-align: center;
+  border-radius: 12px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+
+  p {
+    margin: 0;
+    font-size: 14px;
+    color: #6b7280;
+    font-weight: 500;
+  }
+}
+
+.error-state {
+  background: #fef2f2;
+  border-color: #fed7d7;
+
+  p {
+    color: #dc2626;
   }
 }
 
