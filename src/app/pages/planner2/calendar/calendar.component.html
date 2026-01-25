@@ -70,7 +70,7 @@
     <!-- <div class="spiral-divider"></div> -->
 
     <!-- CENTER: CALENDAR -->
-    <div class="calendar-column">
+    <div class="calendar-column" [class.monthly-view]="viewMode() === 'monthly'">
       <!-- EVENT DETAIL -->
       <app-event-detail
         *ngIf="selectedEvent()"
@@ -113,8 +113,8 @@
 
     <!-- RIGHT SIDE: DASHBOARD CARDS + EVENTS -->
     <div class="events-sidebar">
-      <!-- DASHBOARD CARDS SECTION (Only show in weekly/monthly, not daily) -->
-      <div *ngIf="viewMode() !== 'daily'" class="dashboard-cards-section">
+      <!-- DASHBOARD CARDS SECTION (Only show in weekly view) -->
+      <div *ngIf="viewMode() === 'weekly'" class="dashboard-cards-section">
         <!-- INSPIRATION CARD -->
         <app-inspiration-card [currentDate]="selectedDate()"></app-inspiration-card>
 

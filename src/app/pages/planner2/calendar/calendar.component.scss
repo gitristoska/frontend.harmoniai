@@ -130,6 +130,10 @@
       padding-left: 1.5rem;
       padding-right: 0.5rem;
 
+      &.monthly-view {
+        max-width: 600px;
+      }
+
       &::-webkit-scrollbar {
         width: 8px;
       }

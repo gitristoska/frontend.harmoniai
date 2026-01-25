@@ -48,6 +48,7 @@ export class InspirationCardComponent {
         this.inspiration.set(data);
         this.error.set('');
         this.isLoading.set(false);
+        debugger;
       },
       error: (err: any) => {
         console.error('Error loading weekly inspiration:', err);
@@ -55,6 +56,7 @@ export class InspirationCardComponent {
         this.isLoading.set(false);
         // It's OK if no inspiration exists yet
         this.inspiration.set(null);
+        debugger;
       }
     });
   }
