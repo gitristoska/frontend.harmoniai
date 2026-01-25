@@ -1,0 +1,39 @@
+<mat-card class="inspiration-card">
+  <mat-card-header class="card-header">
+    <div class="header-title">
+      <mat-icon class="header-icon">lightbulb</mat-icon>
+      <h3>Inspiration for Week</h3>
+    </div>
+  </mat-card-header>
+
+  <mat-card-content class="card-content">
+    <div *ngIf="isLoading()" class="loading">
+      <mat-icon class="spinner">cached</mat-icon>
+      Loading...
+    </div>
+
+    <div *ngIf="!isEditing() && !isLoading()" class="inspiration-display">
+      <p *ngIf="inspiration()?.inspiration; else noInspiration" class="inspiration-text">
+        "{{ inspiration()!.inspiration }}"
+      </p>
+      <ng-template #noInspiration>
+        <p class="no-inspiration-text">No inspiration set for this week yet</p>
+      </ng-template>
+      <button mat-icon-button (click)="onEdit()" class="edit-btn" title="Edit">
+        <mat-icon>edit</mat-icon>
+      </button>
+    </div>
+
+    <div *ngIf="isEditing()" class="inspiration-edit">
+      <mat-form-field class="full-width">
+        <mat-label>Weekly Inspiration</mat-label>
+        <textarea matInput [(ngModel)]="editText" placeholder="Enter your weekly inspiration or quote..." rows="3"></textarea>
+      </mat-form-field>
+      <div *ngIf="error()" class="error-message">{{ error() }}</div>
+      <div class="edit-actions">
+        <button mat-button (click)="onCancel()">Cancel</button>
+        <button mat-raised-button color="primary" (click)="onSave()" [disabled]="isLoading()">Save</button>
+      </div>
+    </div>
+  </mat-card-content>
+</mat-card>

@@ -4,7 +4,9 @@ import { Observable } from 'rxjs';
 import {
   DailyEntry,
   DailyEntryCreateDto,
-  DailyEntryUpdateDto
+  DailyEntryUpdateDto,
+  WeeklyInspiration,
+  WeeklyInspirationCreateDto
 } from '../models/api';
 
 @Injectable({ providedIn: 'root' })
@@ -46,5 +48,27 @@ export class DailyEntryService {
 
   delete(id: string): Observable<void> {
     return this.http.delete<void>(`${this.baseApiUrl}/${id}`);
+  }
+
+  // ============================
+  // WEEKLY INSPIRATION
+  // ============================
+
+  getWeeklyInspiration(date: string): Observable<WeeklyInspiration> {
+    // Pass a date within the desired week, backend will calculate week boundaries
+    const params = new HttpParams().set('date', date);
+    return this.http.get<WeeklyInspiration>(
+      `${this.baseApiUrl}/weekly-inspiration`,
+      { params }
+    );
+  }
+
+  createOrUpdateWeeklyInspiration(
+    inspiration: WeeklyInspirationCreateDto
+  ): Observable<WeeklyInspiration> {
+    return this.http.post<WeeklyInspiration>(
+      `${this.baseApiUrl}/weekly-inspiration`,
+      inspiration
+    );
   }
 }

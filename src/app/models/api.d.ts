@@ -100,3 +100,17 @@ export interface DailyEntryUpdateDto {
   callsAndEmailsChecklist?: CallAndEmailItem[];
   rating?: Rating;
 }
+
+export interface WeeklyInspiration {
+  id?: string;
+  weekStartDate: string;          // ISO date of Monday of that week
+  weekEndDate: string;            // ISO date of Sunday of that week
+  inspiration: string;            // The motivational text for the week
+  createdAt?: string;
+  updatedAt?: string;
+  accountId?: string;
+}
+
+export interface WeeklyInspirationCreateDto {
+  inspiration: string;
+}

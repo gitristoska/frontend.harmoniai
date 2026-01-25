@@ -1,0 +1,30 @@
+<mat-card class="must-get-done-card">
+  <mat-card-header class="card-header">
+    <div class="header-title">
+      <mat-icon class="header-icon">flash_on</mat-icon>
+      <h3>Must Get Done (This Week)</h3>
+    </div>
+  </mat-card-header>
+
+  <mat-card-content class="card-content">
+    <div *ngIf="highPriorityEvents.length > 0; else noTasks" class="tasks-list">
+      <div *ngFor="let task of highPriorityEvents" class="task-item">
+        <div class="task-checkbox">
+          <mat-checkbox [checked]="false" (change)="onTaskToggle(task, $event.checked)"></mat-checkbox>
+        </div>
+        <div class="task-indicator" [style.background-color]="getCategoryColor(task.category)"></div>
+        <div class="task-info">
+          <div class="task-title">{{ task.title }}</div>
+          <div class="task-time" *ngIf="task.time">{{ task.time }}</div>
+        </div>
+      </div>
+    </div>
+
+    <ng-template #noTasks>
+      <div class="no-tasks">
+        <p>No high-priority tasks this week!</p>
+        <p class="emoji">✨</p>
+      </div>
+    </ng-template>
+  </mat-card-content>
+</mat-card>

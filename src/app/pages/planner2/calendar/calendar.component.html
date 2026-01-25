@@ -111,8 +111,23 @@
     <!-- SPIRAL DIVIDER -->
     <div class="spiral-divider"></div>
 
-    <!-- RIGHT SIDE: TOP PRIORITIES + TODAY'S EVENTS -->
+    <!-- RIGHT SIDE: DASHBOARD CARDS + EVENTS -->
     <div class="events-sidebar">
+      <!-- DASHBOARD CARDS SECTION (Only show in weekly/monthly, not daily) -->
+      <div *ngIf="viewMode() !== 'daily'" class="dashboard-cards-section">
+        <!-- INSPIRATION CARD -->
+        <app-inspiration-card [currentDate]="selectedDate()"></app-inspiration-card>
+
+        <!-- MUST GET DONE CARD -->
+        <app-must-get-done-card 
+          [highPriorityEvents]="weeklyHighPriorityEvents()"
+          [categories]="categories">
+        </app-must-get-done-card>
+
+        <!-- WEEKLY HABITS CARD -->
+        <app-weekly-habits-card [currentDate]="selectedDate()"></app-weekly-habits-card>
+      </div>
+
       <!-- TOP PRIORITIES BOX (Daily view only) -->
       <mat-card class="priorities-box" *ngIf="viewMode() === 'daily'">
         <mat-card-header class="priorities-header">

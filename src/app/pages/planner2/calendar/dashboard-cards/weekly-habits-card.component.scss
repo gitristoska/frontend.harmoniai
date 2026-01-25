@@ -1,0 +1,137 @@
+.weekly-habits-card {
+  margin-bottom: 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+}
+
+.header-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+
+  h3 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #0c4a6e;
+  }
+}
+
+.header-icon {
+  color: #0284c7;
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+.card-content {
+  padding: 12px 16px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #6b7280;
+  font-size: 13px;
+  padding: 16px 0;
+
+  .spinner {
+    animation: spin 1s linear infinite;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.habits-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  .habit-item {
+    border-bottom: 1px solid #f3f4f6;
+    padding-bottom: 8px;
+
+    &:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .habit-name {
+      font-size: 13px;
+      font-weight: 500;
+      color: #1f2937;
+      margin-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      .completion-count {
+        font-size: 11px;
+        color: #9ca3af;
+        font-weight: normal;
+      }
+    }
+
+    .days-checkboxes {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
+
+      .day-checkbox {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+        cursor: pointer;
+
+        .day-check {
+          ::ng-deep .mdc-checkbox {
+            width: 20px !important;
+            height: 20px !important;
+          }
+        }
+
+        .day-label {
+          font-size: 10px;
+          color: #9ca3af;
+          text-align: center;
+        }
+      }
+    }
+  }
+}
+
+.no-habits {
+  text-align: center;
+  padding: 16px 0;
+  color: #9ca3af;
+
+  p {
+    margin: 4px 0;
+    font-size: 13px;
+
+    &.hint {
+      font-size: 11px;
+      color: #d1d5db;
+    }
+  }
+}

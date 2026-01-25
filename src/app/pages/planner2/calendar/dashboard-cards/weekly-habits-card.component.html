@@ -1,0 +1,43 @@
+<mat-card class="weekly-habits-card">
+  <mat-card-header class="card-header">
+    <div class="header-title">
+      <mat-icon class="header-icon">check_circle</mat-icon>
+      <h3>Weekly Habits</h3>
+    </div>
+  </mat-card-header>
+
+  <mat-card-content class="card-content">
+    <div *ngIf="isLoading()" class="loading">
+      <mat-icon class="spinner">cached</mat-icon>
+      Loading habits...
+    </div>
+
+    <div *ngIf="!isLoading()" class="habits-list">
+      <div *ngIf="habits().length > 0; else noHabits">
+        <div *ngFor="let habit of habits()" class="habit-item">
+          <div class="habit-name">
+            {{ habit.name }}
+            <span class="completion-count">{{ getCompletedDaysCount(habit.id || '') }}/7</span>
+          </div>
+          <div class="days-checkboxes">
+            <div *ngFor="let day of dayLabels; let i = index" class="day-checkbox" [title]="day">
+              <mat-checkbox
+                [checked]="getHabitCompletionForDay(habit.id || '', i)"
+                (change)="toggleHabitDay(habit.id || '', i)"
+                class="day-check">
+              </mat-checkbox>
+              <span class="day-label">{{ day }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <ng-template #noHabits>
+        <div class="no-habits">
+          <p>No habits tracked yet</p>
+          <p class="hint">Add habits in the Habits section to track them here</p>
+        </div>
+      </ng-template>
+    </div>
+  </mat-card-content>
+</mat-card>

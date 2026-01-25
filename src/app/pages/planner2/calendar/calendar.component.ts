@@ -17,6 +17,9 @@ import { EventDetailComponent, EventUpdateData } from './event-detail/event-deta
 import { DailyViewComponent } from './daily-view/daily-view.component';
 import { WeeklyViewComponent } from './weekly-view/weekly-view.component';
 import { MonthlyViewComponent } from './monthly-view/monthly-view.component';
+import { InspirationCardComponent } from './dashboard-cards/inspiration-card.component';
+import { MustGetDoneCardComponent } from './dashboard-cards/must-get-done-card.component';
+import { WeeklyHabitsCardComponent } from './dashboard-cards/weekly-habits-card.component';
 
 export interface CalendarEvent {
   id?: string | number;
@@ -61,7 +64,10 @@ export interface WeekDay {
     EventDetailComponent,
     DailyViewComponent,
     WeeklyViewComponent,
-    MonthlyViewComponent
+    MonthlyViewComponent,
+    InspirationCardComponent,
+    MustGetDoneCardComponent,
+    WeeklyHabitsCardComponent
   ],
   providers: [PlannerService],
   templateUrl: './calendar.component.html',
@@ -198,6 +204,22 @@ export class CalendarComponent {
         return timeA.localeCompare(timeB);
       })
       .slice(0, 3);
+  });
+
+  // Get all high-priority events for the current week (for dashboard card)
+  weeklyHighPriorityEvents = computed(() => {
+    const startOfWeek = new Date(this.selectedDate());
+    startOfWeek.setDate(this.selectedDate().getDate() - this.selectedDate().getDay());
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
+    
+    return this.allEvents()
+      .filter(e => e.date && e.date >= startOfWeek && e.date <= endOfWeek)
+      .sort((a, b) => {
+        const timeA = a.time || '23:59';
+        const timeB = b.time || '23:59';
+        return timeA.localeCompare(timeB);
+      });
   });
 
   filteredEvents = computed(() => {
