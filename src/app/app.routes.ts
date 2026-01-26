@@ -8,10 +8,14 @@ import { Habits } from './pages/habits/habits';
 import { LoginComponent } from './pages/login/login';
 import { SignupComponent } from './pages/signup/signup';
 import { Planner2 } from './pages/planner2/planner2';
+import { MonthlyPlanningPage } from './pages/monthly-planning-page/monthly-planning-page';
+import { MonthlyReflectionPage } from './pages/monthly-reflection-page/monthly-reflection-page';
 
 export const routes: Routes = [
   { path: '', component: Homepage },
   { path: 'planner', component: Planner2 },
+  { path: 'monthly-planning', component: MonthlyPlanningPage },
+  { path: 'monthly-reflection', component: MonthlyReflectionPage },
   { path: 'journal', component: JournalComponent },
   { path: 'ai', component: Ai },
   { path: 'habits', component: Habits },

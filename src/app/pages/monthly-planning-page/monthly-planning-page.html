@@ -1,0 +1,15 @@
+<div class="monthly-planning-page">
+  <!-- Header with back button -->
+  <div class="page-header">
+    <button mat-icon-button (click)="goBack()" class="back-button">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <h1>Monthly Planning</h1>
+    <div class="header-spacer"></div>
+  </div>
+
+  <!-- Main content -->
+  <div class="page-content">
+    <app-monthly-planning [currentDate]="currentDate()"></app-monthly-planning>
+  </div>
+</div>

@@ -152,10 +152,16 @@
       <!-- EVENTS LIST HEADER WITH SHOW ALL MONTH BUTTON (Monthly view only) -->
       <div *ngIf="viewMode() === 'monthly' && monthlyViewMode() === 'day'" class="events-header-actions">
         <h3>{{ selectedMonthlyDay() | date:'EEEE, MMM d' }}</h3>
-        <button mat-button (click)="showAllMonth()" class="show-all-btn">
-          <mat-icon>calendar_month</mat-icon>
-          Show all month
-        </button>
+        <div class="header-buttons">
+          <button mat-button (click)="showAllMonth()" class="show-all-btn">
+            <mat-icon>calendar_month</mat-icon>
+            Show all month
+          </button>
+          <button mat-button (click)="navigateToMonthlyPlanning()" class="monthly-planning-btn" title="Open monthly planning">
+            <mat-icon>target</mat-icon>
+            Monthly Plan
+          </button>
+        </div>
       </div>
 
       <!-- EVENTS LIST FOR SELECTED PERIOD -->
@@ -165,6 +171,14 @@
         [categories]="categories"
         (eventClick)="onEventClick($event)">
       </app-events-list>
+
+      <!-- MONTHLY REFLECTION BUTTON (Monthly view only) -->
+      <div *ngIf="viewMode() === 'monthly'" class="reflection-button-container">
+        <button mat-raised-button color="accent" (click)="navigateToReflection()" class="reflection-btn">
+          <mat-icon>lightbulb</mat-icon>
+          Month Reflection
+        </button>
+      </div>
     </div>
   </div>
 </div>

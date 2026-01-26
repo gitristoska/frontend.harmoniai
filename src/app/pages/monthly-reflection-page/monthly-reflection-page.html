@@ -1,0 +1,131 @@
+<div class="reflection-page">
+  <!-- Header with back button -->
+  <div class="page-header">
+    <button mat-icon-button (click)="goBack()" class="back-button">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <h1>{{ getMonthDisplay() }} Reflection</h1>
+    <div class="header-spacer"></div>
+  </div>
+
+  <!-- ERROR STATE -->
+  <div *ngIf="error()" class="error-banner">
+    <mat-icon>error</mat-icon>
+    <span>{{ error() }}</span>
+    <button mat-icon-button (click)="dismissError()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- LOADING STATE -->
+  <div *ngIf="isLoading()" class="loading-state">
+    <mat-icon class="spinner">hourglass_empty</mat-icon>
+    <p>Loading reflection...</p>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div *ngIf="!isLoading()" class="page-content">
+    <!-- VIEW MODE -->
+    <div *ngIf="!isEditing() && monthlyEntry()?.reflection" class="reflection-content">
+      <div class="section-header">
+        <h2>
+          <mat-icon>lightbulb</mat-icon>
+          Month Reflection
+        </h2>
+        <button mat-icon-button (click)="onEditReflection()" [disabled]="isSaving()">
+          <mat-icon>edit</mat-icon>
+        </button>
+      </div>
+
+      <div class="reflection-grid">
+        <div class="reflection-item overall-rating">
+          <h4>Overall Rating</h4>
+          <div class="rating-display">
+            <div class="rating-stars">
+              <span *ngFor="let i of [1,2,3,4,5]" class="star" [class.filled]="i <= (monthlyEntry()?.reflection?.rating || 0)">★</span>
+            </div>
+            <span class="rating-text">{{ monthlyEntry()?.reflection?.rating }}/10</span>
+          </div>
+        </div>
+
+        <div class="reflection-item wins">
+          <h4>Wins</h4>
+          <p>{{ monthlyEntry()?.reflection?.wins || 'No wins recorded' }}</p>
+        </div>
+
+        <div class="reflection-item challenges">
+          <h4>Challenges</h4>
+          <p>{{ monthlyEntry()?.reflection?.challenges || 'No challenges recorded' }}</p>
+        </div>
+
+        <div class="reflection-item lessons">
+          <h4>Lessons Learned</h4>
+          <p>{{ monthlyEntry()?.reflection?.lessons || 'No lessons recorded' }}</p>
+        </div>
+
+        <div class="reflection-item focus-next">
+          <h4>Focus for Next Month</h4>
+          <p>{{ monthlyEntry()?.reflection?.nextMonthFocus || 'Not set yet' }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMPTY STATE (No Reflection) -->
+    <div *ngIf="!isEditing() && !monthlyEntry()?.reflection" class="empty-reflection">
+      <div class="section-header">
+        <h2>
+          <mat-icon>lightbulb</mat-icon>
+          Month Reflection
+        </h2>
+        <button mat-icon-button (click)="onEditReflection()" [disabled]="isSaving()">
+          <mat-icon>edit</mat-icon>
+        </button>
+      </div>
+      <mat-icon class="empty-icon">calendar_month</mat-icon>
+      <p>No reflection recorded yet. Create one to review this month's experience.</p>
+    </div>
+
+    <!-- EDIT MODE -->
+    <div *ngIf="isEditing()" class="reflection-edit-form">
+      <div class="section-header">
+        <h2>
+          <mat-icon>lightbulb</mat-icon>
+          Edit Reflection
+        </h2>
+      </div>
+
+      <mat-form-field class="full-width">
+        <mat-label>Overall Rating (1-10)</mat-label>
+        <input matInput type="number" min="1" max="10" [(ngModel)]="reflectionForm().rating" />
+      </mat-form-field>
+
+      <mat-form-field class="full-width">
+        <mat-label>Wins & Achievements</mat-label>
+        <textarea matInput rows="4" [(ngModel)]="reflectionForm().wins" placeholder="What went well this month?"></textarea>
+      </mat-form-field>
+
+      <mat-form-field class="full-width">
+        <mat-label>Challenges & Obstacles</mat-label>
+        <textarea matInput rows="4" [(ngModel)]="reflectionForm().challenges" placeholder="What was difficult?"></textarea>
+      </mat-form-field>
+
+      <mat-form-field class="full-width">
+        <mat-label>Lessons Learned</mat-label>
+        <textarea matInput rows="4" [(ngModel)]="reflectionForm().lessons" placeholder="What did you learn?"></textarea>
+      </mat-form-field>
+
+      <mat-form-field class="full-width">
+        <mat-label>Focus for Next Month</mat-label>
+        <textarea matInput rows="4" [(ngModel)]="reflectionForm().nextMonthFocus" placeholder="What should you focus on next?"></textarea>
+      </mat-form-field>
+
+      <div class="form-actions">
+        <button mat-raised-button color="primary" (click)="onSaveReflection()" [disabled]="isSaving()">
+          <mat-icon>save</mat-icon>
+          Save Reflection
+        </button>
+        <button mat-button (click)="onCancelReflection()" [disabled]="isSaving()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>

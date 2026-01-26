@@ -1,0 +1,204 @@
+<div class="monthly-planning-wrapper">
+  <!-- HEADER -->
+  <div class="monthly-planning-header">
+    <h1>{{ getMonthDisplay() }} Plan</h1>
+    <p class="subtitle">Plan, set goals, and reflect on your month</p>
+  </div>
+
+  <!-- ERROR STATE -->
+  <div *ngIf="error()" class="error-banner">
+    <mat-icon>error</mat-icon>
+    <span>{{ error() }}</span>
+    <button mat-icon-button (click)="dismissError()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- LOADING STATE -->
+  <div *ngIf="isLoading()" class="loading-state">
+    <mat-icon class="spinner">hourglass_empty</mat-icon>
+    <p>Loading monthly plan...</p>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div *ngIf="!isLoading()" class="monthly-planning-content">
+
+    <!-- ===== SECTION 1: MONTHLY FOCUS ===== -->
+    <section class="planning-section focus-section">
+      <div class="section-header">
+        <h2>
+          <mat-icon>target</mat-icon>
+          Monthly Focus
+        </h2>
+        <button *ngIf="!editingFocus()" mat-icon-button (click)="onEditFocus()" [disabled]="isSaving()">
+          <mat-icon>edit</mat-icon>
+        </button>
+      </div>
+
+      <!-- VIEW MODE -->
+      <div *ngIf="!editingFocus()" class="section-content">
+        <div class="focus-card">
+          <div class="focus-item">
+            <h4>Intentions</h4>
+            <p class="focus-text">{{ monthlyEntry()?.intentions || 'No intentions set yet' }}</p>
+          </div>
+
+          <div class="focus-item">
+            <h4>Vibe / Mood / Energy</h4>
+            <div class="mood-display">
+              <span *ngIf="monthlyEntry()?.moodWords; else noMood" class="mood-tags">
+                {{ monthlyEntry()?.moodWords }}
+              </span>
+              <ng-template #noMood>
+                <span class="empty-state">No mood set</span>
+              </ng-template>
+            </div>
+          </div>
+
+          <div class="focus-item">
+            <h4>Notes</h4>
+            <p class="focus-text">{{ monthlyEntry()?.notes || 'No additional notes' }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- EDIT MODE -->
+      <div *ngIf="editingFocus()" class="section-edit-form">
+        <mat-form-field class="full-width">
+          <mat-label>Monthly Intentions</mat-label>
+          <textarea matInput rows="4" [(ngModel)]="focusForm().intentions" placeholder="What do you intend to accomplish this month?"></textarea>
+        </mat-form-field>
+
+        <mat-form-field class="full-width">
+          <mat-label>Vibe / Mood / Energy</mat-label>
+          <input matInput [(ngModel)]="focusForm().moodWords" placeholder="e.g., Energetic, Focused, Creative, Calm" />
+        </mat-form-field>
+
+        <mat-form-field class="full-width">
+          <mat-label>Additional Notes</mat-label>
+          <textarea matInput rows="3" [(ngModel)]="focusForm().notes" placeholder="Any other thoughts or context"></textarea>
+        </mat-form-field>
+
+        <div class="form-actions">
+          <button mat-raised-button color="primary" (click)="onSaveFocus()" [disabled]="isSaving()">
+            <mat-icon>save</mat-icon>
+            Save
+          </button>
+          <button mat-button (click)="onCancelFocus()" [disabled]="isSaving()">Cancel</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== SECTION 2: TOP 3 MONTHLY GOALS ===== -->
+    <section class="planning-section goals-section">
+      <div class="section-header">
+        <h2>
+          <mat-icon>emoji_events</mat-icon>
+          Top 3 Goals
+        </h2>
+        <button *ngIf="!editingGoals()" mat-icon-button (click)="onEditGoals()" [disabled]="isSaving()">
+          <mat-icon>edit</mat-icon>
+        </button>
+      </div>
+
+      <!-- VIEW MODE -->
+      <div *ngIf="!editingGoals()" class="goals-grid">
+        <div *ngFor="let goal of displayGoals()" class="goal-card">
+          <h3>{{ goal.title || 'Empty Goal Slot' }}</h3>
+
+          <p *ngIf="goal.description" class="goal-description">{{ goal.description }}</p>
+
+          <div class="progress-section">
+            <label>Progress</label>
+            <div class="progress-bar">
+              <div class="progress-fill" [style.width.%]="goal.progress || 0"></div>
+            </div>
+            <span class="progress-text">{{ goal.progress || 0 }}%</span>
+          </div>
+
+          <div *ngIf="getGoalTaskCount(goal.id) > 0" class="linked-tasks">
+            <h4>Linked Tasks ({{ getGoalTaskCount(goal.id) }})</h4>
+            <ul class="task-list">
+              <li *ngFor="let taskLink of getLinkedTasks(goal.id)">
+                <mat-icon class="task-icon">check_circle</mat-icon>
+                {{ taskLink.taskTitle }}
+              </li>
+            </ul>
+          </div>
+
+          <button mat-stroked-button size="small" (click)="onOpenTaskSelector(goal.id)" class="link-tasks-btn">
+            <mat-icon>link</mat-icon>
+            Link Tasks
+          </button>
+        </div>
+      </div>
+
+      <!-- EDIT MODE -->
+      <div *ngIf="editingGoals()" class="goals-edit-form">
+        <div *ngFor="let goal of goalsForm(); let i = index" class="goal-edit-card">
+          <h3>Goal {{ i + 1 }}</h3>
+
+          <mat-form-field class="full-width">
+            <mat-label>Goal Title *</mat-label>
+            <input matInput [(ngModel)]="goal.title" placeholder="What do you want to achieve?" />
+          </mat-form-field>
+
+          <mat-form-field class="full-width">
+            <mat-label>Description</mat-label>
+            <textarea matInput rows="2" [(ngModel)]="goal.description" placeholder="Optional: describe the goal"></textarea>
+          </mat-form-field>
+
+          <mat-form-field class="full-width">
+            <mat-label>Progress (%)</mat-label>
+            <input matInput type="number" min="0" max="100" [(ngModel)]="goal.progress" />
+          </mat-form-field>
+        </div>
+
+        <div class="form-actions">
+          <button mat-raised-button color="primary" (click)="onSaveGoals()" [disabled]="isSaving()">
+            <mat-icon>save</mat-icon>
+            Save Goals
+          </button>
+          <button mat-button (click)="onCancelGoals()" [disabled]="isSaving()">Cancel</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== TASK SELECTOR MODAL ===== -->
+    <div *ngIf="showTaskSelector() && selectedGoalId() !== null" class="task-selector-modal">
+      <div class="modal-backdrop" (click)="showTaskSelector.set(false)"></div>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Link Tasks to Goal</h3>
+          <button mat-icon-button (click)="showTaskSelector.set(false)">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <div *ngIf="availableTasks().length > 0; else noTasks" class="task-checkbox-list">
+            <div *ngFor="let task of availableTasks()" class="task-checkbox-item">
+              <mat-checkbox
+                [checked]="isTaskLinked(selectedGoalId()!, task.id)"
+                (change)="onToggleTask(selectedGoalId()!, task.id, $event.checked)">
+                <span>{{ task.title }}</span>
+                <span class="task-date" *ngIf="task.endDate">Due: {{ task.endDate | date:'MMM d' }}</span>
+              </mat-checkbox>
+            </div>
+          </div>
+          <ng-template #noTasks>
+            <div class="empty-state">
+              <mat-icon>task_alt</mat-icon>
+              <p>No tasks available for this month</p>
+            </div>
+          </ng-template>
+        </div>
+
+        <div class="modal-footer">
+          <button mat-button (click)="showTaskSelector.set(false)">Done</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

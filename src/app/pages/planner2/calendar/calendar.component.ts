@@ -1,11 +1,13 @@
 import { Component, signal, computed, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { DragDropModule, CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { PlannerService } from '../../../services/task.service';
-import { PlannerTask } from '../../../models/api';
+import { MonthlyPlanningService } from '../../../services/monthly-planning.service';
+import { PlannerTask, MonthlyEntry } from '../../../models/api';
 import { Observable } from 'rxjs';
 import { EventsListComponent } from './events-list/events-list.component';
 import { ViewModeSelectorComponent } from './view-mode-selector/view-mode-selector.component';
@@ -69,7 +71,7 @@ export interface WeekDay {
     MustGetDoneCardComponent,
     WeeklyHabitsCardComponent
   ],
-  providers: [PlannerService],
+  providers: [PlannerService, MonthlyPlanningService],
   templateUrl: './calendar.component.html',
   styleUrls: ['./calendar.component.scss']
 })
@@ -109,8 +111,12 @@ export class CalendarComponent {
 
   allEvents = signal<CalendarEvent[]>([]);
 
-  constructor(private plannerService: PlannerService) {
+  // Monthly reflection
+  currentMonthlyReflection = signal<any>(null);
+
+  constructor(private plannerService: PlannerService, private monthlyPlanningService: MonthlyPlanningService, private router: Router) {
     this.loadTasks();
+    this.loadMonthlyReflection();
   }
 
   ngOnInit() {
@@ -534,5 +540,41 @@ export class CalendarComponent {
 
   onEventDetailClose() {
     this.selectedEvent.set(null);
+  }
+
+  /**
+   * Navigate to the dedicated monthly planning page
+   */
+  navigateToMonthlyPlanning() {
+    this.router.navigate(['/monthly-planning']);
+  }
+
+  /**
+   * Navigate to the monthly reflection page
+   */
+  navigateToReflection() {
+    this.router.navigate(['/monthly-reflection']);
+  }
+
+  /**
+   * Load the monthly reflection for the current month
+   */
+  private loadMonthlyReflection() {
+    const date = this.currentDate();
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const monthStr = `${year}-${month}`;
+
+    this.monthlyPlanningService.getEntry(monthStr).subscribe({
+      next: (entry: MonthlyEntry) => {
+        if (entry.reflection) {
+          this.currentMonthlyReflection.set(entry.reflection);
+        }
+      },
+      error: (err: any) => {
+        console.error('Error loading monthly reflection:', err);
+        this.currentMonthlyReflection.set(null);
+      }
+    });
   }
 }

@@ -114,3 +114,82 @@ export interface WeeklyInspiration {
 export interface WeeklyInspirationCreateDto {
   inspiration: string;
 }
+
+// Monthly Planning Models
+/**
+ * MonthlyEntry: Container for all monthly planning data
+ * Includes focus, goals, and optional reflection
+ */
+export interface MonthlyEntry {
+  id: string;
+  month: string;                  // Format: YYYY-MM (e.g., "2025-01")
+  userId: string;
+  intentions: string;             // Focus intentions
+  moodWords: string;              // Mood or vibe words
+  notes: string;                  // General notes
+  goals: MonthlyGoal[];           // 0-3 goals
+  reflection?: MonthlyReflection;  // Optional reflection
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+/**
+ * MonthlyGoal: Individual goal within a monthly entry
+ */
+export interface MonthlyGoal {
+  id: string;
+  entryId: string;
+  title: string;
+  description: string;
+  progress: number;               // 0-100
+  order: number;                  // Sort order (0, 1, 2, etc.)
+  taskLinks: { taskId: string; taskTitle: string }[];  // Linked tasks
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+/**
+ * MonthlyReflection: Monthly reflection and learnings
+ */
+export interface MonthlyReflection {
+  id: string;
+  entryId: string;
+  rating: number;                 // 1-10
+  wins: string;                   // Multiline text
+  challenges: string;             // Multiline text
+  lessons: string;                // Multiline text
+  nextMonthFocus: string;         // Focus for next month
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+/**
+ * DTOs for creating/updating monthly planning data
+ */
+export interface MonthlyEntryCreateDto {
+  month: string;                  // Format: YYYY-MM
+  intentions: string;
+  moodWords: string;
+  notes: string;
+}
+
+export interface MonthlyGoalCreateDto {
+  title: string;
+  description: string;
+  order: number;
+}
+
+export interface MonthlyGoalUpdateDto {
+  title?: string;
+  description?: string;
+  progress?: number;
+  order?: number;
+}
+
+export interface MonthlyReflectionDto {
+  rating: number;                 // 1-10
+  wins: string;
+  challenges: string;
+  lessons: string;
+  nextMonthFocus: string;
+}
