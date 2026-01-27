@@ -1,20 +1,44 @@
-<mat-card>
-  <h4>{{ headerTitle() }}</h4>
+<mat-card class="events-list-card">
+  <div class="events-header">
+    <div class="header-title">
+      <mat-icon class="header-icon">event_note</mat-icon>
+      <h4>{{ headerTitle() }}</h4>
+    </div>
+    <div class="event-count" *ngIf="(events() && events().length > 0)">
+      {{ events().length }}
+    </div>
+  </div>
+
   <div *ngIf="(events() && events().length > 0); else noEvents" 
+       class="events-container"
        cdkDropList
        cdkDropListGroup="calendar-drop-group"
        [cdkDropListData]="localEvents"
        (cdkDropListDropped)="onDropWithinList($event)"
        cdkDropListSortingDisabled="false">
-    <div *ngFor="let e of localEvents" 
+    <div *ngFor="let e of localEvents; let i = index" 
          class="event-item" 
          [style.border-left]="'4px solid ' + getCategoryColor(e.category)"
          (click)="onEventClick(e)"
          cdkDrag
          [cdkDragData]="e">
-      <div>{{e.time}}</div>
-      <div>{{e.title}} ({{getCategoryName(e.category)}})</div>
+      <div class="event-number">{{ i + 1 }}</div>
+      <div class="event-details">
+        <div class="event-time">
+          <mat-icon class="time-icon">schedule</mat-icon>
+          {{ e.time }}
+        </div>
+        <div class="event-title">{{ e.title }}</div>
+        <div class="event-category">{{ getCategoryName(e.category) || 'General' }}</div>
+      </div>
+      <mat-icon class="drag-handle" cdkDragHandle>drag_indicator</mat-icon>
     </div>
   </div>
-  <ng-template #noEvents>No events</ng-template>
+
+  <ng-template #noEvents>
+    <div class="no-events">
+      <mat-icon>event_available</mat-icon>
+      <p>No events scheduled</p>
+    </div>
+  </ng-template>
 </mat-card>

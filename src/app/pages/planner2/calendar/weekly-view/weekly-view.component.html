@@ -1,28 +1,53 @@
 <mat-card class="weekly-view-card">
   <mat-card-header class="week-header">
-    <h2>Weekly View</h2>
+    <div class="header-content">
+      <div class="header-title">
+        <mat-icon class="header-icon">view_week</mat-icon>
+        <div class="title-text">
+          <h2>Weekly Overview</h2>
+          <p class="subtitle">Plan your week ahead</p>
+        </div>
+      </div>
+      <div class="event-summary">
+        <span class="summary-badge">{{ countTotalEvents() }} events</span>
+      </div>
+    </div>
   </mat-card-header>
 
   <mat-card-content class="week-grid">
-    <div *ngFor="let day of getWeekDays()" class="week-day-row">
+    <div *ngFor="let day of getWeekDays()" class="week-day-row" [class.today]="day.isToday">
       <div class="day-header-horizontal">
         <div class="day-info">
-          <div class="day-name">{{ day.date | date:'EEEE' }}</div>
-          <div class="day-date" [class.today]="day.isToday">{{ day.date | date:'MMM d' }}</div>
+          <div class="day-circle" [class.today]="day.isToday">
+            <span class="day-date-number">{{ day.date | date:'d' }}</span>
+          </div>
+          <div class="day-meta">
+            <div class="day-name">{{ day.date | date:'EEE' }}</div>
+            <div class="day-month">{{ day.date | date:'MMM' }}</div>
+          </div>
+        </div>
+        <div class="event-count" *ngIf="getEventsByDay(day).length > 0">
+          {{ getEventsByDay(day).length }}
         </div>
       </div>
       <div class="day-events-horizontal">
         <div *ngIf="getEventsByDay(day).length > 0; else noEvents" class="events-list-horizontal">
           <div *ngFor="let event of getEventsByDay(day)" 
             class="event-item-horizontal"
-            [style.background-color]="getCategoryColor(event.category)"
+            [style.border-left]="'4px solid ' + getCategoryColor(event.category)"
             (click)="onEventClick(event)">
-            <span class="event-time">{{ event.time }}</span>
-            <span class="event-title">{{ event.title }}</span>
+            <div class="event-time-badge">{{ event.time }}</div>
+            <div class="event-content">
+              <span class="event-title">{{ event.title }}</span>
+              <span class="event-category">{{ event.category || 'General' }}</span>
+            </div>
           </div>
         </div>
         <ng-template #noEvents>
-          <p class="no-events">No events</p>
+          <div class="no-events">
+            <mat-icon>free_cancellation</mat-icon>
+            <p>Rest day</p>
+          </div>
         </ng-template>
       </div>
     </div>

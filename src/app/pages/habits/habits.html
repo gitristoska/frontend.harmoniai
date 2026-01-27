@@ -1,27 +1,38 @@
 <section class="habits-page page-container">
-  <div class="header-card">
-    <h1>Habit Tracker</h1>
-    <p class="subtitle">Build consistency with your daily habits</p>
+  <!-- HEADER SECTION -->
+  <div class="header-section">
+    <div class="header-card">
+      <div class="header-content">
+        <div class="header-text">
+          <h1>
+            <mat-icon class="header-icon">favorite</mat-icon>
+            Habit Tracker
+          </h1>
+          <p class="subtitle">Build consistency with your daily habits</p>
+        </div>
+      </div>
+      <button mat-raised-button class="add-habit-btn" (click)="startAdd()">
+        <mat-icon>add</mat-icon>
+        Add Habit
+      </button>
+    </div>
   </div>
 
-  <button mat-raised-button color="primary" (click)="startAdd()">
-  <mat-icon>add</mat-icon> Add Habit
-</button>
+  <!-- ADD HABIT FORM -->
+  <div *ngIf="showForm" class="habit-form">
+    <h3 class="form-title">Create New Habit</h3>
+    <mat-form-field appearance="outline" class="form-field">
+      <mat-label>Habit name</mat-label>
+      <input matInput [(ngModel)]="formName" placeholder="Enter habit name">
+    </mat-form-field>
 
-<!-- SIMPLE FORM -->
-<div *ngIf="showForm" class="habit-form">
-  <mat-form-field appearance="outline">
-    <mat-label>Habit name</mat-label>
-    <input matInput [(ngModel)]="formName">
-  </mat-form-field>
-
-  <div class="form-buttons">
-    <button mat-button color="primary" (click)="saveHabit()">Save</button>
-    <button mat-button (click)="cancelForm()">Cancel</button>
+    <div class="form-buttons">
+      <button mat-button color="primary" class="save-btn" (click)="saveHabit()">Save Habit</button>
+      <button mat-button class="cancel-btn" (click)="cancelForm()">Cancel</button>
+    </div>
   </div>
-</div>
 
-
+  <!-- OVERVIEW CARD -->
   <mat-card class="overview-card">
     <div class="overview-top">
       <div>
@@ -34,26 +45,36 @@
     <mat-progress-bar mode="determinate" [value]="weeklyCompletionPercent()" color="primary"></mat-progress-bar>
   </mat-card>
 
+  <!-- TRACKER CARD -->
   <mat-card class="tracker-card">
     <div class="tracker-header">
-      <div class="col-habit">Habit</div>
-      <div class="col-days">
-        <span *ngFor="let d of days" class="day-label">{{ d }}</span>
+      <div class="header-info">
+        <mat-icon class="tracker-icon">task_alt</mat-icon>
+        <h3>Daily Habits</h3>
       </div>
+      <div class="habit-count">{{ habits.length }}</div>
     </div>
 
     <div class="tracker-body">
-      <div *ngFor="let h of habits; let i = index" class="tracker-row">
-        <div class="actions">
-          <button mat-icon-button (click)="startEdit(h)">
-            <mat-icon>edit</mat-icon>
-          </button>
-          <button mat-icon-button color="warn" (click)="deleteHabit(h.id)">
-            <mat-icon>delete</mat-icon>
-          </button>
+      <div class="tracker-columns">
+        <div class="col-days-header">
+          <span *ngFor="let d of days" class="day-label">{{ d }}</span>
         </div>
+      </div>
 
-        <div class="col-habit">{{ h.name }}</div>
+      <div *ngFor="let h of habits; let i = index" class="tracker-row">
+        <div class="habit-info">
+          <div class="habit-number">{{ i + 1 }}</div>
+          <div class="habit-name">{{ h.name }}</div>
+          <div class="habit-actions">
+            <button mat-icon-button class="edit-btn" (click)="startEdit(h)" title="Edit">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button class="delete-btn" color="warn" (click)="deleteHabit(h.id)" title="Delete">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </div>
         <div class="col-days">
           <button mat-icon-button class="day-bubble" *ngFor="let done of h.days; let di = index" (click)="toggleDay(i, di)">
             <mat-icon *ngIf="done" class="done">check_circle</mat-icon>
@@ -64,8 +85,14 @@
     </div>
   </mat-card>
 
+  <!-- STATS CARD -->
   <mat-card class="stats-card">
-    <h3>Habit Statistics</h3>
+    <div class="stats-header">
+      <div class="stats-title-group">
+        <mat-icon class="stats-icon">bar_chart</mat-icon>
+        <h3>Habit Statistics</h3>
+      </div>
+    </div>
     <div class="stats-grid">
       <div *ngFor="let h of habits" class="stat-item">
         <div class="stat-top">
@@ -78,9 +105,15 @@
     </div>
   </mat-card>
 
+  <!-- AI INSIGHTS CARD -->
   <mat-card class="ai-card">
-    <h3>AI Suggestions for Improvement</h3>
-    <ul>
+    <div class="ai-header">
+      <div class="ai-title-group">
+        <mat-icon class="ai-icon">lightbulb</mat-icon>
+        <h3>AI Suggestions</h3>
+      </div>
+    </div>
+    <ul class="ai-suggestions">
       <li>Try habit stacking: Pair a new habit with an existing one (e.g., meditate right after morning exercise)</li>
       <li>Your consistency is building. Focus on completing just one habit daily to build momentum.</li>
       <li>Set a reminder for your least completed habit to improve overall consistency</li>

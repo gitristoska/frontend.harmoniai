@@ -1,13 +1,14 @@
 import { Component, input, computed, Output, EventEmitter, OnInit, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
+import { MatIconModule } from '@angular/material/icon';
 import { DragDropModule, CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { CalendarEvent } from '../calendar.component';
 
 @Component({
   selector: 'app-events-list',
   standalone: true,
-  imports: [CommonModule, MatCardModule, DragDropModule],
+  imports: [CommonModule, MatCardModule, MatIconModule, DragDropModule],
   templateUrl: './events-list.component.html',
   styleUrls: ['./events-list.component.scss']
 })

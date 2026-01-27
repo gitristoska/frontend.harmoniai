@@ -40,4 +40,8 @@ export class WeeklyViewComponent {
   getWeekDays() {
     return this.weekDays();
   }
+
+  countTotalEvents(): number {
+    return this.events().length;
+  }
 }

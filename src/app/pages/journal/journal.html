@@ -1,61 +1,92 @@
 <section class="journal-page page-container">
-  <div class="header-card">
-    <h1>Digital Journal</h1>
-    <p class="subtitle">Record your thoughts and let AI help you understand your patterns</p>
+  <!-- HEADER SECTION -->
+  <div class="header-section">
+    <div class="header-card">
+      <div class="header-content">
+        <div class="header-text">
+          <h1>
+            <mat-icon class="header-icon">edit_note</mat-icon>
+            Digital Journal
+          </h1>
+          <p class="subtitle">Record your thoughts and let AI help you understand your patterns</p>
+        </div>
+      </div>
+      <button mat-raised-button class="write-btn" (click)="createNewEntry()" *ngIf="!showForm">
+        <mat-icon>add</mat-icon>
+        Write Entry
+      </button>
+    </div>
   </div>
 
-  <div class="write-bar">
-    <ng-container *ngIf="!showForm">
-      <button mat-button class="write-btn" (click)="createNewEntry()">
-        <mat-icon>add</mat-icon>
-        <span>Write New Entry</span>
-      </button>
-    </ng-container>
-
-    <ng-container *ngIf="showForm">
-      <mat-card class="new-entry-card">
+  <!-- NEW ENTRY FORM -->
+  <div class="write-bar" *ngIf="showForm">
+    <mat-card class="new-entry-card">
+      <div class="entry-form-header">
         <h3>New Journal Entry</h3>
         <div class="entry-date">{{ todayDate }}</div>
-
-        <mat-slide-toggle [(ngModel)]="useAiAnalysis">Use AI Analysis</mat-slide-toggle>
-
-        <mat-form-field appearance="outline" style="width:100%">
-          <textarea matInput rows="8" placeholder="How was your day? What are you thinking about?" [(ngModel)]="newEntryText"></textarea>
-        </mat-form-field>
-
-        <mat-card class="ai-note">
-          <mat-icon>auto_awesome</mat-icon>
-          <div>AI will analyze your entry to detect emotional patterns and suggest helpful activities.</div>
-        </mat-card>
-
-        <div class="entry-actions">
-          <button mat-button class="save" (click)="saveEntry()">Save Entry</button>
-          <button mat-button (click)="cancelEntry()">Cancel</button>
-        </div>
-      </mat-card>
-    </ng-container>
-  </div>
-
-  <div class="entries">
-    <mat-card class="entry" *ngFor="let e of entries">
-      <div class="entry-header">
-        <div class="sentiment" *ngIf="e.sentiment">
-          <mat-icon>{{ getSentimentIcon(e.sentiment) }}</mat-icon> {{ e.sentiment }}
-        </div>
-        <div class="date">{{ e.date | date:'dd-MM-yyyy' }}</div>
       </div>
 
-      <div class="entry-body">
-        <p>{{ e.text }}</p>
-        <div class="entry-actions-icons" style="display: flex; justify-content: flex-end; margin-top: 8px;">
-          <button mat-icon-button color="primary" (click)="editEntry(e)">
-            <mat-icon>edit</mat-icon>
-          </button>
-          <button mat-icon-button color="warn" (click)="deleteEntry(e)">
-            <mat-icon>delete</mat-icon>
-          </button>
-        </div>
+      <div class="form-section">
+        <label class="ai-toggle-label">AI Analysis</label>
+        <mat-slide-toggle [(ngModel)]="useAiAnalysis" class="ai-toggle"></mat-slide-toggle>
+      </div>
+
+      <mat-form-field appearance="outline" class="textarea-field">
+        <textarea matInput rows="10" placeholder="How was your day? What are you thinking about?" [(ngModel)]="newEntryText"></textarea>
+      </mat-form-field>
+
+      <mat-card class="ai-note">
+        <mat-icon class="ai-icon">auto_awesome</mat-icon>
+        <div class="ai-message">AI will analyze your entry to detect emotional patterns and suggest helpful activities.</div>
+      </mat-card>
+
+      <div class="entry-actions">
+        <button mat-raised-button class="save-btn" (click)="saveEntry()">Save Entry</button>
+        <button mat-button class="cancel-btn" (click)="cancelEntry()">Cancel</button>
       </div>
     </mat-card>
+  </div>
+
+  <!-- ENTRIES LIST -->
+  <div class="entries-section">
+    <div class="entries-header" *ngIf="entries.length > 0">
+      <div class="entries-title-group">
+        <mat-icon class="entries-icon">history</mat-icon>
+        <h3>Journal Entries</h3>
+      </div>
+      <div class="entries-count">{{ entries.length }}</div>
+    </div>
+
+    <div class="entries">
+      <div *ngIf="entries.length === 0" class="empty-state">
+        <mat-icon class="empty-icon">article</mat-icon>
+        <p class="empty-title">No entries yet</p>
+        <p class="empty-message">Start writing your first journal entry to record your thoughts and patterns.</p>
+      </div>
+
+      <mat-card class="entry" *ngFor="let e of entries; let i = index">
+        <div class="entry-header">
+          <div class="entry-title-section">
+            <div class="entry-date">{{ e.date | date:'EEEE, MMM d, yyyy' }}</div>
+            <div class="sentiment-badge" *ngIf="e.sentiment" [attr.data-sentiment]="e.sentiment">
+              <mat-icon class="sentiment-icon">{{ getSentimentIcon(e.sentiment) }}</mat-icon>
+              <span class="sentiment-text">{{ e.sentiment }}</span>
+            </div>
+          </div>
+          <div class="entry-actions-icons">
+            <button mat-icon-button class="edit-btn" (click)="editEntry(e)" title="Edit">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button class="delete-btn" color="warn" (click)="deleteEntry(e)" title="Delete">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </div>
+
+        <div class="entry-body">
+          <p class="entry-text">{{ e.text }}</p>
+        </div>
+      </mat-card>
+    </div>
   </div>
 </section>

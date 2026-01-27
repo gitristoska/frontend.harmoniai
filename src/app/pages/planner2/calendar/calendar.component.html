@@ -76,18 +76,19 @@
       </div>
 
       <!-- EVENTS COLUMN (next to calendar) -->
-      <div class="events-column">
+      <!-- <div class="events-column">
         <div class="events-header">
           <h3>This Week's Events</h3>
-        </div>
+        </div> -->
         <app-events-list
           [events]="selectedPeriodEvents()"
           [viewMode]="viewMode()"
           [categories]="categories"
           (eventClick)="onEventClick($event)">
         </app-events-list>
-      </div>
     </div>
+      <!-- </div>
+    </div> -->
 
     <!-- CENTER: CALENDAR (for daily and monthly views) -->
     <div class="calendar-column" [class.monthly-view]="viewMode() === 'monthly'" *ngIf="viewMode() !== 'weekly'">
@@ -134,9 +135,6 @@
         [highPriorityEvents]="weeklyHighPriorityEvents()"
         [categories]="categories">
       </app-must-get-done-card>
-
-      <!-- WEEKLY HABITS CARD -->
-      <app-weekly-habits-card></app-weekly-habits-card>
     </div>
 
     <!-- RIGHT SIDE: MONTHLY VIEW CONTROLS AND EVENTS -->
@@ -172,5 +170,10 @@
         </button>
       </div>
     </div>
+  </div>
+
+  <!-- WEEKLY HABITS ROW (Bottom of screen, full width) -->
+  <div class="weekly-habits-row" *ngIf="viewMode() === 'weekly'">
+    <app-weekly-habits-card></app-weekly-habits-card>
   </div>
 </div>

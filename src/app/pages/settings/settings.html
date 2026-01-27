@@ -1,16 +1,25 @@
 <div class="settings-page">
-  <mat-card class="header-card">
-    <div class="header-content">
-      <h1>Settings</h1>
-      <p class="subtitle">Customize your HarmoniAI experience</p>
-    </div>
-  </mat-card>
+  <!-- HEADER SECTION -->
+  <div class="header-section">
+    <mat-card class="header-card">
+      <div class="header-content">
+        <h1>
+          <mat-icon class="header-icon">settings</mat-icon>
+          Settings
+        </h1>
+        <p class="subtitle">Customize your HarmoniAI experience</p>
+      </div>
+    </mat-card>
+  </div>
 
   <div class="sections">
+    <!-- PROFILE SECTION -->
     <mat-card class="section-card">
       <div class="section-head">
-        <mat-icon>person</mat-icon>
-        <h3>Profile</h3>
+        <div class="section-icon-wrapper">
+          <mat-icon class="section-icon">person</mat-icon>
+        </div>
+        <h3>Profile Settings</h3>
       </div>
 
       <div class="section-body">
@@ -30,35 +39,44 @@
       </div>
     </mat-card>
 
-    <mat-card class="section-card">
+    <!-- ENABLED MODULES SECTION -->
+    <mat-card class="section-card modules-card">
       <div class="section-head">
-        <mat-icon>dashboard_customize</mat-icon>
+        <div class="section-icon-wrapper">
+          <mat-icon class="section-icon">dashboard_customize</mat-icon>
+        </div>
         <h3>Enabled Modules</h3>
       </div>
 
       <div class="section-body modules-list">
-        <div class="module-row" style="display: flex;
-    gap: 40px;">
+        <div class="module-row">
+          <div class="module-icon-wrapper planner-icon">
+            <mat-icon>dashboard</mat-icon>
+          </div>
           <div class="module-info">
-            <div class="module-title" style="color: blue;">Planner</div>
+            <div class="module-title">Planner</div>
             <div class="module-desc">Create and manage daily tasks</div>
           </div>
           <mat-checkbox class="module-check" [(ngModel)]="modules.planner"></mat-checkbox>
         </div>
 
-        <div class="module-row" style="display: flex;
-    gap: 40px;">
+        <div class="module-row">
+          <div class="module-icon-wrapper journal-icon">
+            <mat-icon>edit_note</mat-icon>
+          </div>
           <div class="module-info">
-            <div class="module-title" style="color: blue;">Journal</div>
+            <div class="module-title">Journal</div>
             <div class="module-desc">Digital journal with AI analysis</div>
           </div>
           <mat-checkbox class="module-check" [(ngModel)]="modules.journal"></mat-checkbox>
         </div>
 
-        <div class="module-row" style="display: flex;
-    gap: 40px;  ">
+        <div class="module-row">
+          <div class="module-icon-wrapper habits-icon">
+            <mat-icon>favorite</mat-icon>
+          </div>
           <div class="module-info">
-            <div class="module-title" style="color: blue;">Habit Tracker</div>
+            <div class="module-title">Habit Tracker</div>
             <div class="module-desc">Track daily habits and progress</div>
           </div>
           <mat-checkbox class="module-check" [(ngModel)]="modules.habits"></mat-checkbox>
@@ -66,22 +84,26 @@
       </div>
     </mat-card>
 
-    <mat-card class="section-card about">
+    <!-- ABOUT SECTION -->
+    <mat-card class="section-card about-card">
       <div class="section-head">
-        <mat-icon>info</mat-icon>
+        <div class="section-icon-wrapper">
+          <mat-icon class="section-icon">info</mat-icon>
+        </div>
         <h3>About HarmoniAI</h3>
       </div>
-      <div class="section-body small">
-        <p>HarmoniAI is your intelligent companion for productivity, wellness, and personal growth.</p>
-        <p class="muted">Version 1.0.0 • Made with care for your daily journey</p>
+      <div class="section-body">
+        <p class="about-text">HarmoniAI is your intelligent companion for productivity, wellness, and personal growth.</p>
+        <p class="version-text">Version 1.0.0 • Made with care for your daily journey</p>
       </div>
     </mat-card>
 
+    <!-- SAVE BUTTON -->
     <div class="actions">
-      <button mat-flat-button color="primary" class="save-btn" (click)="saveSettings()">
+      <button mat-raised-button class="save-btn" (click)="saveSettings()">
         <mat-icon>save</mat-icon>
         Save Changes
       </button>
     </div>
   </div>
-  </div>
+</div>
