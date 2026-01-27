@@ -11,31 +11,134 @@
   <div class="card">
     <form [formGroup]="form" (ngSubmit)="onSubmit()">
 
-      <label>Full Name</label>
-      <div class="input-wrap">
-        <input type="text" placeholder="John Doe" formControlName="fullName" />
+      <!-- Error Alert -->
+      <div *ngIf="errorMessage" class="error-alert">
+        <mat-icon>error</mat-icon>
+        <span>{{ errorMessage }}</span>
       </div>
 
-      <label>Email Address</label>
-      <div class="input-wrap">
-        <input type="email" placeholder="you@example.com" formControlName="email" />
+      <!-- Full Name Field -->
+      <div class="form-group">
+        <label for="fullName">Full Name</label>
+        <div class="input-wrap" [class.has-error]="hasError('fullName')">
+          <input
+            id="fullName"
+            type="text"
+            placeholder="John Doe"
+            formControlName="fullName"
+            [attr.aria-invalid]="hasError('fullName')"
+          />
+        </div>
+        <div *ngIf="hasError('fullName')" class="error-message">
+          {{ getFullNameErrorMessage() }}
+        </div>
       </div>
 
-      <label>Password</label>
-      <div class="input-wrap">
-        <input type="password" placeholder="Create a password" formControlName="password" />
+      <!-- Email Field -->
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <div class="input-wrap" [class.has-error]="hasError('email')">
+          <input
+            id="email"
+            type="email"
+            placeholder="you@example.com"
+            formControlName="email"
+            [attr.aria-invalid]="hasError('email')"
+          />
+        </div>
+        <div *ngIf="hasError('email')" class="error-message">
+          {{ getEmailErrorMessage() }}
+        </div>
       </div>
 
-      <label>Confirm Password</label>
-      <div class="input-wrap">
-        <input type="password" placeholder="Confirm your password" formControlName="confirmPassword" />
+      <!-- Password Field -->
+      <div class="form-group">
+        <label for="password">Password</label>
+        <div class="input-wrap" [class.has-error]="hasError('password')">
+          <input
+            id="password"
+            [type]="showPassword ? 'text' : 'password'"
+            placeholder="Create a password (min 8 characters)"
+            formControlName="password"
+            [attr.aria-invalid]="hasError('password')"
+          />
+          <button
+            type="button"
+            class="toggle-password"
+            (click)="togglePasswordVisibility()"
+            [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
+          >
+            <i [class]="showPassword ? 'fi fi-rr-eye' : 'fi fi-rr-eye-crossed'"></i>
+          </button>
+        </div>
+
+        <!-- Password Strength Indicator -->
+        <div class="password-strength" *ngIf="form.get('password')?.value">
+          <div class="strength-bar">
+            <div
+              class="strength-fill"
+              [class]="getPasswordStrengthLabel().class"
+              [style.width.%]="(passwordStrengthScore / 4) * 100"
+            ></div>
+          </div>
+          <span class="strength-label" [class]="getPasswordStrengthLabel().class">
+            {{ getPasswordStrengthLabel().label }}
+          </span>
+        </div>
+
+        <div *ngIf="hasError('password')" class="error-message">
+          {{ getPasswordErrorMessage() }}
+        </div>
       </div>
 
-      <button class="btn-create" type="submit">Create Account</button>
+      <!-- Confirm Password Field -->
+      <div class="form-group">
+        <label for="confirmPassword">Confirm Password</label>
+        <div class="input-wrap" [class.has-error]="hasError('confirmPassword') || form.hasError('passwordMismatch')">
+          <input
+            id="confirmPassword"
+            [type]="showConfirmPassword ? 'text' : 'password'"
+            placeholder="Confirm your password"
+            formControlName="confirmPassword"
+            [attr.aria-invalid]="hasError('confirmPassword') || form.hasError('passwordMismatch')"
+          />
+          <button
+            type="button"
+            class="toggle-password"
+            (click)="toggleConfirmPasswordVisibility()"
+            [attr.aria-label]="showConfirmPassword ? 'Hide password' : 'Show password'"
+          >
+            <i [class]="showConfirmPassword ? 'fi fi-rr-eye' : 'fi fi-rr-eye-crossed'"></i>
+          </button>
+        </div>
+        <div *ngIf="hasError('confirmPassword') || form.hasError('passwordMismatch')" class="error-message">
+          {{ getConfirmPasswordErrorMessage() }}
+        </div>
+      </div>
+
+      <!-- Terms Checkbox -->
+      <div class="form-group checkbox">
+        <input type="checkbox" id="agreeToTerms" formControlName="agreeToTerms" />
+        <label for="agreeToTerms">I agree to the Terms of Service and Privacy Policy</label>
+        <div *ngIf="hasError('agreeToTerms')" class="error-message">
+          You must agree to the terms to continue
+        </div>
+      </div>
+
+      <!-- Submit Button -->
+      <button
+        class="btn-create"
+        type="submit"
+        [disabled]="!form.valid || isLoading"
+        [class.loading]="isLoading"
+      >
+        <span *ngIf="!isLoading">Create Account</span>
+        <span *ngIf="isLoading">Creating Account...</span>
+      </button>
 
       <div class="signin-text">
         Already have an account?
-        <a href="#">Sign in</a>
+        <a routerLink="/login">Sign in</a>
       </div>
 
     </form>
@@ -49,6 +152,3 @@
       <li>Habit tracking with insights</li>
       <li>Digital journal with mood analysis</li>
     </ul>
-  </div>
-
-</div>

@@ -10,18 +10,19 @@ import { SignupComponent } from './pages/signup/signup';
 import { Planner2 } from './pages/planner2/planner2';
 import { MonthlyPlanningPage } from './pages/monthly-planning-page/monthly-planning-page';
 import { MonthlyReflectionPage } from './pages/monthly-reflection-page/monthly-reflection-page';
+import { authGuard, publicGuard } from './core/auth.guard';
 
 export const routes: Routes = [
-  { path: '', component: Homepage },
-  { path: 'planner', component: Planner2 },
-  { path: 'monthly-planning', component: MonthlyPlanningPage },
-  { path: 'monthly-reflection', component: MonthlyReflectionPage },
-  { path: 'journal', component: JournalComponent },
-  { path: 'ai', component: Ai },
-  { path: 'habits', component: Habits },
-  { path: 'settings', component: Settings },
-  { path: 'login', component: LoginComponent },
-  { path: 'signup', component: SignupComponent },
+  { path: '', component: Homepage, canActivate: [authGuard] },
+  { path: 'planner', component: Planner2, canActivate: [authGuard] },
+  { path: 'monthly-planning', component: MonthlyPlanningPage, canActivate: [authGuard] },
+  { path: 'monthly-reflection', component: MonthlyReflectionPage, canActivate: [authGuard] },
+  { path: 'journal', component: JournalComponent, canActivate: [authGuard] },
+  { path: 'ai', component: Ai, canActivate: [authGuard] },
+  { path: 'habits', component: Habits, canActivate: [authGuard] },
+  { path: 'settings', component: Settings, canActivate: [authGuard] },
+  { path: 'login', component: LoginComponent, canActivate: [publicGuard] },
+  { path: 'signup', component: SignupComponent, canActivate: [publicGuard] },
   { path: '**', redirectTo: '' } 
 ];
 

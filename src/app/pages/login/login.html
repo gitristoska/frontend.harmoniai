@@ -8,19 +8,72 @@
 
   <div class="card">
     <form [formGroup]="form" (ngSubmit)="onSubmit()">
-      <label>Email Address</label>
-      <div class="input-wrapper">
-        <i class="fi fi-rr-envelope"></i>
-        <input type="email" formControlName="email" placeholder="you@example.com" />
+      <!-- Error Alert -->
+      <div *ngIf="errorMessage" class="error-alert">
+        <mat-icon>error</mat-icon>
+        <span>{{ errorMessage }}</span>
       </div>
 
-      <label>Password</label>
-      <div class="input-wrapper">
-        <i class="fi fi-rr-lock"></i>
-        <input type="password" formControlName="password" placeholder="Enter your password" />
+      <!-- Email Field -->
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <div class="input-wrapper" [class.has-error]="hasError('email')">
+          <i class="fi fi-rr-envelope"></i>
+          <input
+            id="email"
+            type="email"
+            formControlName="email"
+            placeholder="you@example.com"
+            [attr.aria-invalid]="hasError('email')"
+          />
+        </div>
+        <div *ngIf="hasError('email')" class="error-message">
+          {{ getEmailErrorMessage() }}
+        </div>
       </div>
 
-      <button type="submit" class="btn" [disabled]="form.invalid">Sign In</button>
+      <!-- Password Field -->
+      <div class="form-group">
+        <label for="password">Password</label>
+        <div class="input-wrapper" [class.has-error]="hasError('password')">
+          <i class="fi fi-rr-lock"></i>
+          <input
+            id="password"
+            [type]="showPassword ? 'text' : 'password'"
+            formControlName="password"
+            placeholder="Enter your password"
+            [attr.aria-invalid]="hasError('password')"
+          />
+          <button
+            type="button"
+            class="toggle-password"
+            (click)="togglePasswordVisibility()"
+            [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
+          >
+            <i [class]="showPassword ? 'fi fi-rr-eye' : 'fi fi-rr-eye-crossed'"></i>
+          </button>
+        </div>
+        <div *ngIf="hasError('password')" class="error-message">
+          {{ getPasswordErrorMessage() }}
+        </div>
+      </div>
+
+      <!-- Remember Me -->
+      <div class="form-group checkbox">
+        <input type="checkbox" id="rememberMe" formControlName="rememberMe" />
+        <label for="rememberMe">Remember me</label>
+      </div>
+
+      <!-- Submit Button -->
+      <button
+        type="submit"
+        class="btn"
+        [disabled]="!form.valid || isLoading"
+        [class.loading]="isLoading"
+      >
+        <span *ngIf="!isLoading">Sign In</span>
+        <span *ngIf="isLoading">Signing in...</span>
+      </button>
     </form>
 
     <p class="signup">

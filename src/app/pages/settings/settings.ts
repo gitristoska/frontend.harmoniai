@@ -28,16 +28,13 @@ import { MatIconModule } from '@angular/material/icon';
 })
 export class Settings implements OnInit {
   displayName = 'User';
-  defaultPlanner = 'Work';
-  plannerOptions = ['Work', 'Personal', 'Wellness'];
+  weekStartDay: 'monday' | 'sunday' = 'monday';
 
   modules = {
     planner: true,
     journal: true,
     habits: true
   } as { planner: boolean; journal: boolean; habits: boolean };
-
-  enableNotifications = true;
 
   ngOnInit(): void {
     this.loadSettings();
@@ -46,9 +43,8 @@ export class Settings implements OnInit {
   saveSettings() {
     const settings = {
       displayName: this.displayName,
-      defaultPlanner: this.defaultPlanner,
-      modules: this.modules,
-      enableNotifications: this.enableNotifications
+      weekStartDay: this.weekStartDay,
+      modules: this.modules
     };
     try {
       localStorage.setItem('harmoni_settings', JSON.stringify(settings));
@@ -64,9 +60,8 @@ export class Settings implements OnInit {
       if (!raw) return;
       const s = JSON.parse(raw);
       this.displayName = s.displayName ?? this.displayName;
-      this.defaultPlanner = s.defaultPlanner ?? this.defaultPlanner;
+      this.weekStartDay = s.weekStartDay ?? this.weekStartDay;
       this.modules = s.modules ?? this.modules;
-      this.enableNotifications = s.enableNotifications ?? this.enableNotifications;
     } catch (e) {
       console.warn('Failed to load settings', e);
     }
