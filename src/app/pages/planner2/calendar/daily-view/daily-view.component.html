@@ -173,6 +173,14 @@
                 (change)="toggleNoteItem(item)">
                 <span [class.completed]="item.isDone">{{ item.text }}</span>
               </mat-checkbox>
+              <div class="item-actions">
+                <button mat-icon-button (click)="editCallsEmailItem(item)" title="Edit">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button (click)="deleteCallsEmailItem(item)" title="Delete">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
             </div>
             <input #callsEmailsInput type="text" class="add-item-input" placeholder="Add item..."
               (keyup.enter)="addAndClearNoteItem('callsEmails', callsEmailsInput)" />
@@ -268,6 +276,14 @@
                       (change)="toggleNoteItem(item)">
                       <span [class.completed]="item.isDone">{{ item.text }}</span>
                     </mat-checkbox>
+                    <div class="item-actions">
+                      <button mat-icon-button (click)="editLifeBalanceItem(item)" title="Edit">
+                        <mat-icon>edit</mat-icon>
+                      </button>
+                      <button mat-icon-button (click)="deleteLifeBalanceItem(item)" title="Delete">
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                    </div>
                   </div>
                   <input #categoryInput type="text" class="add-item-input" placeholder="Add..." 
                     (keyup.enter)="addAndClearNoteItem('lifeBalance', categoryInput, getCategoryKey(category.key))" />

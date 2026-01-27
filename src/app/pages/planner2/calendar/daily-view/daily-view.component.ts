@@ -331,6 +331,44 @@ export class DailyViewComponent {
     this.saveDailyEntry();
   }
 
+  editCallsEmailItem(item: CallAndEmailItem) {
+    const newText = prompt('Edit item:', item.text);
+    if (newText !== null && newText.trim()) {
+      item.text = newText.trim();
+      this.saveDailyEntry();
+    }
+  }
+
+  deleteCallsEmailItem(item: CallAndEmailItem) {
+    if (confirm('Are you sure you want to delete this item?')) {
+      const entry = this.dailyEntry();
+      if (entry?.callsAndEmailsChecklist) {
+        entry.callsAndEmailsChecklist = entry.callsAndEmailsChecklist.filter(i => i !== item);
+        this.dailyEntry.set({ ...entry });
+        this.saveDailyEntry();
+      }
+    }
+  }
+
+  editLifeBalanceItem(item: LifeBalanceItem) {
+    const newText = prompt('Edit item:', item.text);
+    if (newText !== null && newText.trim()) {
+      item.text = newText.trim();
+      this.saveDailyEntry();
+    }
+  }
+
+  deleteLifeBalanceItem(item: LifeBalanceItem) {
+    if (confirm('Are you sure you want to delete this item?')) {
+      const entry = this.dailyEntry();
+      if (entry?.lifeBalanceToDoList) {
+        entry.lifeBalanceToDoList = entry.lifeBalanceToDoList.filter(i => i !== item);
+        this.dailyEntry.set({ ...entry });
+        this.saveDailyEntry();
+      }
+    }
+  }
+
   addAndClearNoteItem(category: 'lifeBalance' | 'callsEmails', inputElement: HTMLInputElement, lifeBalanceCategory?: string) {
     const value = inputElement.value.trim();
     if (value) {
