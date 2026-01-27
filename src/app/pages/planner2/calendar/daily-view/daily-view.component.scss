@@ -357,6 +357,12 @@
           padding: 8px;
           background: #f9fafb;
           border-radius: 6px;
+          transition: all 0.2s ease;
+
+          &:hover {
+            background: white;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+          }
 
           .task-indicator {
             width: 4px;
@@ -372,12 +378,79 @@
               font-size: 13px;
               font-weight: 500;
               color: #1f2937;
+              margin-bottom: 2px;
             }
 
-            .task-time {
-              font-size: 12px;
-              color: #9ca3af;
-              margin-top: 2px;
+            .task-meta {
+              display: flex;
+              gap: 12px;
+              align-items: center;
+              flex-wrap: wrap;
+
+              .task-time {
+                font-size: 12px;
+                color: #9ca3af;
+              }
+
+              .task-status-label {
+                font-size: 11px;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.3px;
+              }
+            }
+          }
+
+          .task-status-section {
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+
+            .status-button {
+              padding: 4px;
+              width: 36px;
+              height: 36px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              cursor: pointer;
+              transition: all 0.2s ease;
+
+              &:hover {
+                transform: scale(1.1);
+              }
+
+              mat-icon {
+                font-size: 20px;
+                width: 20px;
+                height: 20px;
+              }
+            }
+          }
+        }
+
+        ::ng-deep .status-menu {
+          .mat-mdc-menu-content {
+            padding: 4px 0 !important;
+          }
+
+          .mat-mdc-menu-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            height: 40px;
+            line-height: 40px;
+            padding: 0 16px;
+
+            &.active {
+              background: #f3f4f6;
+              font-weight: 600;
+            }
+
+            .status-icon {
+              font-size: 18px;
+              width: 18px;
+              height: 18px;
             }
           }
         }

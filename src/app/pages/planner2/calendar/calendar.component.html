@@ -42,23 +42,6 @@
     </app-add-task-form>
   </div>
 
-  <!-- EDIT TASK FORM MODAL -->
-  <div class="modal-overlay" *ngIf="showEditTaskForm() && editingTask()" (click)="onEditTaskCancel()">
-    <app-edit-task-form 
-      [task]="{
-        id: editingTask()!.id!,
-        title: editingTask()!.title,
-        time: editingTask()!.time,
-        category: editingTask()!.category || 'study'
-      }"
-      [categories]="categories"
-      (click)="$event.stopPropagation()"
-      (taskUpdate)="onTaskUpdated($event)"
-      (taskDelete)="onTaskDeleted($event)"
-      (taskCancel)="onEditTaskCancel()">
-    </app-edit-task-form>
-  </div>
-
   <div class="main-content">
     <!-- LEFT SIDE: NOTES -->
       <!-- This section can contain daily view notes if needed -->

@@ -116,11 +116,33 @@
             <mat-card-content>
               <div class="note-items">
                 <div *ngIf="todayEvents().length > 0; else noTasks" class="tasks-list-items">
-                  <div *ngFor="let task of todayEvents()" class="task-item" (click)="openEditTaskModal(task)" style="cursor: pointer;">
+                  <div *ngFor="let task of todayEvents()" class="task-item">
                     <div class="task-indicator" [style.background-color]="getCategoryColor(task.category)"></div>
-                    <div class="task-info">
+                    <div class="task-info" (click)="openEditTaskModal(task)" style="cursor: pointer; flex: 1;">
                       <div class="task-title">{{ task.title }}</div>
-                      <div class="task-time">{{ task.time }}</div>
+                      <div class="task-meta">
+                        <span class="task-time">{{ task.time }}</span>
+                        <span class="task-status-label" [style.color]="getStatusInfo(task.status || 0).color">
+                          {{ getStatusInfo(task.status || 0).label }}
+                        </span>
+                      </div>
+                    </div>
+                    <div class="task-status-section">
+                      <button mat-icon-button [matMenuTriggerFor]="statusMenu" 
+                        [style.color]="getStatusInfo(task.status || 0).color"
+                        class="status-button"
+                        title="Click to change status">
+                        <mat-icon>{{ getStatusInfo(task.status || 0).icon }}</mat-icon>
+                      </button>
+                      <mat-menu #statusMenu="matMenu" class="status-menu">
+                        <button *ngFor="let status of taskStatusOptions" 
+                          mat-menu-item 
+                          (click)="updateTaskStatus(task, status.value)"
+                          [class.active]="task.status === status.value">
+                          <mat-icon [style.color]="status.color" class="status-icon">{{ status.icon }}</mat-icon>
+                          <span>{{ status.label }}</span>
+                        </button>
+                      </mat-menu>
                     </div>
                   </div>
                 </div>

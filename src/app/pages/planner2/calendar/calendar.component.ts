@@ -13,7 +13,6 @@ import { EventsListComponent } from './events-list/events-list.component';
 import { ViewModeSelectorComponent } from './view-mode-selector/view-mode-selector.component';
 import { CategorySelectorComponent } from './category-selector/category-selector.component';
 import { AddTaskFormComponent, NewTaskData } from './add-task-form/add-task-form.component';
-import { EditTaskFormComponent, EditTaskData } from './edit-task-form/edit-task-form.component';
 import { AddTaskButtonComponent } from './add-task-button/add-task-button.component';
 import { EventDetailComponent, EventUpdateData } from './event-detail/event-detail.component';
 import { DailyViewComponent } from './daily-view/daily-view.component';
@@ -30,6 +29,7 @@ export interface CalendarEvent {
   date?: Date;
   category?: string;
   description?: string;
+  status?: number; // 0=NotStarted, 1=InProgress, 2=Completed, 3=OnHold, 4=Cancelled
 }
 
 export interface DayCell {
@@ -62,7 +62,6 @@ export interface WeekDay {
     CategorySelectorComponent,
     AddTaskButtonComponent,
     AddTaskFormComponent,
-    EditTaskFormComponent,
     EventDetailComponent,
     DailyViewComponent,
     WeeklyViewComponent,
@@ -457,42 +456,6 @@ export class CalendarComponent {
     // Open edit form instead of detail view
     this.editingTask.set(event);
     this.showEditTaskForm.set(true);
-  }
-
-  onTaskUpdated(taskData: EditTaskData) {
-    const taskDate = new Date(this.selectedDate());
-    const [hours, minutes] = taskData.time.split(':');
-    taskDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
-
-    const updatePayload = {
-      title: taskData.title,
-      description: taskData.description,
-      startDate: taskData.startDate || taskDate.toISOString(),
-      endDate: taskData.endDate,
-      priority: taskData.priority,
-      status: taskData.status,
-      category: taskData.category
-    };
-
-    this.plannerService.updateTask(taskData.id.toString(), updatePayload).subscribe({
-      next: () => {
-        this.loadTasks();
-        this.showEditTaskForm.set(false);
-        this.editingTask.set(null);
-      },
-      error: (err: any) => console.error('Error updating task:', err)
-    });
-  }
-
-  onTaskDeleted(taskId: string | number) {
-    this.plannerService.deleteTask(taskId.toString()).subscribe({
-      next: () => {
-        this.loadTasks();
-        this.showEditTaskForm.set(false);
-        this.editingTask.set(null);
-      },
-      error: (err: any) => console.error('Error deleting task:', err)
-    });
   }
 
   onEditTaskCancel() {

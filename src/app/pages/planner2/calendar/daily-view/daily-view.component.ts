@@ -6,6 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
+import { MatMenuModule } from '@angular/material/menu';
 import { DragDropModule, CdkDragDrop } from '@angular/cdk/drag-drop';
 import { CalendarEvent } from '../calendar.component';
 import { DailyEntryService } from '../../../../services/dailyentry.service';
@@ -48,7 +49,7 @@ interface DayRating {
 @Component({
   selector: 'app-calendar-daily',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatCardModule, MatIconModule, MatCheckboxModule, MatButtonModule, MatDialogModule, DragDropModule],
+  imports: [CommonModule, FormsModule, MatCardModule, MatIconModule, MatCheckboxModule, MatButtonModule, MatDialogModule, MatMenuModule, DragDropModule],
   templateUrl: './daily-view.component.html',
   styleUrls: ['./daily-view.component.scss']
 })
@@ -472,5 +473,38 @@ export class DailyViewComponent {
   removeRecommendation(recommendationId: string) {
     const current = this.aiRecommendations();
     this.aiRecommendations.set(current.filter(r => r.id !== recommendationId));
+  }
+
+  // Status management
+  taskStatusOptions = [
+    { value: 0, label: 'Not Started', icon: 'schedule', color: '#9ca3af' },
+    { value: 1, label: 'In Progress', icon: 'hourglass_bottom', color: '#3b82f6' },
+    { value: 2, label: 'Completed', icon: 'check_circle', color: '#10b981' },
+    { value: 3, label: 'On Hold', icon: 'pause_circle', color: '#f59e0b' },
+    { value: 4, label: 'Cancelled', icon: 'cancel', color: '#ef4444' }
+  ];
+
+  getStatusInfo(status: number) {
+    return this.taskStatusOptions.find(s => s.value === status) || this.taskStatusOptions[0];
+  }
+
+  updateTaskStatus(task: CalendarEvent, newStatus: number) {
+    if (!task.id) return;
+
+    const updateData = {
+      title: task.title,
+      description: task.description || '',
+      time: task.time,
+      category: task.category || '',
+      status: newStatus
+    };
+
+    this.plannerService.updateTask(task.id, updateData).subscribe({
+      next: () => {
+        // Update task status in memory
+        (task as any).status = newStatus;
+      },
+      error: (err) => console.error('Error updating task status:', err)
+    });
   }
 }
