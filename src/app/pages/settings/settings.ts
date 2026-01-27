@@ -8,6 +8,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { SettingsService } from '../../services/settings.service';
 
 @Component({
   selector: 'app-settings',
@@ -28,7 +29,9 @@ import { MatIconModule } from '@angular/material/icon';
 })
 export class Settings implements OnInit {
   displayName = 'User';
-  weekStartDay: 'monday' | 'sunday' = 'monday';
+  weekStartDay: 'Monday' | 'Sunday' = 'Monday';
+  aiConsent = false;
+  enableNotifications = true;
 
   modules = {
     planner: true,
@@ -36,34 +39,54 @@ export class Settings implements OnInit {
     habits: true
   } as { planner: boolean; journal: boolean; habits: boolean };
 
+  constructor(private settingsService: SettingsService) {}
+
   ngOnInit(): void {
     this.loadSettings();
   }
 
   saveSettings() {
-    const settings = {
+    const modulesJson = JSON.stringify(this.modules);
+    const dto = {
       displayName: this.displayName,
-      weekStartDay: this.weekStartDay,
-      modules: this.modules
+      weekStartsOn: this.weekStartDay,
+      aiConsent: this.aiConsent,
+      modulesJson: modulesJson,
+      enableNotifications: this.enableNotifications
     };
-    try {
-      localStorage.setItem('harmoni_settings', JSON.stringify(settings));
-      console.log('Settings saved', settings);
-    } catch (e) {
-      console.warn('Failed to save settings', e);
-    }
+
+    this.settingsService.updateSettings(dto).subscribe({
+      next: (response) => {
+        console.log('Settings saved successfully', response);
+      },
+      error: (err) => {
+        console.error('Failed to save settings', err);
+      }
+    });
   }
 
   loadSettings() {
-    try {
-      const raw = localStorage.getItem('harmoni_settings');
-      if (!raw) return;
-      const s = JSON.parse(raw);
-      this.displayName = s.displayName ?? this.displayName;
-      this.weekStartDay = s.weekStartDay ?? this.weekStartDay;
-      this.modules = s.modules ?? this.modules;
-    } catch (e) {
-      console.warn('Failed to load settings', e);
-    }
+    this.settingsService.getSettings().subscribe({
+      next: (settings) => {
+        console.log('Settings loaded', settings);
+        this.displayName = settings.displayName || 'User';
+        this.weekStartDay = settings.weekStartsOn || 'Monday';
+        this.aiConsent = settings.aiConsent ?? false;
+        this.enableNotifications = settings.enableNotifications ?? true;
+
+        // Parse modules JSON string
+        if (settings.modulesJson) {
+          try {
+            const parsed = JSON.parse(settings.modulesJson);
+            this.modules = parsed;
+          } catch (e) {
+            console.warn('Failed to parse modulesJson', e);
+          }
+        }
+      },
+      error: (err) => {
+        console.warn('Failed to load settings from API', err);
+      }
+    });
   }
 }

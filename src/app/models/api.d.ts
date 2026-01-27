@@ -45,9 +45,15 @@ export interface PlannerTaskUpdateDto {
 }
 
 export interface SettingsUpdateDto {
-  defaultPlanner?: string | null;
-  modulesJson?: string | null;
-  enableNotifications?: boolean | null;
+  id?: string;
+  userId?: string;
+  displayName?: string;
+  weekStartsOn?: 'Monday' | 'Sunday';
+  aiConsent?: boolean;
+  modulesJson?: string; // JSON string like '{"planner": true, "journal": true, "habits": true}'
+  enableNotifications?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 }
 export interface CallAndEmailItem {
   id?: string;

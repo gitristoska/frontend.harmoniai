@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatIconModule } from '@angular/material/icon';
@@ -9,6 +9,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatDividerModule } from '@angular/material/divider';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { AuthService, User } from '../../services/auth.service';
+import { SettingsService } from '../../services/settings.service';
 import { Observable } from 'rxjs';
 
 @Component({
@@ -34,12 +35,40 @@ export class Navbar implements OnInit {
   showSidenav = false;
   currentUser$: Observable<User | null>;
 
-  constructor(private authService: AuthService, private router: Router) {
+  modules = signal({
+    planner: true,
+    journal: true,
+    habits: true
+  });
+
+  constructor(
+    private authService: AuthService,
+    private settingsService: SettingsService,
+    private router: Router
+  ) {
     this.currentUser$ = this.authService.currentUser$;
   }
 
   ngOnInit() {
-    // Subscribe to auth state to handle redirects if needed
+    this.loadModuleSettings();
+  }
+
+  loadModuleSettings() {
+    this.settingsService.getSettings().subscribe({
+      next: (settings) => {
+        if (settings.modulesJson) {
+          try {
+            const parsed = JSON.parse(settings.modulesJson);
+            this.modules.set(parsed);
+          } catch (e) {
+            console.warn('Failed to parse modulesJson', e);
+          }
+        }
+      },
+      error: (err) => {
+        console.warn('Failed to load module settings', err);
+      }
+    });
   }
 
   toggleSidenav() {

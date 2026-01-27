@@ -12,15 +12,15 @@
         <mat-icon>home</mat-icon>
         <span>Home</span>
       </a>
-      <a mat-list-item routerLink="/planner" routerLinkActive="active" (click)="toggleSidenav()">
+      <a mat-list-item routerLink="/planner" routerLinkActive="active" (click)="toggleSidenav()" [class.disabled]="!modules().planner" [style.pointer-events]="!modules().planner ? 'none' : 'auto'" [style.opacity]="!modules().planner ? '0.5' : '1'">
         <mat-icon>event_note</mat-icon>
         <span>Planner</span>
       </a>
-      <a mat-list-item routerLink="/journal" routerLinkActive="active" (click)="toggleSidenav()">
+      <a mat-list-item routerLink="/journal" routerLinkActive="active" (click)="toggleSidenav()" [class.disabled]="!modules().journal" [style.pointer-events]="!modules().journal ? 'none' : 'auto'" [style.opacity]="!modules().journal ? '0.5' : '1'">
         <mat-icon>menu_book</mat-icon>
         <span>Journal</span>
       </a>
-      <a mat-list-item routerLink="/habits" routerLinkActive="active" (click)="toggleSidenav()">
+      <a mat-list-item routerLink="/habits" routerLinkActive="active" (click)="toggleSidenav()" [class.disabled]="!modules().habits" [style.pointer-events]="!modules().habits ? 'none' : 'auto'" [style.opacity]="!modules().habits ? '0.5' : '1'">
         <mat-icon>check_circle</mat-icon>
         <span>Habits</span>
       </a>
@@ -61,15 +61,15 @@
         <mat-icon>home</mat-icon>
         Home
       </button>
-      <button mat-button routerLink="/planner" routerLinkActive="active">
+      <button mat-button routerLink="/planner" routerLinkActive="active" [disabled]="!modules().planner">
         <mat-icon>event_note</mat-icon>
         Planner
       </button>
-      <button mat-button routerLink="/journal" routerLinkActive="active">
+      <button mat-button routerLink="/journal" routerLinkActive="active" [disabled]="!modules().journal">
         <mat-icon>menu_book</mat-icon>
         Journal
       </button>
-      <button mat-button routerLink="/habits" routerLinkActive="active">
+      <button mat-button routerLink="/habits" routerLinkActive="active" [disabled]="!modules().habits">
         <mat-icon>check_circle</mat-icon>
         Habits
       </button>

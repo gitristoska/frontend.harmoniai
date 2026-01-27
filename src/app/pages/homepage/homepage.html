@@ -2,7 +2,7 @@
   <mat-card class="welcome-card">
     <div class="welcome-left">
       <h2>{{ greeting() }}</h2>
-      <p class="subtitle">Here's your overview for Friday, November 21</p>
+      <p class="subtitle">Here's your overview for {{ todayDateString() }}</p>
     </div>
   </mat-card>
 
@@ -19,7 +19,7 @@
 
     <mat-card class="overview small pink">
       <div class="card-top"><div>Productivity</div><mat-icon>trending_up</mat-icon></div>
-      <div class="card-body"><div class="big">Good momentum</div><div class="sub"> </div></div>
+      <div class="card-body"><div class="big">{{ productivityLabel() }}</div><div class="sub"></div></div>
     </mat-card>
   </div>
 
