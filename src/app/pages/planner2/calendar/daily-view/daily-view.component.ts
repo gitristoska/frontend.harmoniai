@@ -85,6 +85,27 @@ export class DailyViewComponent {
       .slice(0, 3);
   });
 
+  weekHighPriorityTasks = computed(() => {
+    // Get all high priority tasks for the current week (Mon-Sun)
+    const today = this.selectedDate();
+    const weekStart = new Date(today);
+    weekStart.setDate(today.getDate() - today.getDay() + 1); // Monday
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekStart.getDate() + 6); // Sunday
+
+    return this.events()
+      .filter((e: CalendarEvent) => {
+        if (!e.date || e.priority !== 2) return false; // Only high priority
+        const eventDate = new Date(e.date);
+        return eventDate >= weekStart && eventDate <= weekEnd;
+      })
+      .sort((a: CalendarEvent, b: CalendarEvent) => {
+        const dateA = new Date(a.date || 0).getTime();
+        const dateB = new Date(b.date || 0).getTime();
+        return dateA - dateB;
+      });
+  });
+
   selectedLifeBalanceCategory = 'health';
 
   // Signals for API data
@@ -519,5 +540,12 @@ export class DailyViewComponent {
       },
       error: (err) => console.error('Error updating task status:', err)
     });
+  }
+
+  toggleTaskCompletion(task: CalendarEvent) {
+    // Toggle between NotStarted (0) and Completed (2)
+    const currentStatus = task.status || 0;
+    const newStatus = currentStatus === 2 ? 0 : 2; // If completed, mark as not started; otherwise mark as completed
+    this.updateTaskStatus(task, newStatus);
   }
 }

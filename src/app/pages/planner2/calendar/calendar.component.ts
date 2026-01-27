@@ -1,9 +1,10 @@
-import { Component, signal, computed, Input, Output, EventEmitter } from '@angular/core';
+import { Component, signal, computed, Input, Output, EventEmitter, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { DragDropModule, CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { PlannerService } from '../../../services/task.service';
 import { MonthlyPlanningService } from '../../../services/monthly-planning.service';
@@ -15,6 +16,7 @@ import { CategorySelectorComponent } from './category-selector/category-selector
 import { AddTaskFormComponent, NewTaskData } from './add-task-form/add-task-form.component';
 import { AddTaskButtonComponent } from './add-task-button/add-task-button.component';
 import { EventDetailComponent, EventUpdateData } from './event-detail/event-detail.component';
+import { EditTaskFormComponent } from './edit-task-form/edit-task-form.component';
 import { DailyViewComponent } from './daily-view/daily-view.component';
 import { WeeklyViewComponent } from './weekly-view/weekly-view.component';
 import { MonthlyViewComponent } from './monthly-view/monthly-view.component';
@@ -31,6 +33,8 @@ export interface CalendarEvent {
   description?: string;
   priority?: number; // 0=Low, 1=Medium, 2=High
   status?: number; // 0=NotStarted, 1=InProgress, 2=Completed, 3=OnHold, 4=Cancelled
+  startDate?: string;
+  endDate?: string;
 }
 
 export interface DayCell {
@@ -57,6 +61,7 @@ export interface WeekDay {
     MatCardModule, 
     MatIconModule, 
     MatButtonModule, 
+    MatDialogModule,
     DragDropModule,
     EventsListComponent,
     ViewModeSelectorComponent,
@@ -113,6 +118,8 @@ export class CalendarComponent {
 
   // Monthly reflection
   currentMonthlyReflection = signal<any>(null);
+
+  private dialog = inject(MatDialog);
 
   constructor(private plannerService: PlannerService, private monthlyPlanningService: MonthlyPlanningService, private router: Router) {
     this.loadTasks();
@@ -222,7 +229,7 @@ export class CalendarComponent {
     endOfWeek.setDate(startOfWeek.getDate() + 6);
     
     return this.allEvents()
-      .filter(e => e.date && e.date >= startOfWeek && e.date <= endOfWeek)
+      .filter(e => e.date && e.date >= startOfWeek && e.date <= endOfWeek && e.priority === 2) // Only high priority
       .sort((a, b) => {
         const timeA = a.time || '23:59';
         const timeB = b.time || '23:59';
@@ -456,9 +463,40 @@ export class CalendarComponent {
 
   // Event detail methods
   onEventClick(event: CalendarEvent) {
-    // Open edit form instead of detail view
-    this.editingTask.set(event);
-    this.showEditTaskForm.set(true);
+    // Open edit form modal
+    if (!event.id) return;
+    
+    const dialogRef = this.dialog.open(EditTaskFormComponent, {
+      width: '600px',
+      data: {
+        task: {
+          id: event.id,
+          title: event.title,
+          description: event.description || '',
+          time: event.time,
+          category: event.category || '',
+          startDate: event.startDate || '',
+          endDate: event.endDate || '',
+          priority: event.priority || 0,
+          status: event.status || 0
+        },
+        categories: this.categories
+      }
+    });
+
+    dialogRef.afterClosed().subscribe((result: any) => {
+      if (result?.deleted) {
+        if (event.id) {
+          this.plannerService.deleteTask(event.id).subscribe(() => {
+            const events = this.allEvents();
+            this.allEvents.set(events.filter(e => e.id !== event.id));
+          });
+        }
+      } else if (result?.updated) {
+        // Reload tasks to reflect changes
+        this.loadTasks();
+      }
+    });
   }
 
   onEditTaskCancel() {

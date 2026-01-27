@@ -52,8 +52,45 @@
     <!-- SPIRAL DIVIDER -->
     <!-- <div class="spiral-divider"></div> -->
 
-    <!-- CENTER: CALENDAR -->
-    <div class="calendar-column" [class.monthly-view]="viewMode() === 'monthly'">
+    <!-- CENTER: CALENDAR AND EVENTS (for weekly view) -->
+    <div class="calendar-and-events" *ngIf="viewMode() === 'weekly'">
+      <!-- CALENDAR COLUMN -->
+      <div class="calendar-column">
+        <!-- EVENT DETAIL -->
+        <app-event-detail
+          *ngIf="selectedEvent()"
+          [event]="selectedEvent()!"
+          [categories]="categories"
+          (eventUpdate)="onEventUpdate($event)"
+          (eventDelete)="onEventDelete()"
+          (eventClose)="onEventDetailClose()">
+        </app-event-detail>
+
+        <!-- WEEKLY CALENDAR -->
+        <app-calendar-weekly
+          [weekDays]="weekDays()"
+          [events]="filteredEvents()"
+          [categories]="categories"
+          (eventClick)="onEventClick($event)">
+        </app-calendar-weekly>
+      </div>
+
+      <!-- EVENTS COLUMN (next to calendar) -->
+      <div class="events-column">
+        <div class="events-header">
+          <h3>This Week's Events</h3>
+        </div>
+        <app-events-list
+          [events]="selectedPeriodEvents()"
+          [viewMode]="viewMode()"
+          [categories]="categories"
+          (eventClick)="onEventClick($event)">
+        </app-events-list>
+      </div>
+    </div>
+
+    <!-- CENTER: CALENDAR (for daily and monthly views) -->
+    <div class="calendar-column" [class.monthly-view]="viewMode() === 'monthly'" *ngIf="viewMode() !== 'weekly'">
       <!-- EVENT DETAIL -->
       <app-event-detail
         *ngIf="selectedEvent()"
@@ -74,13 +111,6 @@
         (eventClick)="onEventClick($event)">
       </app-calendar-daily>
 
-      <app-calendar-weekly *ngIf="viewMode() === 'weekly'"
-        [weekDays]="weekDays()"
-        [events]="filteredEvents()"
-        [categories]="categories"
-        (eventClick)="onEventClick($event)">
-      </app-calendar-weekly>
-
       <app-calendar-monthly *ngIf="viewMode() === 'monthly'"
         [calendarDays]="calendarDays()"
         [events]="filteredEvents()"
@@ -94,46 +124,25 @@
     <!-- SPIRAL DIVIDER -->
     <!-- <div class="spiral-divider"></div> -->
 
-    <!-- RIGHT SIDE: DASHBOARD CARDS + EVENTS -->
-    <div class="events-sidebar" *ngIf="viewMode() !== 'daily'">
-      <!-- DASHBOARD CARDS SECTION (Only show in weekly view) -->
-      <div *ngIf="viewMode() === 'weekly'" class="dashboard-cards-section">
-        <!-- INSPIRATION CARD -->
-        <app-inspiration-card [currentDate]="selectedDate()"></app-inspiration-card>
+    <!-- RIGHT SIDE: DASHBOARD CARDS (Weekly view only) -->
+    <div class="dashboard-sidebar" *ngIf="viewMode() === 'weekly'">
+      <!-- INSPIRATION CARD -->
+      <app-inspiration-card [currentDate]="selectedDate()"></app-inspiration-card>
 
-        <!-- MUST GET DONE CARD -->
-        <app-must-get-done-card 
-          [highPriorityEvents]="weeklyHighPriorityEvents()"
-          [categories]="categories">
-        </app-must-get-done-card>
+      <!-- MUST GET DONE CARD -->
+      <app-must-get-done-card 
+        [highPriorityEvents]="weeklyHighPriorityEvents()"
+        [categories]="categories">
+      </app-must-get-done-card>
 
-        <!-- WEEKLY HABITS CARD -->
-        <app-weekly-habits-card [currentDate]="selectedDate()"></app-weekly-habits-card>
-      </div>
+      <!-- WEEKLY HABITS CARD -->
+      <app-weekly-habits-card></app-weekly-habits-card>
+    </div>
 
-      <!-- TOP PRIORITIES BOX (Weekly/Monthly view only) -->
-      <mat-card class="priorities-box" *ngIf="viewMode() !== 'daily'">
-        <mat-card-header class="priorities-header">
-          <h3>Top Priorities</h3>
-        </mat-card-header>
-        <mat-card-content class="priorities-content">
-          <div *ngIf="topPriorities().length > 0; else noPriorities" class="priorities-list">
-            <div *ngFor="let task of topPriorities()" class="priority-item">
-              <div class="priority-indicator" [style.background-color]="getCategoryColor(task.category)"></div>
-              <div class="priority-task-info">
-                <div class="priority-title">{{ task.title }}</div>
-                <div class="priority-time">{{ task.time }}</div>
-              </div>
-            </div>
-          </div>
-          <ng-template #noPriorities>
-            <p class="no-priorities">No priority tasks for this day</p>
-          </ng-template>
-        </mat-card-content>
-      </mat-card>
-
+    <!-- RIGHT SIDE: MONTHLY VIEW CONTROLS AND EVENTS -->
+    <div class="events-sidebar" *ngIf="viewMode() === 'monthly'">
       <!-- EVENTS LIST HEADER WITH SHOW ALL MONTH BUTTON (Monthly view only) -->
-      <div *ngIf="viewMode() === 'monthly' && monthlyViewMode() === 'day'" class="events-header-actions">
+      <div *ngIf="monthlyViewMode() === 'day'" class="events-header-actions">
         <h3>{{ selectedMonthlyDay() | date:'EEEE, MMM d' }}</h3>
         <div class="header-buttons">
           <button mat-button (click)="showAllMonth()" class="show-all-btn">
@@ -147,9 +156,8 @@
         </div>
       </div>
 
-      <!-- EVENTS LIST FOR SELECTED PERIOD (Not shown for daily view) -->
+      <!-- EVENTS LIST FOR MONTHLY VIEW -->
       <app-events-list
-        *ngIf="viewMode() !== 'daily'"
         [events]="selectedPeriodEvents()"
         [viewMode]="viewMode()"
         [categories]="categories"
@@ -157,7 +165,7 @@
       </app-events-list>
 
       <!-- MONTHLY REFLECTION BUTTON (Monthly view only) -->
-      <div *ngIf="viewMode() === 'monthly'" class="reflection-button-container">
+      <div class="reflection-button-container">
         <button mat-raised-button color="accent" (click)="navigateToReflection()" class="reflection-btn">
           <mat-icon>lightbulb</mat-icon>
           Month Reflection

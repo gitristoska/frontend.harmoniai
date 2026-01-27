@@ -1,29 +1,58 @@
 <mat-card class="must-get-done-card">
   <mat-card-header class="card-header">
-    <div class="header-title">
-      <mat-icon class="header-icon">flash_on</mat-icon>
-      <h3>Must Get Done (This Week)</h3>
+    <div class="header-content">
+      <div class="header-title">
+        <mat-icon class="header-icon">track_changes</mat-icon>
+        <div class="title-text">
+          <h3>Must Get Done</h3>
+          <p class="subtitle">This Week</p>
+        </div>
+      </div>
+      <div class="task-count" *ngIf="highPriorityEvents.length > 0">
+        {{ highPriorityEvents.length }}
+      </div>
     </div>
   </mat-card-header>
 
   <mat-card-content class="card-content">
     <div *ngIf="highPriorityEvents.length > 0; else noTasks" class="tasks-list">
-      <div *ngFor="let task of highPriorityEvents" class="task-item">
-        <div class="task-checkbox">
-          <mat-checkbox [checked]="false" (change)="onTaskToggle(task, $event.checked)"></mat-checkbox>
-        </div>
-        <div class="task-indicator" [style.background-color]="getCategoryColor(task.category)"></div>
-        <div class="task-info">
-          <div class="task-title">{{ task.title }}</div>
-          <div class="task-time" *ngIf="task.time">{{ task.time }}</div>
+      <div *ngFor="let task of highPriorityEvents; let i = index" class="task-item" [class.completed]="task.status === 2">
+        <div class="task-number">{{ i + 1 }}</div>
+        <div class="task-main">
+          <div class="task-header-row">
+            <div class="task-title" [class.completed]="task.status === 2">{{ task.title }}</div>
+            <button 
+              mat-icon-button 
+              [class.checked]="task.status === 2"
+              (click)="onTaskToggle(task, task.status !== 2)"
+              class="task-checkbox-btn"
+              [attr.aria-label]="task.status === 2 ? 'Mark incomplete' : 'Mark complete'">
+              <mat-icon class="checkbox-icon">{{ task.status === 2 ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+            </button>
+          </div>
+          <div class="task-meta">
+            <span class="task-date" *ngIf="task.date">
+              <mat-icon class="meta-icon">calendar_today</mat-icon>
+              {{ task.date | date:'MMM d' }}
+            </span>
+            <span class="task-time" *ngIf="task.time">
+              <mat-icon class="meta-icon">schedule</mat-icon>
+              {{ task.time }}
+            </span>
+            <div class="category-badge" [style.background-color]="getCategoryColor(task.category) + '20'" [style.color]="getCategoryColor(task.category)">
+              <span class="category-dot" [style.background-color]="getCategoryColor(task.category)"></span>
+              {{ task.category || 'General' }}
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
     <ng-template #noTasks>
       <div class="no-tasks">
-        <p>No high-priority tasks this week!</p>
-        <p class="emoji">✨</p>
+        <mat-icon class="empty-icon">done_all</mat-icon>
+        <p class="empty-title">All Clear!</p>
+        <p class="empty-subtitle">No high-priority tasks this week</p>
       </div>
     </ng-template>
   </mat-card-content>

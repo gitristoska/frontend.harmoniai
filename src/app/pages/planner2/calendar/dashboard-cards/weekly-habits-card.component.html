@@ -1,41 +1,57 @@
 <mat-card class="weekly-habits-card">
   <mat-card-header class="card-header">
-    <div class="header-title">
-      <mat-icon class="header-icon">check_circle</mat-icon>
-      <h3>Weekly Habits</h3>
+    <div class="header-content">
+      <div class="header-title">
+        <mat-icon class="header-icon">favorite</mat-icon>
+        <h3>Weekly Habits</h3>
+      </div>
+      <div class="weekly-progress" *ngIf="habits().length > 0">
+        <span class="progress-text">{{ getWeeklyCompletion() }}%</span>
+      </div>
     </div>
   </mat-card-header>
 
   <mat-card-content class="card-content">
-    <div *ngIf="isLoading()" class="loading">
-      <mat-icon class="spinner">cached</mat-icon>
-      Loading habits...
+    <div *ngIf="isLoading()" class="loading-state">
+      <mat-icon class="spinner">hourglass_empty</mat-icon>
+      <p>Loading habits...</p>
     </div>
 
-    <div *ngIf="!isLoading()" class="habits-list">
-      <div *ngIf="habits().length > 0; else noHabits">
-        <div *ngFor="let habit of habits()" class="habit-item">
-          <div class="habit-name">
-            {{ habit.name }}
-            <span class="completion-count">{{ getCompletedDaysCount(habit.id || '') }}/7</span>
+    <div *ngIf="!isLoading()" class="habits-container">
+      <div *ngIf="habits().length > 0; else noHabits" class="habits-list">
+        <div *ngFor="let habit of habits()" class="habit-card">
+          <div class="habit-header">
+            <h4 class="habit-name">{{ habit.name }}</h4>
+            <span class="habit-score">{{ getDaysDone(habit) }}<span class="total">/7</span></span>
           </div>
-          <div class="days-checkboxes">
-            <div *ngFor="let day of dayLabels; let i = index" class="day-checkbox" [title]="day">
-              <mat-checkbox
-                [checked]="getHabitCompletionForDay(habit.id || '', i)"
-                (change)="toggleHabitDay(habit.id || '', i)"
-                class="day-check">
-              </mat-checkbox>
+
+          <div class="days-grid">
+            <button
+              *ngFor="let day of dayLabels; let i = index"
+              mat-icon-button
+              [class.completed]="habit.days[i]"
+              [matTooltip]="day"
+              (click)="toggleDay(habit, i)"
+              class="day-button">
+              <mat-icon class="day-icon">{{ habit.days[i] ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
               <span class="day-label">{{ day }}</span>
+            </button>
+          </div>
+
+          <div class="habit-progress">
+            <div class="progress-bar">
+              <div class="progress-fill" [style.width.%]="getCompletionPercent(habit)"></div>
             </div>
+            <span class="progress-percent">{{ getCompletionPercent(habit) }}%</span>
           </div>
         </div>
       </div>
 
       <ng-template #noHabits>
-        <div class="no-habits">
-          <p>No habits tracked yet</p>
-          <p class="hint">Add habits in the Habits section to track them here</p>
+        <div class="empty-state">
+          <mat-icon>insights</mat-icon>
+          <p class="empty-title">No habits yet</p>
+          <p class="empty-hint">Create habits in the Habits section to track them here</p>
         </div>
       </ng-template>
     </div>

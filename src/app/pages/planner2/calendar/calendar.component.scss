@@ -119,6 +119,94 @@
       opacity: 0.6;
     }
 
+    .calendar-and-events {
+      display: flex;
+      gap: 1.25rem;
+      flex: 1;
+      min-width: 0;
+      max-height: calc(100vh - 200px);
+
+      .calendar-column {
+        flex: 0 0 65%;
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+        min-width: 0;
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding-left: 1.5rem;
+        padding-right: 0.5rem;
+
+        &::-webkit-scrollbar {
+          width: 8px;
+        }
+
+        &::-webkit-scrollbar-track {
+          background: #f1f1f1;
+          border-radius: 10px;
+        }
+
+        &::-webkit-scrollbar-thumb {
+          background: #cbd5e1;
+          border-radius: 10px;
+
+          &:hover {
+            background: #94a3b8;
+          }
+        }
+      }
+
+      .events-column {
+        flex: 0 0 25%;
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+        min-width: 0;
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding-right: 0.5rem;
+        border-left: 1px solid #e5e7eb;
+        padding-left: 1rem;
+
+        .events-header {
+          padding: 16px 0;
+          flex-shrink: 0;
+          border-bottom: 1px solid #e5e7eb;
+
+          h3 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 600;
+            color: #0f172a;
+          }
+        }
+
+        app-events-list {
+          flex: 1;
+          overflow-y: auto;
+          min-height: 0;
+        }
+
+        &::-webkit-scrollbar {
+          width: 8px;
+        }
+
+        &::-webkit-scrollbar-track {
+          background: #f1f1f1;
+          border-radius: 10px;
+        }
+
+        &::-webkit-scrollbar-thumb {
+          background: #cbd5e1;
+          border-radius: 10px;
+
+          &:hover {
+            background: #94a3b8;
+          }
+        }
+      }
+    }
+
     .calendar-column {
       flex: 1;
       display: flex;
@@ -146,6 +234,36 @@
       &::-webkit-scrollbar-thumb {
         background: #cbd5e1;
         border-radius: 10px;
+
+        &:hover {
+          background: #94a3b8;
+        }
+      }
+    }
+
+    .dashboard-sidebar {
+      width: 300px;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      position: sticky;
+      top: 0;
+      max-height: calc(100vh - 200px);
+      padding-left: 1.5rem;
+      padding-right: 0.5rem;
+      overflow-y: auto;
+
+      &::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      &::-webkit-scrollbar-track {
+        background: transparent;
+      }
+
+      &::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 3px;
 
         &:hover {
           background: #94a3b8;
@@ -201,78 +319,6 @@
 
           &:hover {
             background-color: #e0e7ff;
-          }
-        }
-      }
-
-      .priorities-box {
-        border-radius: 12px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        flex-shrink: 0;
-
-        .priorities-header {
-          padding: 16px 20px;
-          border-bottom: 2px solid #e2e8f0;
-
-          h3 {
-            margin: 0;
-            font-size: 16px;
-            font-weight: 600;
-            color: #0f172a;
-          }
-        }
-
-        .priorities-content {
-          padding: 12px;
-
-          .priorities-list {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-
-            .priority-item {
-              display: flex;
-              gap: 12px;
-              padding: 10px;
-              background: #f8fafc;
-              border-radius: 8px;
-              align-items: flex-start;
-
-              .priority-indicator {
-                width: 4px;
-                height: 50px;
-                border-radius: 2px;
-                flex-shrink: 0;
-              }
-
-              .priority-task-info {
-                flex: 1;
-                min-width: 0;
-
-                .priority-title {
-                  font-size: 13px;
-                  font-weight: 600;
-                  color: #0f172a;
-                  white-space: nowrap;
-                  overflow: hidden;
-                  text-overflow: ellipsis;
-                  margin-bottom: 4px;
-                }
-
-                .priority-time {
-                  font-size: 11px;
-                  color: #64748b;
-                }
-              }
-            }
-          }
-
-          .no-priorities {
-            margin: 0;
-            text-align: center;
-            color: #cbd5e1;
-            font-size: 12px;
-            padding: 10px;
           }
         }
       }

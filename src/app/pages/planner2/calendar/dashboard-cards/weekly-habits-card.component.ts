@@ -1,17 +1,11 @@
-import { Component, input, signal } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
-import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatButtonModule } from '@angular/material/button';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { HabitService } from '../../../../services/habit.service';
-import { Habit } from '../../../../models/habit.model';
-
-interface HabitCompletion {
-  habitId: string;
-  habitName: string;
-  days: { day: string; completed: boolean }[];
-}
+import { Habit, HabitUpdateDto } from '../../../../models/habit.model';
 
 @Component({
   selector: 'app-weekly-habits-card',
@@ -20,35 +14,28 @@ interface HabitCompletion {
     CommonModule,
     MatCardModule,
     MatIconModule,
-    MatCheckboxModule,
-    MatButtonModule
+    MatButtonModule,
+    MatTooltipModule
   ],
   templateUrl: './weekly-habits-card.component.html',
   styleUrls: ['./weekly-habits-card.component.scss']
 })
-export class WeeklyHabitsCardComponent {
-  currentDate = input<Date>(new Date());
-
+export class WeeklyHabitsCardComponent implements OnInit {
   habits = signal<Habit[]>([]);
-  habitCompletions = signal<Map<string, boolean[]>>(new Map());
   isLoading = signal(false);
   dayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
-  constructor(private habitService: HabitService) {
+  constructor(private habitService: HabitService) {}
+
+  ngOnInit() {
     this.loadHabits();
   }
 
-  private loadHabits() {
+  loadHabits() {
     this.isLoading.set(true);
     this.habitService.getAll().subscribe({
       next: (data: Habit[]) => {
         this.habits.set(data);
-        // Initialize completion map (all false for now - TODO: load actual completion data)
-        const completions = new Map<string, boolean[]>();
-        data.forEach((habit: Habit) => {
-          completions.set(habit.id || '', Array(7).fill(false));
-        });
-        this.habitCompletions.set(completions);
         this.isLoading.set(false);
       },
       error: (err: any) => {
@@ -58,22 +45,39 @@ export class WeeklyHabitsCardComponent {
     });
   }
 
-  toggleHabitDay(habitId: string, dayIndex: number) {
-    const completions = this.habitCompletions();
-    const habitCompletion = completions.get(habitId);
-    if (habitCompletion) {
-      habitCompletion[dayIndex] = !habitCompletion[dayIndex];
-      completions.set(habitId, [...habitCompletion]);
-      this.habitCompletions.set(completions);
-      // TODO: Save completion state to backend
-    }
+  toggleDay(habit: Habit, dayIndex: number) {
+    const newDays = [...habit.days];
+    newDays[dayIndex] = !newDays[dayIndex];
+
+    const dto: HabitUpdateDto = {
+      name: habit.name,
+      days: newDays
+    };
+
+    this.habitService.update(habit.id, dto).subscribe({
+      next: () => {
+        // Update local state
+        habit.days[dayIndex] = !habit.days[dayIndex];
+        // Trigger signal update
+        this.habits.set([...this.habits()]);
+      },
+      error: (err: any) => console.error('Toggle day failed', err)
+    });
   }
 
-  getHabitCompletionForDay(habitId: string, dayIndex: number): boolean {
-    return this.habitCompletions().get(habitId)?.[dayIndex] ?? false;
+  getCompletionPercent(habit: Habit): number {
+    const done = habit.days.filter(Boolean).length;
+    return Math.round((done / 7) * 100);
   }
 
-  getCompletedDaysCount(habitId: string): number {
-    return (this.habitCompletions().get(habitId) || []).filter(c => c).length;
+  getWeeklyCompletion(): number {
+    const allHabits = this.habits();
+    if (!allHabits.length) return 0;
+    const sum = allHabits.reduce((acc, h) => acc + this.getCompletionPercent(h), 0);
+    return Math.round(sum / allHabits.length);
+  }
+
+  getDaysDone(habit: Habit): number {
+    return habit.days.filter(Boolean).length;
   }
 }
