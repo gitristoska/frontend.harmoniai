@@ -20,15 +20,18 @@
     margin: 0 0 0.5rem;
     font-size: 32px;
     font-weight: 800;
-    color: #1f2937;
+    background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #ec4899 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
     letter-spacing: -0.5px;
   }
 
   .subtitle {
     margin: 0;
     font-size: 14px;
-    color: #6b7280;
-    font-weight: 500;
+    color: #7c3aed;
+    font-weight: 600;
   }
 }
 
@@ -112,6 +115,7 @@
 
   &:hover {
     box-shadow: 0 8px 32px rgba(15, 23, 42, 0.12);
+    border-color: #d1d5db;
   }
 }
 
@@ -134,14 +138,11 @@
     letter-spacing: -0.3px;
 
     mat-icon {
-      color: #3b82f6;
       font-size: 24px;
     }
   }
 
   button {
-    color: #3b82f6;
-
     &:hover {
       background: rgba(59, 130, 246, 0.1);
     }
@@ -173,19 +174,43 @@
 // SECTION 1: MONTHLY FOCUS
 // ============================================
 .focus-section {
+  .section-header {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border-bottom-color: #fcd34d;
+
+    h2 {
+      color: #92400e;
+      mat-icon {
+        color: #f59e0b;
+      }
+    }
+
+    button {
+      color: #d97706;
+      &:hover {
+        background: rgba(217, 119, 6, 0.1);
+      }
+    }
+  }
+
   .focus-card {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 24px;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
     padding: 24px;
   }
 
   .focus-item {
+    padding: 16px;
+    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+    border-radius: 12px;
+    border: 1px solid #fcd34d;
+
     h4 {
       margin: 0 0 12px;
       font-size: 12px;
       font-weight: 700;
-      color: #6b7280;
+      color: #92400e;
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
@@ -193,7 +218,7 @@
     .focus-text {
       margin: 0;
       font-size: 14px;
-      color: #374151;
+      color: #78350f;
       line-height: 1.6;
       white-space: pre-wrap;
       word-break: break-word;
@@ -207,10 +232,10 @@
       .mood-tags {
         padding: 8px 16px;
         background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-        border: 1px solid #fcd34d;
+        border: 2px solid #f59e0b;
         border-radius: 20px;
         font-size: 13px;
-        font-weight: 600;
+        font-weight: 700;
         color: #92400e;
       }
 
@@ -226,6 +251,25 @@
 // SECTION 2: TOP 3 GOALS
 // ============================================
 .goals-section {
+  .section-header {
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    border-bottom-color: #93c5fd;
+
+    h2 {
+      color: #1e40af;
+      mat-icon {
+        color: #3b82f6;
+      }
+    }
+
+    button {
+      color: #2563eb;
+      &:hover {
+        background: rgba(37, 99, 235, 0.1);
+      }
+    }
+  }
+
   .goals-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -242,7 +286,8 @@
 
     &:hover {
       border-color: #3b82f6;
-      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+      box-shadow: 0 8px 16px rgba(59, 130, 246, 0.2);
+      transform: translateY(-2px);
     }
 
     .goal-position {
@@ -275,7 +320,7 @@
         display: block;
         font-size: 11px;
         font-weight: 700;
-        color: #6b7280;
+        color: #1e40af;
         text-transform: uppercase;
         margin-bottom: 6px;
       }
@@ -306,6 +351,7 @@
       padding: 12px;
       background: white;
       border-radius: 8px;
+      border-left: 3px solid #3b82f6;
 
       h4 {
         margin: 0 0 8px;
@@ -348,32 +394,39 @@
       border-color: #3b82f6;
 
       mat-icon {
-        margin-right: 4px;
+        font-size: 16px;
+        width: 16px;
+        height: 16px;
       }
 
       &:hover {
-        background: rgba(59, 130, 246, 0.05);
+        background: rgba(59, 130, 246, 0.1);
       }
     }
   }
 
   .goals-edit-form {
-    padding: 24px;
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 20px;
+    padding: 24px;
 
     .goal-edit-card {
-      padding: 20px;
-      background: #f9fafb;
-      border: 1px solid #e5e7eb;
+      padding: 16px;
+      background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+      border: 1px solid #bfdbfe;
       border-radius: 8px;
 
       h3 {
         margin: 0 0 16px;
-        font-size: 14px;
+        font-size: 16px;
         font-weight: 700;
-        color: #1f2937;
+        color: #1e40af;
+      }
+
+      .full-width {
+        width: 100%;
+        margin-bottom: 12px;
       }
     }
   }

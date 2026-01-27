@@ -106,7 +106,6 @@
     align-items: flex-start;
     gap: 0;
     flex: 1;
-    max-height: calc(100vh - 200px);
 
     .notes-sidebar {
       width: 350px;
@@ -163,28 +162,8 @@
         flex-direction: column;
         gap: 1.25rem;
         min-width: 0;
-        overflow-y: auto;
-        overflow-x: hidden;
         padding-left: 1.5rem;
         padding-right: 0.5rem;
-
-        &::-webkit-scrollbar {
-          width: 8px;
-        }
-
-        &::-webkit-scrollbar-track {
-          background: #f1f1f1;
-          border-radius: 10px;
-        }
-
-        &::-webkit-scrollbar-thumb {
-          background: #cbd5e1;
-          border-radius: 10px;
-
-          &:hover {
-            background: #94a3b8;
-          }
-        }
       }
 
       .events-column {
@@ -193,8 +172,6 @@
         flex-direction: column;
         gap: 0;
         min-width: 0;
-        overflow-y: auto;
-        overflow-x: hidden;
         padding-right: 0.5rem;
         border-left: 1px solid #e5e7eb;
         padding-left: 1rem;
@@ -214,26 +191,7 @@
 
         app-events-list {
           flex: 1;
-          overflow-y: auto;
           min-height: 0;
-        }
-
-        &::-webkit-scrollbar {
-          width: 8px;
-        }
-
-        &::-webkit-scrollbar-track {
-          background: #f1f1f1;
-          border-radius: 10px;
-        }
-
-        &::-webkit-scrollbar-thumb {
-          background: #cbd5e1;
-          border-radius: 10px;
-
-          &:hover {
-            background: #94a3b8;
-          }
         }
       }
     }
@@ -244,31 +202,11 @@
       flex-direction: column;
       gap: 1.25rem;
       min-width: 0;
-      overflow-y: auto;
-      overflow-x: hidden;
       padding-left: 1.5rem;
       padding-right: 0.5rem;
 
       &.monthly-view {
         max-width: 600px;
-      }
-
-      &::-webkit-scrollbar {
-        width: 8px;
-      }
-
-      &::-webkit-scrollbar-track {
-        background: #f1f1f1;
-        border-radius: 10px;
-      }
-
-      &::-webkit-scrollbar-thumb {
-        background: #cbd5e1;
-        border-radius: 10px;
-
-        &:hover {
-          background: #94a3b8;
-        }
       }
     }
 
@@ -309,7 +247,6 @@
       gap: 1.25rem;
       position: sticky;
       top: 0;
-      height: 130vh;
       padding-left: 1.5rem;
       padding-right: 0.5rem;
 
@@ -356,7 +293,6 @@
 
       app-events-list {
         flex: 1;
-        overflow-y: auto;
         min-height: 0;
 
         &::-webkit-scrollbar {

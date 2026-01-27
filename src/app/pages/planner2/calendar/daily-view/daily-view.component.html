@@ -266,29 +266,33 @@
             <h3>Life Balance To-Do List</h3>
           </mat-card-header>
           <mat-card-content>
-            <div class="life-balance-table">
-              <div class="life-balance-category" *ngFor="let category of groupLifeBalanceByCategory() | keyvalue">
-                <div class="category-header">{{ category.key }}</div>
-                <div class="note-items">
-                  <div *ngFor="let item of category.value" class="note-item">
-                    <mat-checkbox 
-                      [checked]="item.isDone"
-                      (change)="toggleNoteItem(item)">
-                      <span [class.completed]="item.isDone">{{ item.text }}</span>
-                    </mat-checkbox>
-                    <div class="item-actions">
-                      <button mat-icon-button (click)="editLifeBalanceItem(item)" title="Edit">
-                        <mat-icon>edit</mat-icon>
-                      </button>
-                      <button mat-icon-button (click)="deleteLifeBalanceItem(item)" title="Delete">
-                        <mat-icon>delete</mat-icon>
-                      </button>
+            <div class="life-balance-grid">
+              <ng-container *ngFor="let categoryEntry of groupLifeBalanceByCategory() | keyvalue; let i = index">
+                <div class="lb-column" [class]="'lb-col-' + getCategoryKey(categoryEntry.key)">
+                  <div class="column-header">{{ categoryEntry.key }}</div>
+                  <div class="items-container">
+                    <div *ngFor="let item of categoryEntry.value" class="lb-item">
+                      <mat-checkbox 
+                        [checked]="item.isDone"
+                        (change)="toggleNoteItem(item)">
+                        <span [class.completed]="item.isDone">{{ item.text }}</span>
+                      </mat-checkbox>
+                      <div class="item-actions">
+                        <button mat-icon-button (click)="editLifeBalanceItem(item)" title="Edit">
+                          <mat-icon>edit</mat-icon>
+                        </button>
+                        <button mat-icon-button (click)="deleteLifeBalanceItem(item)" title="Delete">
+                          <mat-icon>delete</mat-icon>
+                        </button>
+                      </div>
                     </div>
                   </div>
-                  <input #categoryInput type="text" class="add-item-input" placeholder="Add..." 
-                    (keyup.enter)="addAndClearNoteItem('lifeBalance', categoryInput, getCategoryKey(category.key))" />
+                  <div class="add-item-wrapper">
+                    <input #categoryInput type="text" class="add-item-input" placeholder="Add item..." 
+                      (keyup.enter)="addAndClearNoteItem('lifeBalance', categoryInput, getCategoryKey(categoryEntry.key))" />
+                  </div>
                 </div>
-              </div>
+              </ng-container>
             </div>
           </mat-card-content>
         </mat-card>

@@ -140,16 +140,21 @@
     <!-- RIGHT SIDE: MONTHLY VIEW CONTROLS AND EVENTS -->
     <div class="events-sidebar" *ngIf="viewMode() === 'monthly'">
       <!-- EVENTS LIST HEADER WITH SHOW ALL MONTH BUTTON (Monthly view only) -->
-      <div *ngIf="monthlyViewMode() === 'day'" class="events-header-actions">
-        <h3>{{ selectedMonthlyDay() | date:'EEEE, MMM d' }}</h3>
+      <div class="events-header-actions">
+        <h3 *ngIf="monthlyViewMode() === 'day'">{{ selectedMonthlyDay() | date:'EEEE, MMM d' }}</h3>
+        <h3 *ngIf="monthlyViewMode() === 'month'">{{ selectedDate() | date:'MMMM yyyy' }}</h3>
         <div class="header-buttons">
-          <button mat-button (click)="showAllMonth()" class="show-all-btn">
+          <button mat-button (click)="showAllMonth()" class="show-all-btn" *ngIf="monthlyViewMode() === 'day'">
             <mat-icon>calendar_month</mat-icon>
             Show all month
           </button>
           <button mat-button (click)="navigateToMonthlyPlanning()" class="monthly-planning-btn" title="Open monthly planning">
             <mat-icon>target</mat-icon>
             Monthly Plan
+          </button>
+          <button mat-raised-button color="accent" (click)="navigateToReflection()" class="reflection-btn" title="Open monthly reflection">
+            <mat-icon>lightbulb</mat-icon>
+            Month Reflection
           </button>
         </div>
       </div>
@@ -161,14 +166,6 @@
         [categories]="categories"
         (eventClick)="onEventClick($event)">
       </app-events-list>
-
-      <!-- MONTHLY REFLECTION BUTTON (Monthly view only) -->
-      <div class="reflection-button-container">
-        <button mat-raised-button color="accent" (click)="navigateToReflection()" class="reflection-btn">
-          <mat-icon>lightbulb</mat-icon>
-          Month Reflection
-        </button>
-      </div>
     </div>
   </div>
 

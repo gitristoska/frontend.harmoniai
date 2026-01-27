@@ -2,7 +2,7 @@
   <!-- HEADER -->
   <div class="monthly-planning-header">
     <h1>{{ getMonthDisplay() }} Plan</h1>
-    <p class="subtitle">Plan, set goals, and reflect on your month</p>
+    <p class="subtitle">💡 Plan, set goals, and reflect on your month</p>
   </div>
 
   <!-- ERROR STATE -->
@@ -27,7 +27,7 @@
     <section class="planning-section focus-section">
       <div class="section-header">
         <h2>
-          <mat-icon>target</mat-icon>
+          <mat-icon>lightbulb</mat-icon>
           Monthly Focus
         </h2>
         <button *ngIf="!editingFocus()" mat-icon-button (click)="onEditFocus()" [disabled]="isSaving()">
@@ -39,12 +39,12 @@
       <div *ngIf="!editingFocus()" class="section-content">
         <div class="focus-card">
           <div class="focus-item">
-            <h4>Intentions</h4>
+            <h4>✨ Intentions</h4>
             <p class="focus-text">{{ monthlyEntry()?.intentions || 'No intentions set yet' }}</p>
           </div>
 
           <div class="focus-item">
-            <h4>Vibe / Mood / Energy</h4>
+            <h4>🎯 Vibe / Mood / Energy</h4>
             <div class="mood-display">
               <span *ngIf="monthlyEntry()?.moodWords; else noMood" class="mood-tags">
                 {{ monthlyEntry()?.moodWords }}
@@ -56,7 +56,7 @@
           </div>
 
           <div class="focus-item">
-            <h4>Notes</h4>
+            <h4>📝 Notes</h4>
             <p class="focus-text">{{ monthlyEntry()?.notes || 'No additional notes' }}</p>
           </div>
         </div>
@@ -93,7 +93,7 @@
     <section class="planning-section goals-section">
       <div class="section-header">
         <h2>
-          <mat-icon>emoji_events</mat-icon>
+          <mat-icon>flag</mat-icon>
           Top 3 Goals
         </h2>
         <button *ngIf="!editingGoals()" mat-icon-button (click)="onEditGoals()" [disabled]="isSaving()">
@@ -109,7 +109,7 @@
           <p *ngIf="goal.description" class="goal-description">{{ goal.description }}</p>
 
           <div class="progress-section">
-            <label>Progress</label>
+            <label>📊 Progress</label>
             <div class="progress-bar">
               <div class="progress-fill" [style.width.%]="goal.progress || 0"></div>
             </div>
@@ -117,7 +117,7 @@
           </div>
 
           <div *ngIf="getGoalTaskCount(goal.id) > 0" class="linked-tasks">
-            <h4>Linked Tasks ({{ getGoalTaskCount(goal.id) }})</h4>
+            <h4>🔗 Linked Tasks ({{ getGoalTaskCount(goal.id) }})</h4>
             <ul class="task-list">
               <li *ngFor="let taskLink of getLinkedTasks(goal.id)">
                 <mat-icon class="task-icon">check_circle</mat-icon>
@@ -169,7 +169,7 @@
       <div class="modal-backdrop" (click)="showTaskSelector.set(false)"></div>
       <div class="modal-content">
         <div class="modal-header">
-          <h3>Link Tasks to Goal</h3>
+          <h3>🔗 Link Tasks to Goal</h3>
           <button mat-icon-button (click)="showTaskSelector.set(false)">
             <mat-icon>close</mat-icon>
           </button>
