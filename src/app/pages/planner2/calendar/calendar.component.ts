@@ -29,6 +29,7 @@ export interface CalendarEvent {
   date?: Date;
   category?: string;
   description?: string;
+  priority?: number; // 0=Low, 1=Medium, 2=High
   status?: number; // 0=NotStarted, 1=InProgress, 2=Completed, 3=OnHold, 4=Cancelled
 }
 
@@ -158,7 +159,9 @@ export class CalendarComponent {
             time: timeStr,
             date: dateObj,
             category: t.category,
-            description: t.description
+            description: t.description,
+            priority: t.priority,
+            status: t.status
           };
         });
         this.allEvents.set(events);

@@ -74,8 +74,9 @@ export class DailyViewComponent {
   });
 
   topPriorities = computed(() => {
-    // Get top 3 priority tasks sorted by time
+    // Get high priority tasks (priority === 2) sorted by time, max 3
     return this.todayEvents()
+      .filter((task: CalendarEvent) => task.priority === 2) // Only High priority
       .sort((a: CalendarEvent, b: CalendarEvent) => {
         const timeA = a.time || '23:59';
         const timeB = b.time || '23:59';
@@ -486,6 +487,18 @@ export class DailyViewComponent {
 
   getStatusInfo(status: number) {
     return this.taskStatusOptions.find(s => s.value === status) || this.taskStatusOptions[0];
+  }
+
+  getPriorityLabel(priority: number | string): string {
+    if (typeof priority === 'string') {
+      return priority.toLowerCase();
+    }
+    const priorityMap: { [key: number]: string } = {
+      0: 'Low',
+      1: 'Medium',
+      2: 'High'
+    };
+    return priorityMap[priority] || 'Low';
   }
 
   updateTaskStatus(task: CalendarEvent, newStatus: number) {

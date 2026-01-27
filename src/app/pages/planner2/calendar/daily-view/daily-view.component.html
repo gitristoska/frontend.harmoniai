@@ -120,8 +120,12 @@
                     <div class="task-indicator" [style.background-color]="getCategoryColor(task.category)"></div>
                     <div class="task-info" (click)="openEditTaskModal(task)" style="cursor: pointer; flex: 1;">
                       <div class="task-title">{{ task.title }}</div>
+                      <div *ngIf="task.description" class="task-description">{{ task.description }}</div>
                       <div class="task-meta">
                         <span class="task-time">{{ task.time }}</span>
+                        <span *ngIf="task.priority !== undefined && task.priority !== null" class="task-priority" [class]="'priority-' + getPriorityLabel(task.priority)">
+                          {{ getPriorityLabel(task.priority) }}
+                        </span>
                         <span class="task-status-label" [style.color]="getStatusInfo(task.status || 0).color">
                           {{ getStatusInfo(task.status || 0).label }}
                         </span>
