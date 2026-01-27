@@ -12,18 +12,48 @@
   <!-- MAIN LAYOUT -->
   <div class="daily-view-layout" *ngIf="!isLoading()">
     
-    <!-- TOP SECTION: Calendar (Primary) + Right Sidebar (Metrics) -->
-    <div class="top-section">
+    <!-- GRID LAYOUT WITH NESTED DIVS -->
+    <div class="daily-grid-layout">
       
-      <!-- LEFT: CALENDAR (MAIN FOCUS) -->
-      <div class="calendar-main">
-        <mat-card class="daily-view-card">
-          <mat-card-header class="date-header">
-            <h2>{{ selectedDate() | date:'EEEE, MMMM d, yyyy' }}</h2>
-          </mat-card-header>
+      <!-- SECTION 1: Items 1,2,3 (Grateful For, Inspiration, Calendar) -->
+      <div class="grid-section-top">
+        
+        <!-- Items 1,2: Grateful For & Inspiration (nested) -->
+        <div class="grid-subsection-reflections">
+          <!-- 1: Grateful For -->
+          <mat-card class="notes-card grateful-for grid-item-1">
+            <mat-card-header>
+              <h3>Grateful For</h3>
+            </mat-card-header>
+            <mat-card-content>
+              <textarea class="note-textarea" placeholder="What are you grateful for today?"
+                [(ngModel)]="dailyEntry()!.gratefulFor"
+                (blur)="saveDailyEntry()"></textarea>
+            </mat-card-content>
+          </mat-card>
 
-          <mat-card-content class="time-grid">
-            <div *ngFor="let slot of getTimeSlots()" class="time-slot">
+          <!-- 2: Inspiration -->
+          <mat-card class="notes-card inspiration grid-item-2">
+            <mat-card-header>
+              <h3>Inspiration</h3>
+            </mat-card-header>
+            <mat-card-content>
+              <textarea class="note-textarea" placeholder="What inspired or motivated you today?"
+                [(ngModel)]="dailyEntry()!.inspirationOrMotivation"
+                (blur)="saveDailyEntry()"></textarea>
+            </mat-card-content>
+          </mat-card>
+        </div>
+
+        <!-- 3: Daily Calendar -->
+        <div class="calendar-main grid-item-3">
+          <mat-card class="daily-view-card">
+            <mat-card-header class="date-header">
+              <h2>{{ selectedDate() | date:'EEEE, MMMM d, yyyy' }}</h2>
+            </mat-card-header>
+
+            <mat-card-content class="time-grid">
+              <div *ngFor="let slot of getTimeSlots()" class="time-slot">
               <div class="time-label">{{ slot }}</div>
               <div class="events-container" 
                 cdkDropList 
@@ -44,170 +74,192 @@
           </mat-card-content>
         </mat-card>
       </div>
-
-      <!-- RIGHT: SIDEBAR (DAILY TRACKING) -->
-      <div class="tracking-sidebar">
-        
-        <!-- RATE YOUR DAY -->
-        <mat-card class="rate-day-card">
-          <mat-card-header>
-            <h3>Rate Your Day</h3>
-          </mat-card-header>
-          <mat-card-content>
-            <div class="rating-section">
-              <label>Productivity</label>
-              <div class="rating-stars">
-                <span *ngFor="let i of [1,2,3,4,5]"
-                  class="star"
-                  [class.filled]="(dayRating().productivity || 1) >= i"
-                  (click)="setProductivityRating(i)">
-                  ★
-                </span>
-              </div>
-            </div>
-
-            <div class="rating-section">
-              <label>Mood</label>
-              <div class="rating-moods">
-                <span *ngFor="let i of [1,2,3,4,5]"
-                  class="mood"
-                  [class.filled]="(dayRating().mood || 1) >= i"
-                  (click)="setMoodRating(i)">
-                  😊
-                </span>
-              </div>
-            </div>
-
-            <div class="rating-section">
-              <label>Health</label>
-              <div class="rating-hearts">
-                <span *ngFor="let i of [1,2,3,4,5]"
-                  class="heart"
-                  [class.filled]="(dayRating().health || 1) >= i"
-                  (click)="setHealthRating(i)">
-                  ❤️
-                </span>
-              </div>
-            </div>
-          </mat-card-content>
-        </mat-card>
-
-        <!-- CALLS/EMAILS -->
-        <mat-card class="notes-card calls-emails">
-          <mat-card-header>
-            <h3>Calls & Emails</h3>
-          </mat-card-header>
-          <mat-card-content>
-            <div class="note-items">
-              <div *ngFor="let item of dailyEntry()?.callsAndEmailsChecklist || []" class="note-item">
-                <mat-checkbox 
-                  [checked]="item.isDone"
-                  (change)="toggleNoteItem(item)">
-                  <span [class.completed]="item.isDone">{{ item.text }}</span>
-                </mat-checkbox>
-              </div>
-              <input #callsEmailsInput type="text" class="add-item-input" placeholder="Add item..."
-                (keyup.enter)="addAndClearNoteItem('callsEmails', callsEmailsInput)" />
-            </div>
-          </mat-card-content>
-        </mat-card>
       </div>
-    </div>
-
-    <!-- MIDDLE SECTION: DAILY REFLECTIONS (Grid Layout) -->
-    <div class="reflections-section">
-      <h3 class="section-title">Daily Reflections</h3>
-      <div class="reflections-grid">
+      
+      <!-- SECTION 2: Items 4-9 (Priority, Tasks, Calls, Personal Notes, Rate Day, Notes Tomorrow) -->
+      <div class="grid-section-middle">
         
-        <!-- Grateful For -->
-        <mat-card class="notes-card grateful-for">
-          <mat-card-header>
-            <h3>Grateful For</h3>
-          </mat-card-header>
-          <mat-card-content>
-            <textarea class="note-textarea" placeholder="What are you grateful for today?"
-              [(ngModel)]="dailyEntry()!.gratefulFor"
-              (blur)="saveDailyEntry()"></textarea>
-          </mat-card-content>
-        </mat-card>
+        <!-- Items 4,5: Priority List & Tasks List (nested) -->
+        <div class="grid-subsection-tasks">
+          <!-- 4: Priority List (Tasks) -->
+          <mat-card class="notes-card priority-list grid-item-4" style="
+        max-height: 333px;
+        overflow-y: auto;">
+            <mat-card-header>
+              <h3>Priority List</h3>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="note-items">
+                <div *ngIf="topPriorities().length > 0; else noPriorities" class="priorities-list">
+                  <div *ngFor="let task of topPriorities()" class="priority-item">
+                    <div class="priority-indicator" [style.background-color]="getCategoryColor(task.category)"></div>
+                    <div class="priority-task-info">
+                      <div class="priority-title">{{ task.title }}</div>
+                      <div class="priority-time">{{ task.time }}</div>
+                    </div>
+                  </div>
+                </div>
+                <ng-template #noPriorities>
+                  <p class="no-priorities">No priority tasks for today</p>
+                </ng-template>
+              </div>
+            </mat-card-content>
+          </mat-card>
 
-        <!-- Inspiration/Motivation -->
-        <mat-card class="notes-card inspiration">
-          <mat-card-header>
-            <h3>Inspiration</h3>
-          </mat-card-header>
-          <mat-card-content>
-            <textarea class="note-textarea" placeholder="What inspired or motivated you today?"
-              [(ngModel)]="dailyEntry()!.inspirationOrMotivation"
-              (blur)="saveDailyEntry()"></textarea>
-          </mat-card-content>
-        </mat-card>
-
-        <!-- Personal Notes -->
-        <mat-card class="notes-card personal-notes">
-          <mat-card-header>
-            <h3>Personal Notes</h3>
-          </mat-card-header>
-          <mat-card-content>
-            <textarea class="note-textarea" placeholder="Write your personal notes..."
-              [(ngModel)]="dailyEntry()!.personalNotes"
-              (blur)="saveDailyEntry()"></textarea>
-          </mat-card-content>
-        </mat-card>
-      </div>
-
-      <!-- Notes for Tomorrow (Full Width) -->
-      <mat-card class="notes-card notes-tomorrow full-width">
-        <mat-card-header>
-          <h3>Notes for Tomorrow</h3>
-        </mat-card-header>
-        <mat-card-content>
-          <textarea class="note-textarea" placeholder="Write notes for tomorrow..."
-            [(ngModel)]="dailyEntry()!.notesForTomorrow"
-            (blur)="saveDailyEntry()"></textarea>
+          <!-- 5: Tasks List -->
+          <mat-card class="notes-card tasks-list grid-item-5" style="min-height: 472px;
+    max-height: 472px;
+    overflow: auto;">
+            <mat-card-header>
+              <h3>Tasks List</h3>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="note-items">
+                <div *ngIf="todayEvents().length > 0; else noTasks" class="tasks-list-items">
+                  <div *ngFor="let task of todayEvents()" class="task-item" (click)="openEditTaskModal(task)" style="cursor: pointer;">
+                    <div class="task-indicator" [style.background-color]="getCategoryColor(task.category)"></div>
+                    <div class="task-info">
+                      <div class="task-title">{{ task.title }}</div>
+                      <div class="task-time">{{ task.time }}</div>
+                    </div>
+                  </div>
+                </div>
+                <ng-template #noTasks>
+                  <p class="no-tasks">No tasks for today</p>
+                </ng-template>
+              </div>
         </mat-card-content>
       </mat-card>
-    </div>
+        </div>
 
-    <!-- BOTTOM SECTION: LIFE BALANCE + AI RECOMMENDATIONS -->
-    <div class="bottom-cards-container">
-      <!-- Life Balance -->
-      <mat-card class="notes-card life-balance">
+        <!-- Items 6,7,8,9: Calls & Emails, Personal Notes, Rate Day, Notes Tomorrow (nested) -->
+        <div class="grid-subsection-tracking">
+          <!-- 6: Calls and Email -->
+          <mat-card class="notes-card calls-emails grid-item-6">
         <mat-card-header>
-          <h3>Life Balance To-Do List</h3>
+          <h3>Calls & Emails</h3>
         </mat-card-header>
         <mat-card-content>
-          <div class="life-balance-tabs">
-            <button *ngFor="let category of groupLifeBalanceByCategory() | keyvalue"
-              class="tab-button"
-              [class.active]="selectedLifeBalanceCategory === category.key"
-              (click)="selectedLifeBalanceCategory = category.key">
-              {{ category.key }}
-            </button>
-          </div>
           <div class="note-items">
-            <div *ngFor="let item of (groupLifeBalanceByCategory()[selectedLifeBalanceCategory] || [])" class="note-item">
+            <div *ngFor="let item of dailyEntry()?.callsAndEmailsChecklist || []" class="note-item">
               <mat-checkbox 
                 [checked]="item.isDone"
                 (change)="toggleNoteItem(item)">
                 <span [class.completed]="item.isDone">{{ item.text }}</span>
               </mat-checkbox>
             </div>
-            <input #lifeBalanceInput type="text" class="add-item-input" placeholder="Add item..." 
-              (keyup.enter)="addAndClearNoteItem('lifeBalance', lifeBalanceInput)" />
+            <input #callsEmailsInput type="text" class="add-item-input" placeholder="Add item..."
+              (keyup.enter)="addAndClearNoteItem('callsEmails', callsEmailsInput)" />
           </div>
         </mat-card-content>
       </mat-card>
 
-      <!-- AI RECOMMENDATIONS -->
-      <mat-card class="ai-recommendations-card">
+      <!-- 7: Personal Notes -->
+      <mat-card class="notes-card personal-notes grid-item-7">
         <mat-card-header>
-          <mat-icon class="ai-icon">sparkles</mat-icon>
-          <h3>AI Recommendations</h3>
+          <h3>Personal Notes</h3>
         </mat-card-header>
         <mat-card-content>
-          <div *ngFor="let rec of aiRecommendations()" class="recommendation-item">
-            <p class="recommendation-text">{{ rec.text }}</p>
+          <textarea class="note-textarea" placeholder="Write your personal notes..."
+            [(ngModel)]="dailyEntry()!.personalNotes"
+            (blur)="saveDailyEntry()"></textarea>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- 8: Rate Your Day -->
+      <mat-card class="rate-day-card grid-item-8" style="overflow: unset;">
+            <mat-card-header>
+              <h3>Rate Your Day</h3>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="rating-section">
+                <label>Productivity</label>
+                <div class="rating-stars">
+                  <span *ngFor="let i of [1,2,3,4,5]"
+                    class="star"
+                    [class.filled]="(dayRating().productivity || 1) >= i"
+                    (click)="setProductivityRating(i)">
+                    ★
+                  </span>
+                </div>
+              </div>
+
+              <div class="rating-section">
+                <label>Mood</label>
+                <div class="rating-moods">
+                  <span *ngFor="let i of [1,2,3,4,5]"
+                    class="mood"
+                    [class.filled]="(dayRating().mood || 1) >= i"
+                    (click)="setMoodRating(i)">
+                    😊
+                  </span>
+                </div>
+              </div>
+
+              <div class="rating-section">
+                <label>Health</label>
+                <div class="rating-hearts">
+                  <span *ngFor="let i of [1,2,3,4,5]"
+                    class="heart"
+                    [class.filled]="(dayRating().health || 1) >= i"
+                    (click)="setHealthRating(i)">
+                    ❤️
+                  </span>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- 9: Notes for Tomorrow -->
+          <mat-card class="notes-card notes-tomorrow grid-item-9">
+            <mat-card-header>
+              <h3>Notes for Tomorrow</h3>
+            </mat-card-header>
+            <mat-card-content>
+              <textarea class="note-textarea" placeholder="Write notes for tomorrow..."
+                [(ngModel)]="dailyEntry()!.notesForTomorrow"
+                (blur)="saveDailyEntry()"></textarea>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </div>
+
+      <!-- SECTION 3: Items 10,11 (Life Balance & AI Recommendations) -->
+      <div class="grid-section-bottom">
+        <!-- 10: Life Balance List -->
+        <mat-card class="notes-card life-balance grid-item-10">
+          <mat-card-header>
+            <h3>Life Balance To-Do List</h3>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="life-balance-table">
+              <div class="life-balance-category" *ngFor="let category of groupLifeBalanceByCategory() | keyvalue">
+                <div class="category-header">{{ category.key }}</div>
+                <div class="note-items">
+                  <div *ngFor="let item of category.value" class="note-item">
+                    <mat-checkbox 
+                      [checked]="item.isDone"
+                      (change)="toggleNoteItem(item)">
+                      <span [class.completed]="item.isDone">{{ item.text }}</span>
+                    </mat-checkbox>
+                  </div>
+                  <input #categoryInput type="text" class="add-item-input" placeholder="Add..." 
+                    (keyup.enter)="addAndClearNoteItem('lifeBalance', categoryInput, getCategoryKey(category.key))" />
+                </div>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- 11: AI Recommendations -->
+        <mat-card class="ai-recommendations-card grid-item-11">
+          <mat-card-header>
+            <mat-icon class="ai-icon">sparkles</mat-icon>
+            <h3>AI Recommendations</h3>
+          </mat-card-header>
+          <mat-card-content>
+            <div *ngFor="let rec of aiRecommendations()" class="recommendation-item">
+              <p class="recommendation-text">{{ rec.text }}</p>
             <div class="recommendation-actions">
               <button class="add-btn" (click)="toggleRecommendation(rec)">
                 <mat-icon>{{ rec.added ? 'check' : 'add' }}</mat-icon>
@@ -220,6 +272,8 @@
           </div>
         </mat-card-content>
       </mat-card>
+      </div>
+
     </div>
   </div>
 </div>

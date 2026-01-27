@@ -109,10 +109,10 @@
     </div>
 
     <!-- SPIRAL DIVIDER -->
-    <div class="spiral-divider"></div>
+    <!-- <div class="spiral-divider"></div> -->
 
     <!-- RIGHT SIDE: DASHBOARD CARDS + EVENTS -->
-    <div class="events-sidebar">
+    <div class="events-sidebar" *ngIf="viewMode() !== 'daily'">
       <!-- DASHBOARD CARDS SECTION (Only show in weekly view) -->
       <div *ngIf="viewMode() === 'weekly'" class="dashboard-cards-section">
         <!-- INSPIRATION CARD -->
@@ -128,8 +128,8 @@
         <app-weekly-habits-card [currentDate]="selectedDate()"></app-weekly-habits-card>
       </div>
 
-      <!-- TOP PRIORITIES BOX (Daily view only) -->
-      <mat-card class="priorities-box" *ngIf="viewMode() === 'daily'">
+      <!-- TOP PRIORITIES BOX (Weekly/Monthly view only) -->
+      <mat-card class="priorities-box" *ngIf="viewMode() !== 'daily'">
         <mat-card-header class="priorities-header">
           <h3>Top Priorities</h3>
         </mat-card-header>
@@ -164,8 +164,9 @@
         </div>
       </div>
 
-      <!-- EVENTS LIST FOR SELECTED PERIOD -->
+      <!-- EVENTS LIST FOR SELECTED PERIOD (Not shown for daily view) -->
       <app-events-list
+        *ngIf="viewMode() !== 'daily'"
         [events]="selectedPeriodEvents()"
         [viewMode]="viewMode()"
         [categories]="categories"

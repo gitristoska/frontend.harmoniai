@@ -4,11 +4,15 @@ import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatButtonModule } from '@angular/material/button';
+import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { DragDropModule, CdkDragDrop } from '@angular/cdk/drag-drop';
 import { CalendarEvent } from '../calendar.component';
 import { DailyEntryService } from '../../../../services/dailyentry.service';
 import { PlannerService } from '../../../../services/task.service';
 import { DailyEntry, LifeBalanceItem, CallAndEmailItem, Rating } from '../../../../models/api';
+import { computed } from '@angular/core';
+import { EditTaskFormComponent } from '../edit-task-form/edit-task-form.component';
 
 interface NoteItem {
   id: string;
@@ -44,7 +48,7 @@ interface DayRating {
 @Component({
   selector: 'app-calendar-daily',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatCardModule, MatIconModule, MatCheckboxModule, DragDropModule],
+  imports: [CommonModule, FormsModule, MatCardModule, MatIconModule, MatCheckboxModule, MatButtonModule, MatDialogModule, DragDropModule],
   templateUrl: './daily-view.component.html',
   styleUrls: ['./daily-view.component.scss']
 })
@@ -56,6 +60,29 @@ export class DailyViewComponent {
   endHour = input<number>(22);
   eventClick = output<CalendarEvent>();
 
+  // Computed properties for today's tasks
+  todayEvents = computed(() => {
+    const today = this.selectedDate();
+    return this.events().filter(e => {
+      if (!e.date) return false;
+      const eventDate = new Date(e.date);
+      return eventDate.getFullYear() === today.getFullYear() &&
+             eventDate.getMonth() === today.getMonth() &&
+             eventDate.getDate() === today.getDate();
+    });
+  });
+
+  topPriorities = computed(() => {
+    // Get top 3 priority tasks sorted by time
+    return this.todayEvents()
+      .sort((a: CalendarEvent, b: CalendarEvent) => {
+        const timeA = a.time || '23:59';
+        const timeB = b.time || '23:59';
+        return timeA.localeCompare(timeB);
+      })
+      .slice(0, 3);
+  });
+
   selectedLifeBalanceCategory = 'health';
 
   // Signals for API data
@@ -63,7 +90,7 @@ export class DailyViewComponent {
   isLoading = signal(false);
   error = signal<string | null>(null);
 
-  constructor(private dailyEntryService: DailyEntryService, private plannerService: PlannerService) {
+  constructor(private dailyEntryService: DailyEntryService, private plannerService: PlannerService, private dialog: MatDialog) {
     // Load daily entry when selected date changes
     effect(() => {
       this.loadDailyEntry(this.selectedDate());
@@ -171,6 +198,13 @@ export class DailyViewComponent {
 
   private getLifeBalanceCategoriesGrouped() {
     const entry = this.dailyEntry();
+    const categoryLabels: Record<string, string> = {
+      'health': 'Health & Fitness',
+      'family': 'Family & Friends',
+      'fun': 'Fun & Creation',
+      'spiritual': 'Spiritual'
+    };
+
     const result: Record<string, LifeBalanceItem[]> = {
       'Health & Fitness': [],
       'Family & Friends': [],
@@ -179,8 +213,10 @@ export class DailyViewComponent {
     };
 
     (entry?.lifeBalanceToDoList || []).forEach(item => {
-      if (item.category && result[item.category]) {
-        result[item.category].push(item);
+      const category = item.category as string;
+      const displayLabel = categoryLabels[category] || category;
+      if (result[displayLabel]) {
+        result[displayLabel].push(item);
       }
     });
 
@@ -189,6 +225,16 @@ export class DailyViewComponent {
 
   groupLifeBalanceByCategory() {
     return this.getLifeBalanceCategoriesGrouped();
+  }
+
+  getCategoryKey(displayName: string): string {
+    const keyMap: Record<string, string> = {
+      'Health & Fitness': 'health',
+      'Family & Friends': 'family',
+      'Fun & Creation': 'fun',
+      'Spiritual': 'spiritual'
+    };
+    return keyMap[displayName] || 'health';
   }
 
   getEventTopPosition(time: string): number {
@@ -262,15 +308,15 @@ export class DailyViewComponent {
     this.saveDailyEntry();
   }
 
-  addAndClearNoteItem(category: 'lifeBalance' | 'callsEmails', inputElement: HTMLInputElement) {
+  addAndClearNoteItem(category: 'lifeBalance' | 'callsEmails', inputElement: HTMLInputElement, lifeBalanceCategory?: string) {
     const value = inputElement.value.trim();
     if (value) {
-      this.addNoteItem(category, value);
+      this.addNoteItem(category, value, lifeBalanceCategory);
       inputElement.value = '';
     }
   }
 
-  addNoteItem(category: 'lifeBalance' | 'callsEmails', title: string) {
+  addNoteItem(category: 'lifeBalance' | 'callsEmails', title: string, lifeBalanceCategory?: string) {
     const entry = this.dailyEntry();
     if (!entry || !title.trim()) return;
 
@@ -278,7 +324,7 @@ export class DailyViewComponent {
       const newItem: LifeBalanceItem = {
         id: Date.now().toString(),
         text: title.trim(),
-        category: this.selectedLifeBalanceCategory,
+        category: lifeBalanceCategory || 'health',
         isDone: false
       };
       if (!entry.lifeBalanceToDoList) {
@@ -373,6 +419,54 @@ export class DailyViewComponent {
 
   toggleRecommendation(recommendation: Recommendation) {
     recommendation.added = !recommendation.added;
+  }
+
+  openEditTaskModal(task: CalendarEvent) {
+    if (!task.id) return;
+
+    const dialogRef = this.dialog.open(EditTaskFormComponent, {
+      width: '600px',
+      data: {
+        task: {
+          id: task.id,
+          title: task.title,
+          description: task.description || '',
+          time: task.time,
+          category: task.category || '',
+          startDate: '',
+          endDate: ''
+        },
+        categories: this.categories()
+      }
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        if (result.deleted) {
+          // Delete task
+          this.plannerService.deleteTask(task.id!).subscribe({
+            next: () => {
+              // Remove from events
+              const events = this.events();
+              const index = events.findIndex(e => e.id === task.id);
+              if (index > -1) {
+                events.splice(index, 1);
+              }
+            },
+            error: (err) => console.error('Error deleting task:', err)
+          });
+        } else if (result.updated) {
+          // Update task
+          this.plannerService.updateTask(task.id!, result.data).subscribe({
+            next: () => {
+              // Update event
+              Object.assign(task, result.data);
+            },
+            error: (err) => console.error('Error updating task:', err)
+          });
+        }
+      }
+    });
   }
 
   removeRecommendation(recommendationId: string) {

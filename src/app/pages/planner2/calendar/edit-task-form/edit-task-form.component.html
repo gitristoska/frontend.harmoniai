@@ -8,23 +8,23 @@
 
   <mat-form-field appearance="outline" style="width:100%">
     <mat-label>Task Title</mat-label>
-    <input matInput [(ngModel)]="taskTitle" placeholder="Enter task title">
+    <input matInput name="taskTitle" [(ngModel)]="taskTitle" placeholder="Enter task title">
   </mat-form-field>
 
   <mat-form-field appearance="outline" style="width:100%">
     <mat-label>Description</mat-label>
-    <textarea matInput [(ngModel)]="taskDescription" placeholder="Enter task description" rows="3"></textarea>
+    <textarea matInput name="taskDescription" [(ngModel)]="taskDescription" placeholder="Enter task description" rows="3"></textarea>
   </mat-form-field>
 
   <div class="form-row">
     <mat-form-field appearance="outline" style="flex:1">
       <mat-label>Time</mat-label>
-      <input matInput type="time" [(ngModel)]="taskTime">
+      <input matInput type="time" name="taskTime" [(ngModel)]="taskTime">
     </mat-form-field>
 
     <mat-form-field appearance="outline" style="flex:1">
       <mat-label>Priority</mat-label>
-      <mat-select [(ngModel)]="taskPriority">
+      <mat-select name="taskPriority" [(ngModel)]="taskPriority">
         <mat-option [value]="0">Low</mat-option>
         <mat-option [value]="1">Medium</mat-option>
         <mat-option [value]="2">High</mat-option>
@@ -35,7 +35,7 @@
   <div class="form-row">
     <mat-form-field appearance="outline" style="flex:1">
       <mat-label>Status</mat-label>
-      <mat-select [(ngModel)]="taskStatus">
+      <mat-select name="taskStatus" [(ngModel)]="taskStatus">
         <mat-option *ngFor="let option of taskStatusOptions" [value]="option.value">
           {{ option.label }}
         </mat-option>
@@ -44,8 +44,8 @@
 
     <mat-form-field appearance="outline" style="flex:1">
       <mat-label>Category</mat-label>
-      <mat-select [(ngModel)]="taskCategory">
-        <mat-option *ngFor="let cat of categories()" [value]="cat.id">
+      <mat-select name="taskCategory" [(ngModel)]="taskCategory">
+        <mat-option *ngFor="let cat of categories" [value]="cat.id">
           <span *ngIf="cat.id !== 'all'" class="dot" [style.background]="cat.color"></span> {{cat.name}}
         </mat-option>
       </mat-select>
@@ -55,12 +55,16 @@
   <div class="form-row">
     <mat-form-field appearance="outline" style="flex:1">
       <mat-label>Start Date</mat-label>
-      <input matInput type="date" [(ngModel)]="taskStartDate">
+      <input matInput [matDatepicker]="startPicker" name="taskStartDate" [(ngModel)]="taskStartDateObj" (change)="onStartDateChange()">
+      <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+      <mat-datepicker #startPicker></mat-datepicker>
     </mat-form-field>
 
     <mat-form-field appearance="outline" style="flex:1">
       <mat-label>End Date</mat-label>
-      <input matInput type="date" [(ngModel)]="taskEndDate">
+      <input matInput [matDatepicker]="endPicker" name="taskEndDate" [(ngModel)]="taskEndDateObj" (change)="onEndDateChange()">
+      <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
+      <mat-datepicker #endPicker></mat-datepicker>
     </mat-form-field>
   </div>
 
