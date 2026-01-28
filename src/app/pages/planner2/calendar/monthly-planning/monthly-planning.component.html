@@ -30,21 +30,45 @@
           <mat-icon>lightbulb</mat-icon>
           Monthly Focus
         </h2>
-        <button *ngIf="!editingFocus()" mat-icon-button (click)="onEditFocus()" [disabled]="isSaving()">
-          <mat-icon>edit</mat-icon>
-        </button>
       </div>
 
       <!-- VIEW MODE -->
-      <div *ngIf="!editingFocus()" class="section-content">
-        <div class="focus-card">
-          <div class="focus-item">
+      <div class="focus-card">
+        <!-- Intentions Card -->
+        <div class="focus-item">
+          <div class="item-header">
             <h4>✨ Intentions</h4>
+            <button *ngIf="!editingIntentions()" mat-icon-button (click)="onEditIntentions()" [disabled]="isSaving()" class="item-edit-btn">
+              <mat-icon>edit</mat-icon>
+            </button>
+          </div>
+          <div *ngIf="!editingIntentions()" class="item-content">
             <p class="focus-text">{{ monthlyEntry()?.intentions || 'No intentions set yet' }}</p>
           </div>
+          <div *ngIf="editingIntentions()" class="item-edit-form">
+            <mat-form-field class="full-width">
+              <mat-label>Monthly Intentions</mat-label>
+              <textarea matInput rows="3" [(ngModel)]="focusForm().intentions" placeholder="What do you intend to accomplish this month?"></textarea>
+            </mat-form-field>
+            <div class="form-actions">
+              <button mat-raised-button color="primary" (click)="onSaveIntentions()" [disabled]="isSaving()">
+                <mat-icon>save</mat-icon>
+                Save
+              </button>
+              <button mat-button (click)="onCancelIntentions()" [disabled]="isSaving()">Cancel</button>
+            </div>
+          </div>
+        </div>
 
-          <div class="focus-item">
+        <!-- Mood Card -->
+        <div class="focus-item">
+          <div class="item-header">
             <h4>🎯 Vibe / Mood / Energy</h4>
+            <button *ngIf="!editingMood()" mat-icon-button (click)="onEditMood()" [disabled]="isSaving()" class="item-edit-btn">
+              <mat-icon>edit</mat-icon>
+            </button>
+          </div>
+          <div *ngIf="!editingMood()" class="item-content">
             <div class="mood-display">
               <span *ngIf="monthlyEntry()?.moodWords; else noMood" class="mood-tags">
                 {{ monthlyEntry()?.moodWords }}
@@ -54,37 +78,45 @@
               </ng-template>
             </div>
           </div>
-
-          <div class="focus-item">
-            <h4>📝 Notes</h4>
-            <p class="focus-text">{{ monthlyEntry()?.notes || 'No additional notes' }}</p>
+          <div *ngIf="editingMood()" class="item-edit-form">
+            <mat-form-field class="full-width">
+              <mat-label>Vibe / Mood / Energy</mat-label>
+              <input matInput [(ngModel)]="focusForm().moodWords" placeholder="e.g., Energetic, Focused, Creative, Calm" />
+            </mat-form-field>
+            <div class="form-actions">
+              <button mat-raised-button color="primary" (click)="onSaveMood()" [disabled]="isSaving()">
+                <mat-icon>save</mat-icon>
+                Save
+              </button>
+              <button mat-button (click)="onCancelMood()" [disabled]="isSaving()">Cancel</button>
+            </div>
           </div>
         </div>
-      </div>
 
-      <!-- EDIT MODE -->
-      <div *ngIf="editingFocus()" class="section-edit-form">
-        <mat-form-field class="full-width">
-          <mat-label>Monthly Intentions</mat-label>
-          <textarea matInput rows="4" [(ngModel)]="focusForm().intentions" placeholder="What do you intend to accomplish this month?"></textarea>
-        </mat-form-field>
-
-        <mat-form-field class="full-width">
-          <mat-label>Vibe / Mood / Energy</mat-label>
-          <input matInput [(ngModel)]="focusForm().moodWords" placeholder="e.g., Energetic, Focused, Creative, Calm" />
-        </mat-form-field>
-
-        <mat-form-field class="full-width">
-          <mat-label>Additional Notes</mat-label>
-          <textarea matInput rows="3" [(ngModel)]="focusForm().notes" placeholder="Any other thoughts or context"></textarea>
-        </mat-form-field>
-
-        <div class="form-actions">
-          <button mat-raised-button color="primary" (click)="onSaveFocus()" [disabled]="isSaving()">
-            <mat-icon>save</mat-icon>
-            Save
-          </button>
-          <button mat-button (click)="onCancelFocus()" [disabled]="isSaving()">Cancel</button>
+        <!-- Notes Card -->
+        <div class="focus-item">
+          <div class="item-header">
+            <h4>📝 Notes</h4>
+            <button *ngIf="!editingNotes()" mat-icon-button (click)="onEditNotes()" [disabled]="isSaving()" class="item-edit-btn">
+              <mat-icon>edit</mat-icon>
+            </button>
+          </div>
+          <div *ngIf="!editingNotes()" class="item-content">
+            <p class="focus-text">{{ monthlyEntry()?.notes || 'No additional notes' }}</p>
+          </div>
+          <div *ngIf="editingNotes()" class="item-edit-form">
+            <mat-form-field class="full-width">
+              <mat-label>Additional Notes</mat-label>
+              <textarea matInput rows="3" [(ngModel)]="focusForm().notes" placeholder="Any other thoughts or context"></textarea>
+            </mat-form-field>
+            <div class="form-actions">
+              <button mat-raised-button color="primary" (click)="onSaveNotes()" [disabled]="isSaving()">
+                <mat-icon>save</mat-icon>
+                Save
+              </button>
+              <button mat-button (click)="onCancelNotes()" [disabled]="isSaving()">Cancel</button>
+            </div>
+          </div>
         </div>
       </div>
     </section>

@@ -22,11 +22,11 @@ export class JournalService {
 
   getEntries(userId: string): Observable<JournalEntry[]> {
   return this.http.get<JournalEntry[]>(`${this.baseUrl}?userId=${userId}`);
-}
+  }
 
 
   createEntry(entry: { text: string; useAi: boolean }): Observable<JournalEntry> {
-    debugger
+   // debugger
     return this.http.post<JournalEntry>(`${this.baseUrl}`, entry);
   }
 

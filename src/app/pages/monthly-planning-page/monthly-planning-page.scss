@@ -1,7 +1,6 @@
 .monthly-planning-page {
   display: flex;
   flex-direction: column;
-  height: 100vh;
   background: linear-gradient(135deg, #f5f7fa 0%, #e9f0f8 50%, #f0e9f8 100%);
 }
 
@@ -42,7 +41,6 @@
 
 .page-content {
   flex: 1;
-  overflow-y: auto;
   padding: 24px;
   max-width: 1200px;
   margin: 0 auto;

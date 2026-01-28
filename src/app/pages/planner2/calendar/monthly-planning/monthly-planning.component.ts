@@ -53,7 +53,9 @@ export class MonthlyPlanningComponent {
   availableTasks = signal<PlannerTask[]>([]);
 
   // Edit mode flags
-  editingFocus = signal(false);
+  editingIntentions = signal(false);
+  editingMood = signal(false);
+  editingNotes = signal(false);
   editingGoals = signal(false);
   selectedGoalId = signal<string | null>(null);
   showTaskSelector = signal(false);
@@ -149,14 +151,14 @@ export class MonthlyPlanningComponent {
   }
 
   /**
-   * SECTION: MONTHLY FOCUS
+   * SECTION: MONTHLY FOCUS - Individual Item Editing
    */
 
-  onEditFocus() {
-    this.editingFocus.set(true);
+  onEditIntentions() {
+    this.editingIntentions.set(true);
   }
 
-  onSaveFocus() {
+  onSaveIntentions() {
     this.isSaving.set(true);
     const entry = this.monthlyEntry();
     if (!entry) {
@@ -165,30 +167,96 @@ export class MonthlyPlanningComponent {
       return;
     }
 
-    this.monthlyPlanningService.updateEntry(entry.id, this.focusForm()).subscribe({
+    this.monthlyPlanningService.updateEntry(entry.id, { intentions: this.focusForm().intentions }).subscribe({
       next: (updated) => {
         this.monthlyEntry.set(updated);
-        this.editingFocus.set(false);
+        this.editingIntentions.set(false);
         this.isSaving.set(false);
       },
       error: (err) => {
-        console.error('Failed to save focus:', err);
-        this.error.set('Failed to save focus');
+        console.error('Failed to save intentions:', err);
+        this.error.set('Failed to save intentions');
         this.isSaving.set(false);
       }
     });
   }
 
-  onCancelFocus() {
+  onCancelIntentions() {
     const entry = this.monthlyEntry();
     if (entry) {
-      this.focusForm.set({
-        intentions: entry.intentions || '',
-        moodWords: entry.moodWords || '',
-        notes: entry.notes || ''
-      });
+      this.focusForm.set({ ...this.focusForm(), intentions: entry.intentions || '' });
     }
-    this.editingFocus.set(false);
+    this.editingIntentions.set(false);
+  }
+
+  onEditMood() {
+    this.editingMood.set(true);
+  }
+
+  onSaveMood() {
+    this.isSaving.set(true);
+    const entry = this.monthlyEntry();
+    if (!entry) {
+      this.error.set('No entry loaded');
+      this.isSaving.set(false);
+      return;
+    }
+
+    this.monthlyPlanningService.updateEntry(entry.id, { moodWords: this.focusForm().moodWords }).subscribe({
+      next: (updated) => {
+        this.monthlyEntry.set(updated);
+        this.editingMood.set(false);
+        this.isSaving.set(false);
+      },
+      error: (err) => {
+        console.error('Failed to save mood:', err);
+        this.error.set('Failed to save mood');
+        this.isSaving.set(false);
+      }
+    });
+  }
+
+  onCancelMood() {
+    const entry = this.monthlyEntry();
+    if (entry) {
+      this.focusForm.set({ ...this.focusForm(), moodWords: entry.moodWords || '' });
+    }
+    this.editingMood.set(false);
+  }
+
+  onEditNotes() {
+    this.editingNotes.set(true);
+  }
+
+  onSaveNotes() {
+    this.isSaving.set(true);
+    const entry = this.monthlyEntry();
+    if (!entry) {
+      this.error.set('No entry loaded');
+      this.isSaving.set(false);
+      return;
+    }
+
+    this.monthlyPlanningService.updateEntry(entry.id, { notes: this.focusForm().notes }).subscribe({
+      next: (updated) => {
+        this.monthlyEntry.set(updated);
+        this.editingNotes.set(false);
+        this.isSaving.set(false);
+      },
+      error: (err) => {
+        console.error('Failed to save notes:', err);
+        this.error.set('Failed to save notes');
+        this.isSaving.set(false);
+      }
+    });
+  }
+
+  onCancelNotes() {
+    const entry = this.monthlyEntry();
+    if (entry) {
+      this.focusForm.set({ ...this.focusForm(), notes: entry.notes || '' });
+    }
+    this.editingNotes.set(false);
   }
 
   /**
