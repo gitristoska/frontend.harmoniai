@@ -1,109 +1,198 @@
-<div class="settings-page">
-  <!-- HEADER SECTION -->
-  <div class="header-section">
-    <mat-card class="header-card">
-      <div class="header-content">
-        <h1>
-          <mat-icon class="header-icon">settings</mat-icon>
-          Settings
-        </h1>
-        <p class="subtitle">Customize your HarmoniAI experience</p>
-      </div>
-    </mat-card>
+<div class="settings-container">
+  <!-- HEADER -->
+  <div class="settings-header">
+    <h1>Settings</h1>
+    <p class="subtitle">Customize your experience</p>
   </div>
 
-  <div class="sections">
-    <!-- PROFILE SECTION -->
-    <mat-card class="section-card">
-      <div class="section-head">
-        <div class="section-icon-wrapper">
-          <mat-icon class="section-icon">person</mat-icon>
+  <!-- Success Message -->
+  <div *ngIf="saveSuccess()" class="success-toast">
+    <mat-icon>check_circle</mat-icon>
+    <span>Settings saved successfully</span>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="error()" class="error-toast">
+    <mat-icon>error</mat-icon>
+    <span>{{ error() }}</span>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading()" class="loading">
+    <mat-icon>hourglass_empty</mat-icon>
+    <p>Loading settings...</p>
+  </div>
+
+  <!-- Settings Form -->
+  <div *ngIf="settings() && !loading()" class="settings-form">
+    <!-- DISPLAY PREFERENCES -->
+    <mat-card class="settings-section">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>palette</mat-icon>
+          Display
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <!-- Dark Mode -->
+        <div class="setting-item">
+          <div class="setting-label">
+            <label>Dark Mode</label>
+          </div>
+          <div class="setting-control">
+            <mat-slide-toggle
+              [checked]="settings()!.darkMode"
+              (change)="onSettingChange('darkMode', $event.checked)">
+            </mat-slide-toggle>
+          </div>
         </div>
-        <h3>Profile Settings</h3>
-      </div>
 
-      <div class="section-body">
-        <label class="field-label">Display Name</label>
-        <mat-form-field appearance="outline" class="full">
-          <input matInput placeholder="Display name" [(ngModel)]="displayName" />
-        </mat-form-field>
+        <!-- Language -->
+        <div class="setting-item">
+          <div class="setting-label">
+            <label>Language</label>
+          </div>
+          <div class="setting-control">
+            <mat-form-field appearance="outline">
+              <mat-label>Select Language</mat-label>
+              <mat-select
+                [value]="settings()!.locale"
+                (selectionChange)="onSettingChange('locale', $event.value)">
+                <mat-option *ngFor="let opt of localeOptions" [value]="opt.value">
+                  {{ opt.label }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
 
-        <label class="field-label">Week Starts On</label>
-        <mat-form-field appearance="outline" class="full">
-          <mat-label>Week Start Day</mat-label>
-          <mat-select [(ngModel)]="weekStartDay">
-            <mat-option value="monday">Monday</mat-option>
-            <mat-option value="sunday">Sunday</mat-option>
-          </mat-select>
-        </mat-form-field>
-      </div>
+        <!-- Timezone -->
+        <div class="setting-item">
+          <div class="setting-label">
+            <label>Timezone</label>
+          </div>
+          <div class="setting-control">
+            <mat-form-field appearance="outline">
+              <mat-label>Select Timezone</mat-label>
+              <mat-select
+                [value]="settings()!.timezone"
+                (selectionChange)="onSettingChange('timezone', $event.value)">
+                <mat-option *ngFor="let opt of timezoneOptions" [value]="opt.value">
+                  {{ opt.label }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
+
+        <!-- Week Start -->
+        <div class="setting-item">
+          <div class="setting-label">
+            <label>Week Starts On</label>
+          </div>
+          <div class="setting-control">
+            <mat-form-field appearance="outline">
+              <mat-label>Week Start</mat-label>
+              <mat-select
+                [value]="settings()!.weekStartsOn"
+                (selectionChange)="onSettingChange('weekStartsOn', $event.value)">
+                <mat-option *ngFor="let opt of weekStartOptions" [value]="opt.value">
+                  {{ opt.label }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
+      </mat-card-content>
     </mat-card>
 
-    <!-- ENABLED MODULES SECTION -->
-    <mat-card class="section-card modules-card">
-      <div class="section-head">
-        <div class="section-icon-wrapper">
-          <mat-icon class="section-icon">dashboard_customize</mat-icon>
-        </div>
-        <h3>Enabled Modules</h3>
-      </div>
-
-      <div class="section-body modules-list">
-        <div class="module-row">
-          <div class="module-icon-wrapper planner-icon">
-            <mat-icon>dashboard</mat-icon>
+    <!-- NOTIFICATION PREFERENCES -->
+    <mat-card class="settings-section">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>notifications</mat-icon>
+          Notifications
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <!-- Email Notifications -->
+        <div class="setting-item">
+          <div class="setting-label">
+            <label>Email Notifications</label>
           </div>
-          <div class="module-info">
-            <div class="module-title">Planner</div>
-            <div class="module-desc">Create and manage daily tasks</div>
+          <div class="setting-control">
+            <mat-slide-toggle
+              [checked]="settings()!.enableEmailNotifications"
+              (change)="onSettingChange('enableEmailNotifications', $event.checked)">
+            </mat-slide-toggle>
           </div>
-          <mat-checkbox class="module-check" [(ngModel)]="modules.planner"></mat-checkbox>
-        </div>
-
-        <div class="module-row">
-          <div class="module-icon-wrapper journal-icon">
-            <mat-icon>edit_note</mat-icon>
-          </div>
-          <div class="module-info">
-            <div class="module-title">Journal</div>
-            <div class="module-desc">Digital journal with AI analysis</div>
-          </div>
-          <mat-checkbox class="module-check" [(ngModel)]="modules.journal"></mat-checkbox>
         </div>
 
-        <div class="module-row">
-          <div class="module-icon-wrapper habits-icon">
-            <mat-icon>favorite</mat-icon>
+        <!-- Daily Reminder Time -->
+        <div class="setting-item">
+          <div class="setting-label">
+            <label>Daily Reminder Time</label>
           </div>
-          <div class="module-info">
-            <div class="module-title">Habit Tracker</div>
-            <div class="module-desc">Track daily habits and progress</div>
+          <div class="setting-control">
+            <mat-form-field appearance="outline">
+              <mat-label>Reminder Time</mat-label>
+              <input
+                matInput
+                type="time"
+                [value]="settings()!.dailyReminderTime"
+                (change)="onSettingChange('dailyReminderTime', $event.target.value)" />
+            </mat-form-field>
           </div>
-          <mat-checkbox class="module-check" [(ngModel)]="modules.habits"></mat-checkbox>
         </div>
-      </div>
+      </mat-card-content>
     </mat-card>
 
-    <!-- ABOUT SECTION -->
-    <mat-card class="section-card about-card">
-      <div class="section-head">
-        <div class="section-icon-wrapper">
-          <mat-icon class="section-icon">info</mat-icon>
+    <!-- AI & PRIVACY -->
+    <mat-card class="settings-section">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>privacy_tip</mat-icon>
+          AI & Privacy
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <!-- AI Consent -->
+        <div class="setting-item">
+          <div class="setting-label">
+            <label>
+              <strong>AI Features Consent</strong>
+              <p class="info-text">
+                Allow AI to analyze your tasks, reflections, and habits to provide personalized
+                insights
+              </p>
+            </label>
+          </div>
+          <div class="setting-control">
+            <mat-slide-toggle
+              [checked]="settings()!.aiConsent"
+              (change)="onSettingChange('aiConsent', $event.checked)">
+            </mat-slide-toggle>
+          </div>
         </div>
-        <h3>About HarmoniAI</h3>
-      </div>
-      <div class="section-body">
-        <p class="about-text">HarmoniAI is your intelligent companion for productivity, wellness, and personal growth.</p>
-        <p class="version-text">Version 1.0.0 • Made with care for your daily journey</p>
-      </div>
-    </mat-card>
 
-    <!-- SAVE BUTTON -->
-    <div class="actions">
-      <button mat-raised-button class="save-btn" (click)="saveSettings()">
-        <mat-icon>save</mat-icon>
-        Save Changes
-      </button>
-    </div>
+        <!-- Analytics -->
+        <div class="setting-item">
+          <div class="setting-label">
+            <label>
+              <strong>Anonymous Analytics</strong>
+              <p class="info-text">
+                Help us improve by sharing anonymous usage patterns (no personal data)
+              </p>
+            </label>
+          </div>
+          <div class="setting-control">
+            <mat-slide-toggle
+              [checked]="settings()!.allowAnalytics"
+              (change)="onSettingChange('allowAnalytics', $event.checked)">
+            </mat-slide-toggle>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
   </div>
 </div>

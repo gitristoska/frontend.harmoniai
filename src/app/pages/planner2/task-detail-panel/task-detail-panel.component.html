@@ -1,0 +1,212 @@
+<div class="task-detail-container">
+  <!-- Empty State -->
+  <div *ngIf="!task" class="empty-state">
+    <mat-icon>assignment</mat-icon>
+    <p>Select a task to view and edit details</p>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading()" class="loading-state">
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+
+  <!-- Task Detail Form -->
+  <div *ngIf="task && !isLoading()" class="detail-content">
+    <div class="detail-header">
+      <h2>{{ task.title }}</h2>
+      <button mat-icon-button matTooltip="Close" (click)="onCancel()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <!-- Alert Banner for High Reschedule Count -->
+    <div *ngIf="isAtRisk()" class="alert-banner warning">
+      <mat-icon>warning</mat-icon>
+      <div>
+        <strong>Procrastination Alert</strong>
+        <p>This task has been rescheduled {{ rescheduleCount }} times. Consider breaking it into smaller steps.</p>
+      </div>
+    </div>
+
+    <form [formGroup]="form" class="task-form">
+      <!-- Basic Information Section -->
+      <mat-expansion-panel defaultExpanded>
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <mat-icon>info</mat-icon>
+            Basic Information
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+
+        <div class="form-section">
+          <mat-form-field class="full-width">
+            <mat-label>Task Title *</mat-label>
+            <input matInput formControlName="title" placeholder="Enter task title" maxlength="200" />
+            <mat-hint>{{ form.get('title')?.value?.length || 0 }}/200</mat-hint>
+          </mat-form-field>
+
+          <mat-form-field class="full-width">
+            <mat-label>Description</mat-label>
+            <textarea matInput formControlName="description" placeholder="Add task details..." maxlength="2000" rows="4"></textarea>
+            <mat-hint>{{ charCount }}/2000</mat-hint>
+          </mat-form-field>
+
+          <div class="form-row">
+            <mat-form-field>
+              <mat-label>Category</mat-label>
+              <mat-select formControlName="category">
+                <mat-option value="">None</mat-option>
+                <mat-option *ngFor="let cat of categoryOptions" [value]="cat">
+                  {{ cat }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field>
+              <mat-label>Priority</mat-label>
+              <mat-select formControlName="priority">
+                <mat-option *ngFor="let p of priorityOptions" [value]="p.value">
+                  {{ p.label }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
+      </mat-expansion-panel>
+
+      <!-- Scheduling Section -->
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <mat-icon>schedule</mat-icon>
+            Schedule & Duration
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+
+        <div class="form-section">
+          <div class="form-row">
+            <mat-form-field>
+              <mat-label>Start Date</mat-label>
+              <input matInput [matDatepicker]="startPicker" formControlName="startDate" />
+              <mat-datepicker-toggle matIconSuffix [for]="startPicker"></mat-datepicker-toggle>
+              <mat-datepicker #startPicker></mat-datepicker>
+            </mat-form-field>
+
+            <mat-form-field>
+              <mat-label>Start Time (HH:mm)</mat-label>
+              <input matInput formControlName="startTime" placeholder="14:30" type="time" />
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field>
+              <mat-label>Duration (minutes)</mat-label>
+              <input matInput formControlName="duration" type="number" placeholder="120" />
+            </mat-form-field>
+
+            <mat-form-field>
+              <mat-label>Deadline</mat-label>
+              <input matInput [matDatepicker]="deadlinePicker" formControlName="deadline" />
+              <mat-datepicker-toggle matIconSuffix [for]="deadlinePicker"></mat-datepicker-toggle>
+              <mat-datepicker #deadlinePicker></mat-datepicker>
+            </mat-form-field>
+          </div>
+        </div>
+      </mat-expansion-panel>
+
+      <!-- Status Section -->
+      <mat-expansion-panel>
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <mat-icon>task_alt</mat-icon>
+            Status
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+
+        <div class="form-section">
+          <mat-form-field class="full-width">
+            <mat-label>Current Status</mat-label>
+            <mat-select formControlName="status">
+              <mat-option *ngFor="let s of statusOptions" [value]="s.value">
+                {{ s.label }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <div class="quick-status-buttons">
+            <button
+              type="button"
+              mat-stroked-button
+              (click)="quickStatusChange(0)"
+              [class.active]="form.get('status')?.value === 0">
+              <mat-icon>radio_button_unchecked</mat-icon>
+              To Do
+            </button>
+            <button
+              type="button"
+              mat-stroked-button
+              (click)="quickStatusChange(1)"
+              [class.active]="form.get('status')?.value === 1">
+              <mat-icon>schedule</mat-icon>
+              In Progress
+            </button>
+            <button
+              type="button"
+              mat-stroked-button
+              (click)="quickStatusChange(2)"
+              [class.active]="form.get('status')?.value === 2">
+              <mat-icon>check_circle</mat-icon>
+              Done
+            </button>
+          </div>
+        </div>
+      </mat-expansion-panel>
+
+      <!-- Task History Section -->
+      <mat-expansion-panel *ngIf="taskHistoryEvents.length > 0">
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <mat-icon>history</mat-icon>
+            Task History ({{ taskHistoryEvents.length }})
+          </mat-panel-title>
+          <mat-panel-description *ngIf="rescheduleCount > 0">
+            Rescheduled: {{ rescheduleCount }} times
+          </mat-panel-description>
+        </mat-expansion-panel-header>
+
+        <div class="form-section">
+          <div class="history-list">
+            <div 
+              *ngFor="let event of taskHistoryEvents; let last = last" 
+              class="history-item"
+              [ngClass]="event.action">
+              <div class="history-time">
+                {{ getRelativeTime(event.timestamp) }}
+              </div>
+              <div class="history-action">
+                <mat-icon *ngIf="event.action === 'created'">add_circle</mat-icon>
+                <mat-icon *ngIf="event.action === 'rescheduled'">update</mat-icon>
+                <mat-icon *ngIf="event.action === 'statusChanged'">task_alt</mat-icon>
+                {{ getActionLabel(event.action) }}
+              </div>
+              <div class="history-description">{{ event.description }}</div>
+            </div>
+          </div>
+        </div>
+      </mat-expansion-panel>
+    </form>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+      <button mat-raised-button color="primary" (click)="onSave()" [disabled]="!form.valid || isSaving()">
+        <mat-icon>{{ isSaving() ? 'hourglass_empty' : 'save' }}</mat-icon>
+        {{ isSaving() ? 'Saving...' : 'Save Changes' }}
+      </button>
+      <button mat-stroked-button (click)="onCancel()">Cancel</button>
+      <button mat-stroked-button color="warn" (click)="onDelete()" [disabled]="isSaving()">
+        <mat-icon>delete</mat-icon>
+        Delete
+      </button>
+    </div>
+  </div>
+</div>

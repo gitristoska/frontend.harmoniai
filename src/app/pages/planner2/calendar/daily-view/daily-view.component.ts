@@ -73,6 +73,15 @@ export class DailyViewComponent {
     });
   });
 
+  // Separate all-day events (no specific time) from timed events
+  allDayEvents = computed(() => {
+    return this.todayEvents().filter(e => !e.startTime || e.startTime === '');
+  });
+
+  timedEvents = computed(() => {
+    return this.todayEvents().filter(e => e.startTime && e.startTime !== '');
+  });
+
   topPriorities = computed(() => {
     // Get high priority tasks (priority === 2) sorted by time, max 3
     return this.todayEvents()
@@ -270,7 +279,7 @@ export class DailyViewComponent {
   }
 
   getEventsByHour(hour: number): CalendarEvent[] {
-    return this.events().filter(e => this.getEventHour(e.time) === hour);
+    return this.timedEvents().filter(e => this.getEventHour(e.startTime || '') === hour);
   }
 
   getCategoryColor(categoryId?: string): string {
@@ -296,7 +305,7 @@ export class DailyViewComponent {
     const newTime = `${targetHour.toString().padStart(2, '0')}:00`;
     
     // Update the event time
-    droppedEvent.time = newTime;
+    droppedEvent.startTime = newTime;
     
     // Update via API
     if (droppedEvent.id) {
@@ -586,4 +595,5 @@ export class DailyViewComponent {
     const newStatus = currentStatus === 2 ? 0 : 2; // If completed, mark as not started; otherwise mark as completed
     this.updateTaskStatus(task, newStatus);
   }
+
 }

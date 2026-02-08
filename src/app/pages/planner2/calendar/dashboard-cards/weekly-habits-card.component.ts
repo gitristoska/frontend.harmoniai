@@ -46,28 +46,39 @@ export class WeeklyHabitsCardComponent implements OnInit {
   }
 
   toggleDay(habit: Habit, dayIndex: number) {
-    const newDays = [...habit.days];
-    newDays[dayIndex] = !newDays[dayIndex];
+    // Only allow toggling if the day is scheduled
+    if (!habit.scheduledDays[dayIndex]) {
+      return;
+    }
 
-    const dto: HabitUpdateDto = {
-      name: habit.name,
-      days: newDays
-    };
+    // Determine new completion status
+    const currentStatus = habit.completionStatus[dayIndex];
+    const newStatus = currentStatus === true ? false : true;
 
-    this.habitService.update(habit.id, dto).subscribe({
-      next: () => {
-        // Update local state
-        habit.days[dayIndex] = !habit.days[dayIndex];
-        // Trigger signal update
-        this.habits.set([...this.habits()]);
+    // Call API to update completion status for this day
+    this.habitService.markDayComplete(habit.id, dayIndex, newStatus).subscribe({
+      next: (updatedHabit) => {
+        // Update local state with response from server
+        const index = this.habits().findIndex(h => h.id === habit.id);
+        if (index > -1) {
+          const updatedHabits = [...this.habits()];
+          updatedHabits[index] = updatedHabit;
+          this.habits.set(updatedHabits);
+        }
       },
       error: (err: any) => console.error('Toggle day failed', err)
     });
   }
 
   getCompletionPercent(habit: Habit): number {
-    const done = habit.days.filter(Boolean).length;
-    return Math.round((done / 7) * 100);
+    const scheduledCount = habit.scheduledDays.filter(Boolean).length;
+    if (scheduledCount === 0) return 0;
+    
+    const completedCount = habit.completionStatus
+      .filter((status, index) => habit.scheduledDays[index] && status === true)
+      .length;
+    
+    return Math.round((completedCount / scheduledCount) * 100);
   }
 
   getWeeklyCompletion(): number {
@@ -78,6 +89,20 @@ export class WeeklyHabitsCardComponent implements OnInit {
   }
 
   getDaysDone(habit: Habit): number {
-    return habit.days.filter(Boolean).length;
+    return habit.completionStatus
+      .filter((status, index) => habit.scheduledDays[index] && status === true)
+      .length;
+  }
+
+  getDaysScheduled(habit: Habit): number {
+    return habit.scheduledDays.filter(Boolean).length;
+  }
+
+  isDayScheduled(habit: Habit, dayIndex: number): boolean {
+    return habit.scheduledDays[dayIndex];
+  }
+
+  isDayCompleted(habit: Habit, dayIndex: number): boolean {
+    return habit.completionStatus[dayIndex] === true;
   }
 }

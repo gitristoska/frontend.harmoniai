@@ -1,43 +1,66 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { MatCardModule } from '@angular/material/card';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatCardModule } from '@angular/material/card';
-import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { SettingsService } from '../../services/settings.service';
+import { MatButtonModule } from '@angular/material/button';
+import { SettingsService, SettingsData, SettingsUpdate } from '../../services/settings.service';
 
 @Component({
   selector: 'app-settings',
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule,
+    MatCardModule,
+    MatSlideToggleModule,
+    MatSelectModule,
     MatFormFieldModule,
     MatInputModule,
-    MatSelectModule,
-    MatCheckboxModule,
-    MatCardModule,
-    MatButtonModule,
-    MatIconModule
+    MatIconModule,
+    MatButtonModule
   ],
   templateUrl: './settings.html',
   styleUrls: ['./settings.scss']
 })
-export class Settings implements OnInit {
-  displayName = 'User';
-  weekStartDay: 'Monday' | 'Sunday' = 'Monday';
-  aiConsent = false;
-  enableNotifications = true;
+export class SettingsComponent implements OnInit {
+  settings = signal<SettingsData | null>(null);
+  loading = signal(true);
+  error = signal<string | null>(null);
+  saveSuccess = signal(false);
 
-  modules = {
-    planner: true,
-    journal: true,
-    habits: true
-  } as { planner: boolean; journal: boolean; habits: boolean };
+  localeOptions = [
+    { label: 'English (US)', value: 'en-US' },
+    { label: 'English (UK)', value: 'en-GB' },
+    { label: 'Deutsch', value: 'de-DE' },
+    { label: 'Français', value: 'fr-FR' },
+    { label: 'Español', value: 'es-ES' },
+    { label: 'Italiano', value: 'it-IT' },
+    { label: 'Português (BR)', value: 'pt-BR' }
+  ];
+
+  timezoneOptions = [
+    { label: 'UTC', value: 'UTC' },
+    { label: 'New York', value: 'America/New_York' },
+    { label: 'Chicago', value: 'America/Chicago' },
+    { label: 'Denver', value: 'America/Denver' },
+    { label: 'Los Angeles', value: 'America/Los_Angeles' },
+    { label: 'London', value: 'Europe/London' },
+    { label: 'Paris', value: 'Europe/Paris' },
+    { label: 'Berlin', value: 'Europe/Berlin' },
+    { label: 'Madrid', value: 'Europe/Madrid' },
+    { label: 'Tokyo', value: 'Asia/Tokyo' },
+    { label: 'Shanghai', value: 'Asia/Shanghai' },
+    { label: 'Singapore', value: 'Asia/Singapore' },
+    { label: 'Sydney', value: 'Australia/Sydney' }
+  ];
+
+  weekStartOptions = [
+    { label: 'Monday', value: 'Monday' },
+    { label: 'Sunday', value: 'Sunday' }
+  ];
 
   constructor(private settingsService: SettingsService) {}
 
@@ -45,48 +68,44 @@ export class Settings implements OnInit {
     this.loadSettings();
   }
 
-  saveSettings() {
-    const modulesJson = JSON.stringify(this.modules);
-    const dto = {
-      displayName: this.displayName,
-      weekStartsOn: this.weekStartDay,
-      aiConsent: this.aiConsent,
-      modulesJson: modulesJson,
-      enableNotifications: this.enableNotifications
-    };
-
-    this.settingsService.updateSettings(dto).subscribe({
-      next: (response) => {
-        console.log('Settings saved successfully', response);
+  loadSettings(): void {
+    this.loading.set(true);
+    this.error.set(null);
+    this.settingsService.getSettings().subscribe({
+      next: (data) => {
+        this.settings.set(data);
+        this.loading.set(false);
       },
       error: (err) => {
-        console.error('Failed to save settings', err);
+        this.error.set('Failed to load settings');
+        this.loading.set(false);
+        console.error(err);
       }
     });
   }
 
-  loadSettings() {
-    this.settingsService.getSettings().subscribe({
-      next: (settings) => {
-        console.log('Settings loaded', settings);
-        this.displayName = settings.displayName || 'User';
-        this.weekStartDay = settings.weekStartsOn || 'Monday';
-        this.aiConsent = settings.aiConsent ?? false;
-        this.enableNotifications = settings.enableNotifications ?? true;
+  onSettingChange(field: keyof SettingsUpdate, value: any): void {
+    const currentSettings = this.settings();
+    if (!currentSettings) return;
 
-        // Parse modules JSON string
-        if (settings.modulesJson) {
-          try {
-            const parsed = JSON.parse(settings.modulesJson);
-            this.modules = parsed;
-          } catch (e) {
-            console.warn('Failed to parse modulesJson', e);
-          }
-        }
+    const update: SettingsUpdate = { [field]: value };
+
+    this.settingsService.updateSettings(update).subscribe({
+      next: (updatedSettings) => {
+        this.settings.set(updatedSettings);
+        this.showSaveSuccess();
       },
       error: (err) => {
-        console.warn('Failed to load settings from API', err);
+        this.error.set(`Failed to update ${field}`);
+        console.error(err);
       }
     });
+  }
+
+  private showSaveSuccess(): void {
+    this.saveSuccess.set(true);
+    setTimeout(() => {
+      this.saveSuccess.set(false);
+    }, 2000);
   }
 }

@@ -1,4 +1,27 @@
 <section class="habits-page page-container">
+  <!-- WEEK NAVIGATION HEADER -->
+  <div class="week-navigation">
+    <button mat-icon-button class="nav-btn" (click)="previousWeek()" title="Previous Week">
+      <mat-icon>chevron_left</mat-icon>
+    </button>
+    <div class="week-info">
+      <div class="week-label">{{ getWeekRangeLabel() }}</div>
+      <button 
+        mat-button 
+        class="today-btn" 
+        *ngIf="!isCurrentWeek()"
+        (click)="goToCurrentWeek()"
+        title="Go to current week">
+        <mat-icon>today</mat-icon>
+        Today
+      </button>
+      <span class="current-indicator" *ngIf="isCurrentWeek()">This Week</span>
+    </div>
+    <button mat-icon-button class="nav-btn" (click)="nextWeek()" title="Next Week">
+      <mat-icon>chevron_right</mat-icon>
+    </button>
+  </div>
+
   <!-- HEADER SECTION -->
   <div class="header-section">
     <div class="header-card">
@@ -20,11 +43,24 @@
 
   <!-- ADD HABIT FORM -->
   <div *ngIf="showForm" class="habit-form">
-    <h3 class="form-title">Create New Habit</h3>
+    <h3 class="form-title">{{ editId ? 'Edit Habit' : 'Create New Habit' }}</h3>
     <mat-form-field appearance="outline" class="form-field">
       <mat-label>Habit name</mat-label>
       <input matInput [(ngModel)]="formName" placeholder="Enter habit name">
     </mat-form-field>
+
+    <!-- Day selector for scheduled days -->
+    <div class="form-day-selector">
+      <label class="form-label">Schedule for days:</label>
+      <div class="day-checkboxes">
+        <mat-checkbox 
+          *ngFor="let day of days; let i = index" 
+          [(ngModel)]="selectedScheduledDays[i]"
+          class="day-checkbox">
+          {{ day }}
+        </mat-checkbox>
+      </div>
+    </div>
 
     <div class="form-buttons">
       <button mat-button color="primary" class="save-btn" (click)="saveHabit()">Save Habit</button>
@@ -56,30 +92,53 @@
     </div>
 
     <div class="tracker-body">
-      <div class="tracker-columns">
-        <div class="col-days-header">
-          <span *ngFor="let d of days" class="day-label">{{ d }}</span>
-        </div>
+      <!-- Loading state -->
+      <div class="tracker-loading" *ngIf="habitsLoading">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Loading habits...</p>
       </div>
 
-      <div *ngFor="let h of habits; let i = index" class="tracker-row">
-        <div class="habit-info">
-          <div class="habit-number">{{ i + 1 }}</div>
-          <div class="habit-name">{{ h.name }}</div>
-          <div class="habit-actions">
-            <button mat-icon-button class="edit-btn" (click)="startEdit(h)" title="Edit">
-              <mat-icon>edit</mat-icon>
-            </button>
-            <button mat-icon-button class="delete-btn" color="warn" (click)="deleteHabit(h.id)" title="Delete">
-              <mat-icon>delete</mat-icon>
-            </button>
+      <!-- Content -->
+      <div *ngIf="!habitsLoading">
+        <div class="tracker-columns">
+          <div class="col-days-header">
+            <span *ngFor="let d of days" class="day-label">{{ d }}</span>
           </div>
         </div>
-        <div class="col-days">
-          <button mat-icon-button class="day-bubble" *ngFor="let done of h.days; let di = index" (click)="toggleDay(i, di)">
-            <mat-icon *ngIf="done" class="done">check_circle</mat-icon>
-            <mat-icon *ngIf="!done" class="not-done">radio_button_unchecked</mat-icon>
-          </button>
+
+        <div *ngFor="let h of habits; let i = index" class="tracker-row">
+          <div class="habit-info">
+            <div class="habit-number">{{ i + 1 }}</div>
+            <div class="habit-name">{{ h.name }}</div>
+            <div class="habit-actions">
+              <button mat-icon-button class="edit-btn" (click)="startEdit(h)" title="Edit">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button class="delete-btn" color="warn" (click)="deleteHabit(h.id)" title="Delete">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </div>
+          <div class="col-days">
+            <!-- Day completion buttons -->
+            <button 
+              mat-icon-button 
+              class="day-bubble" 
+              *ngFor="let dayIndex of [0, 1, 2, 3, 4, 5, 6]"
+              [class.scheduled]="isDayScheduled(h, dayIndex)"
+              [class.not-scheduled]="isDayNotScheduled(h, dayIndex)"
+              [class.completed]="isDayCompleted(h, dayIndex)"
+              [disabled]="isDayNotScheduled(h, dayIndex)"
+              (click)="toggleDayCompletion(h, dayIndex)"
+              [title]="isDayNotScheduled(h, dayIndex) ? 'Not scheduled' : (isDayCompleted(h, dayIndex) ? 'Mark incomplete' : 'Mark complete')">
+              <!-- Completed day -->
+              <mat-icon *ngIf="isDayCompleted(h, dayIndex)" class="done">check_circle</mat-icon>
+              <!-- Scheduled but not completed -->
+              <mat-icon *ngIf="isDayScheduled(h, dayIndex) && !isDayCompleted(h, dayIndex)" class="not-done">radio_button_unchecked</mat-icon>
+              <!-- Not scheduled -->
+              <mat-icon *ngIf="isDayNotScheduled(h, dayIndex)" class="not-scheduled">block</mat-icon>
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -97,7 +156,7 @@
       <div *ngFor="let h of habits" class="stat-item">
         <div class="stat-top">
           <div class="stat-name">{{ h.name }}</div>
-          <div class="stat-days">{{ daysDone(h) }}/{{ h.days.length }} days</div>
+          <div class="stat-days">{{ daysDone(h) }}/{{ daysScheduled(h) }} days</div>
         </div>
         <mat-progress-bar mode="determinate" [value]="habitCompletion(h) * 100"></mat-progress-bar>
         <div class="stat-footer">{{ (habitCompletion(h) * 100) | number:'1.0-0' }}% completion this week</div>
@@ -112,11 +171,42 @@
         <mat-icon class="ai-icon">lightbulb</mat-icon>
         <h3>AI Suggestions</h3>
       </div>
+      <div class="ai-controls">
+        <span class="suggestion-timestamp" *ngIf="weeklySuggestionsGeneratedAt">
+          Updated {{ getRelativeTime(weeklySuggestionsGeneratedAt) }}
+        </span>
+        <button 
+          mat-icon-button 
+          (click)="refreshAiSuggestions()" 
+          [disabled]="suggestionsLoading"
+          title="Refresh suggestions"
+          class="refresh-btn">
+          <mat-icon [class.spinning]="suggestionsLoading">{{ suggestionsLoading ? 'hourglass_empty' : 'refresh' }}</mat-icon>
+        </button>
+      </div>
     </div>
-    <ul class="ai-suggestions">
-      <li>Try habit stacking: Pair a new habit with an existing one (e.g., meditate right after morning exercise)</li>
-      <li>Your consistency is building. Focus on completing just one habit daily to build momentum.</li>
-      <li>Set a reminder for your least completed habit to improve overall consistency</li>
-    </ul>
+    <div class="ai-content">
+      <!-- Initial loading -->
+      <div class="loading-suggestions" *ngIf="aiSuggestionsInitialLoading && !suggestionsLoading">
+        <mat-spinner diameter="30"></mat-spinner>
+        <p>Loading suggestions...</p>
+      </div>
+      
+      <!-- Suggestions list -->
+      <ul class="ai-suggestions" *ngIf="getSuggestionsList().length > 0 && !aiSuggestionsInitialLoading">
+        <li *ngFor="let suggestion of getSuggestionsList()">{{ suggestion }}</li>
+      </ul>
+      
+      <!-- Empty state -->
+      <div class="empty-suggestions" *ngIf="getSuggestionsList().length === 0 && !aiSuggestionsInitialLoading && !suggestionsLoading">
+        <p>No suggestions yet. Complete more habits to get personalized AI suggestions!</p>
+      </div>
+      
+      <!-- Refresh loading -->
+      <div class="loading-suggestions" *ngIf="suggestionsLoading">
+        <mat-spinner diameter="30"></mat-spinner>
+        <p>Generating suggestions...</p>
+      </div>
+    </div>
   </mat-card>
 </section>

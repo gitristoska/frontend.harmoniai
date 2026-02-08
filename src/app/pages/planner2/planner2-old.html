@@ -1,0 +1,320 @@
+<div class="planner-container">
+  <!-- HEADER -->
+  <div class="planner-header">
+    <div class="header-left">
+      <h1>📋 Planner</h1>
+      <p class="header-subtitle">Your AI-powered planning assistant</p>
+    </div>
+    
+    <div class="header-right">
+      <div class="completion-badge">
+        <div class="completion-circle">
+          <svg viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="45" class="circle-bg"></circle>
+            <circle 
+              cx="50" 
+              cy="50" 
+              r="45" 
+              class="circle-progress"
+              [style.--percentage]="completionRate() + '%'"
+            ></circle>
+          </svg>
+          <span class="completion-text">{{ completionRate() }}%</span>
+        </div>
+        <span class="completion-label">Complete</span>
+      </div>
+      <mat-card class="kpi-card">
+        <div class="kpi-item">
+          <mat-icon>assignment_turned_in</mat-icon>
+          <span>{{ completedCount() }}/{{ totalCount() }}</span>
+        </div>
+      </mat-card>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <mat-tab-group [(selectedIndex)]="activeTab" (selectedIndexChange)="onTabChange($event)" class="planner-tabs">
+    <!-- DAILY VIEW TAB -->
+    <mat-tab label="📅 Today" [disabled]="dailyLoading()">
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">calendar_today</mat-icon>
+        <span>Daily</span>
+      </ng-template>
+
+      <div class="tab-content daily-view">
+        <!-- DATE NAVIGATION -->
+        <div class="date-navigation">
+          <button mat-icon-button (click)="previousDay()" matTooltip="Previous day">
+            <mat-icon>navigate_before</mat-icon>
+          </button>
+          <div class="date-display">
+            <h2>{{ getDateLabel(selectedDate()) }}</h2>
+            <p>{{ selectedDate() | date: 'EEEE, MMMM d, yyyy' }}</p>
+          </div>
+          <button mat-icon-button (click)="nextDay()" matTooltip="Next day">
+            <mat-icon>navigate_next</mat-icon>
+          </button>
+          <button mat-stroked-button (click)="todayClicked()" class="today-btn">
+            <mat-icon>today</mat-icon>
+            Today
+          </button>
+        </div>
+
+        <!-- LOADING STATE -->
+        <div *ngIf="dailyLoading()" class="loading-state">
+          <div class="spinner"></div>
+          <p>Loading tasks...</p>
+        </div>
+
+        <!-- ERROR STATE -->
+        <div *ngIf="error() && !dailyLoading()" class="error-state">
+          <mat-icon>error_outline</mat-icon>
+          <p>{{ error() }}</p>
+          <button mat-raised-button color="primary" (click)="loadTasksForDate(selectedDate())">
+            Try again
+          </button>
+        </div>
+
+        <!-- TASKS LIST -->
+        <div *ngIf="!dailyLoading() && !error()" class="tasks-section">
+          <!-- NO TASKS STATE -->
+          <div *ngIf="tasksForToday().length === 0" class="empty-state">
+            <mat-icon>assignment</mat-icon>
+            <h3>No tasks for today</h3>
+            <p>Great! You're all caught up. Add a new task to get started.</p>
+            <button mat-raised-button color="primary" (click)="openCreateTaskDialog()">
+              <mat-icon>add</mat-icon>
+              Add Task
+            </button>
+          </div>
+
+          <!-- TASKS CARDS -->
+          <div *ngFor="let task of tasksForToday()" 
+               class="task-card"
+               [class.task-done]="task.status === 2"
+               [class]="getPriorityClass(task.priority)">
+            
+            <!-- STATUS INDICATOR -->
+            <div class="task-status">
+              <input type="checkbox" 
+                     [checked]="task.status === 2"
+                     (change)="updateTaskStatus(task, $event.target.checked ? 2 : 0)">
+            </div>
+
+            <!-- TASK CONTENT -->
+            <div class="task-content">
+              <div class="task-header">
+                <h3 class="task-title">{{ task.title }}</h3>
+                <span class="priority-badge" [class]="'priority-' + getPriorityLabel(task.priority).toLowerCase()">
+                  {{ getPriorityLabel(task.priority) }}
+                </span>
+              </div>
+              
+              <p *ngIf="task.description" class="task-description">{{ task.description }}</p>
+
+              <div class="task-meta">
+                <span *ngIf="task.startTime" class="meta-item">
+                  <mat-icon>schedule</mat-icon>
+                  {{ formatTime(task.startTime) }}
+                </span>
+                <span *ngIf="task.duration" class="meta-item">
+                  <mat-icon>timer</mat-icon>
+                  {{ task.duration }} min
+                </span>
+                <span *ngIf="task.category" class="meta-item">
+                  <mat-icon>label</mat-icon>
+                  {{ task.category }}
+                </span>
+                <span *ngIf="(task.rescheduleCount ?? 0) >= 3" class="meta-item warning">
+                  <mat-icon matTooltip="This task has been rescheduled multiple times">warning</mat-icon>
+                  Procrastination risk
+                </span>
+              </div>
+            </div>
+
+            <!-- ACTIONS -->
+            <div class="task-actions">
+              <button mat-icon-button matTooltip="Edit">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button matTooltip="Delete" (click)="deleteTask(task)">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ADD TASK BUTTON -->
+        <div class="add-task-fab" *ngIf="tasksForToday().length > 0">
+          <button mat-fab color="primary" (click)="openCreateTaskDialog()" matTooltip="Add new task">
+            <mat-icon>add</mat-icon>
+          </button>
+        </div>
+
+        <!-- AI INSIGHTS SECTION -->
+        <div class="ai-insights">
+          <mat-card class="insights-card">
+            <mat-card-header>
+              <mat-icon class="insights-icon">auto_awesome</mat-icon>
+              <h3>AI Daily Insights</h3>
+            </mat-card-header>
+            <mat-card-content>
+              <p class="insights-text">
+                Based on your patterns, you typically work best in the morning. 
+                Your {{ totalCount() }} tasks are well-distributed across your peak hours (9 AM - 12 PM). 
+                <strong>Recommendation:</strong> Start with high-priority tasks first, 
+                then move to medium-priority items after lunch.
+              </p>
+              <div class="insights-tip">
+                <mat-icon>lightbulb</mat-icon>
+                <span>💡 Pro Tip: You have {{ procrastinationRisks().length }} task(s) at procrastination risk. Try completing them by EOD!</span>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </div>
+    </mat-tab>
+
+    <!-- WEEKLY VIEW TAB -->
+    <mat-tab label="📆 Week" [disabled]="weeklyLoading()">
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">date_range</mat-icon>
+        <span>Weekly</span>
+      </ng-template>
+
+      <div class="tab-content weekly-view">
+        <!-- LOADING STATE -->
+        <div *ngIf="weeklyLoading()" class="loading-state">
+          <div class="spinner"></div>
+          <p>Loading weekly tasks...</p>
+        </div>
+
+        <!-- WEEKLY SUMMARY CARD -->
+        <div *ngIf="!weeklyLoading()" class="weekly-summary">
+          <mat-card class="summary-card">
+            <div class="summary-row">
+              <div class="summary-metric">
+                <span class="metric-label">This Week</span>
+                <span class="metric-value">{{ Object.keys(weeklyTasks()).length }} days</span>
+              </div>
+              <div class="summary-metric">
+                <span class="metric-label">Total Tasks</span>
+                <span class="metric-value">{{ Object.values(weeklyTasks()).flat().length }}</span>
+              </div>
+              <div class="summary-metric">
+                <span class="metric-label">Completion</span>
+                <span class="metric-value completion-rate">{{ getWeeklyCompletionRate() }}%</span>
+              </div>
+            </div>
+          </mat-card>
+        </div>
+
+        <!-- WEEKLY TASKS BY DAY -->
+        <div *ngIf="!weeklyLoading()" class="weekly-tasks">
+          <div *ngFor="let day of getWeekDays(getWeekStart(selectedDate()))" class="day-column">
+            <div class="day-header">
+              <h3>{{ getDayLabel(day) }}</h3>
+              <span class="day-task-count">{{ getTasksForDay(day.toISOString().split('T')[0]).length }} tasks</span>
+            </div>
+
+            <div class="day-tasks">
+              <!-- No tasks for this day -->
+              <div *ngIf="getTasksForDay(day.toISOString().split('T')[0]).length === 0" class="no-tasks">
+                <mat-icon>check_circle</mat-icon>
+                <span>Rest day</span>
+              </div>
+
+              <!-- Tasks for this day -->
+              <div *ngFor="let task of getTasksForDay(day.toISOString().split('T')[0])" 
+                   class="weekly-task-card"
+                   [class.task-done]="task.status === 2"
+                   [class]="getPriorityClass(task.priority)">
+                <div class="task-checkbox">
+                  <input type="checkbox" [checked]="task.status === 2" (change)="updateTaskStatus(task, $event.target.checked ? 2 : 0)">
+                </div>
+                <div class="task-info">
+                  <h4>{{ task.title }}</h4>
+                  <span *ngIf="task.startTime" class="task-time">{{ task.startTime }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </mat-tab>
+
+    <!-- ANALYTICS TAB -->
+    <mat-tab label="📊 Analytics" [disabled]="analyticsLoading()">
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">insights</mat-icon>
+        <span>Analytics</span>
+      </ng-template>
+
+      <div class="tab-content analytics-view">
+        <!-- LOADING STATE -->
+        <div *ngIf="analyticsLoading()" class="loading-state">
+          <div class="spinner"></div>
+          <p>Loading analytics...</p>
+        </div>
+
+        <!-- ANALYTICS CONTENT -->
+        <div *ngIf="!analyticsLoading()" class="analytics-content">
+          <!-- AI INSIGHTS -->
+          <mat-card class="analytics-card insights-section">
+            <mat-card-header>
+              <mat-icon class="section-icon">auto_awesome</mat-icon>
+              <h3>AI Daily Insights</h3>
+            </mat-card-header>
+            <mat-card-content>
+              <p class="insights-text">{{ aiInsights() }}</p>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- PRODUCTIVITY ANALYSIS -->
+          <mat-card class="analytics-card productivity-section">
+            <mat-card-header>
+              <mat-icon class="section-icon">trending_up</mat-icon>
+              <h3>Productivity Analysis</h3>
+            </mat-card-header>
+            <mat-card-content>
+              <pre class="analysis-text">{{ productivityInsights() }}</pre>
+            </mat-card-content>
+          </mat-card>
+
+          <!-- KEY METRICS -->
+          <div class="metrics-grid">
+            <mat-card class="metric-card">
+              <div class="metric-content">
+                <mat-icon>check_circle</mat-icon>
+                <div class="metric-details">
+                  <span class="metric-label">Completion Rate</span>
+                  <span class="metric-value large">{{ completionRate() }}%</span>
+                </div>
+              </div>
+            </mat-card>
+
+            <mat-card class="metric-card">
+              <div class="metric-content">
+                <mat-icon>warning</mat-icon>
+                <div class="metric-details">
+                  <span class="metric-label">Procrastination Risks</span>
+                  <span class="metric-value large" [class.warning]="procrastinationRisks().length > 0">{{ procrastinationRisks().length }}</span>
+                </div>
+              </div>
+            </mat-card>
+
+            <mat-card class="metric-card">
+              <div class="metric-content">
+                <mat-icon>assignment</mat-icon>
+                <div class="metric-details">
+                  <span class="metric-label">Total Tasks</span>
+                  <span class="metric-value large">{{ totalCount() }}</span>
+                </div>
+              </div>
+            </mat-card>
+          </div>
+        </div>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>

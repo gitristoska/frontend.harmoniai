@@ -23,7 +23,7 @@ interface HabitItem {
   id: string;
   name: string;
   done?: boolean;
-  days: boolean[];
+  days: (boolean | null)[];
 }
 interface AiRec { title: string; desc: string; icon: string }
 
@@ -92,7 +92,7 @@ export class Homepage implements OnInit {
   loadSettings() {
     this.settingsService.getSettings().subscribe({
       next: (settings) => {
-        const displayName = settings.displayName || 'User';
+        const displayName = 'User';
         this.greeting.set(`Welcome back, ${displayName}! 👋`);
       },
       error: (err) => {
@@ -141,15 +141,25 @@ export class Homepage implements OnInit {
   }
 
   loadHabits() {
-    this.habitService.getAll().subscribe({
+    // Get current week start
+    const today = new Date();
+    const dayOfWeek = today.getDay() || 7; // Convert Sunday (0) to 7
+    const diff = today.getDate() - dayOfWeek + 1; // Adjust to get Monday
+    const weekStart = new Date(today.getFullYear(), today.getMonth(), diff);
+    
+    this.habitService.getByWeek(weekStart).subscribe({
       next: (habits) => {
-        const todayIndex = this.todayDayIndex();
-        const habitItems: HabitItem[] = habits.map(habit => ({
-          id: habit.id,
-          name: habit.name,
-          days: habit.days,
-          done: habit.days[todayIndex] || false
-        }));
+        // Get today's index in the week (0=Monday, 6=Sunday)
+        const dayIndex = ((today.getDay() + 6) % 7); // Convert Sunday=0 to Monday=0
+        
+        const habitItems: HabitItem[] = habits
+          .filter(habit => habit.scheduledDays[dayIndex]) // Only show habits scheduled for today
+          .map(habit => ({
+            id: habit.id,
+            name: habit.name,
+            days: habit.completionStatus,
+            done: habit.completionStatus[dayIndex] === true
+          }));
         this.habits.set(habitItems);
       },
       error: (err) => {
@@ -249,15 +259,13 @@ export class Homepage implements OnInit {
     
     if (habit) {
       const todayIndex = this.todayDayIndex();
-      // Toggle today's day
+
+      // Toggle today's completion status
       habit.done = !habit.done;
-      habit.days[todayIndex] = habit.done;
+      habit.days[todayIndex] = habit.done ? true : false;
       
-      // Update via API
-      this.habitService.update(habit.id, {
-        name: habit.name,
-        days: habit.days
-      }).subscribe({
+      // Update via API using the new PATCH endpoint
+      this.habitService.markDayComplete(habit.id, todayIndex, habit.done).subscribe({
         next: () => {
           this.habits.set([...habits]);
           console.log('Habit updated successfully');
@@ -266,17 +274,18 @@ export class Homepage implements OnInit {
           console.error('Failed to update habit', err);
           // Revert on error
           habit.done = !habit.done;
-          habit.days[todayIndex] = habit.done;
+          habit.days[todayIndex] = !habit.done ? true : false;
           this.habits.set([...habits]);
         }
       });
     }
   }
 
-  get tasksCount() { return this.tasksToday().filter(t => !t.done).length }
+  get tasksCount(): number {
+    return this.tasksToday().filter(t => !t.done).length;
+  }
 
-  // overall habit completion percent (simple example)
-  get habitCompletionPercent() {
+  get habitCompletionPercent(): number {
     const h = this.habits();
     if (!h.length) return 0;
     const done = h.filter(x => x.done).length;

@@ -18,11 +18,6 @@
 
   <div class="form-row">
     <mat-form-field appearance="outline" style="flex:1">
-      <mat-label>Time</mat-label>
-      <input matInput type="time" name="taskTime" [(ngModel)]="taskTime">
-    </mat-form-field>
-
-    <mat-form-field appearance="outline" style="flex:1">
       <mat-label>Priority</mat-label>
       <mat-select name="taskPriority" [(ngModel)]="taskPriority">
         <mat-option [value]="0">Low</mat-option>
@@ -30,9 +25,7 @@
         <mat-option [value]="2">High</mat-option>
       </mat-select>
     </mat-form-field>
-  </div>
 
-  <div class="form-row">
     <mat-form-field appearance="outline" style="flex:1">
       <mat-label>Status</mat-label>
       <mat-select name="taskStatus" [(ngModel)]="taskStatus">
@@ -40,6 +33,22 @@
           {{ option.label }}
         </mat-option>
       </mat-select>
+    </mat-form-field>
+  </div>
+
+  <div class="form-row">
+    <mat-form-field appearance="outline" style="flex:1">
+      <mat-label>Start Date</mat-label>
+      <input matInput [matDatepicker]="startPicker" name="taskStartDate" [(ngModel)]="taskStartDateObj" (change)="onStartDateChange()">
+      <mat-datepicker-toggle matIconSuffix [for]="startPicker"></mat-datepicker-toggle>
+      <mat-datepicker #startPicker></mat-datepicker>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" style="flex:1">
+      <mat-label>End Date</mat-label>
+      <input matInput [matDatepicker]="endPicker" name="taskEndDate" [(ngModel)]="taskEndDateObj" (change)="onEndDateChange()">
+      <mat-datepicker-toggle matIconSuffix [for]="endPicker"></mat-datepicker-toggle>
+      <mat-datepicker #endPicker></mat-datepicker>
     </mat-form-field>
 
     <mat-form-field appearance="outline" style="flex:1">
@@ -52,19 +61,24 @@
     </mat-form-field>
   </div>
 
-  <div class="form-row">
+  <!-- SCHEDULING FIELDS -->
+  <div class="form-row" style="align-items: center; margin-bottom: 16px;">
+    <label style="flex: 1; display: flex; align-items: center; gap: 8px; cursor: pointer;">
+      <input type="checkbox" [(ngModel)]="hasTime" style="width: 18px; height: 18px; cursor: pointer;">
+      <span style="font-size: 14px; color: #555;">Scheduled time</span>
+    </label>
+  </div>
+
+  <!-- TIME AND DURATION FIELDS (only show if hasTime is true) -->
+  <div class="form-row" *ngIf="hasTime">
     <mat-form-field appearance="outline" style="flex:1">
-      <mat-label>Start Date</mat-label>
-      <input matInput [matDatepicker]="startPicker" name="taskStartDate" [(ngModel)]="taskStartDateObj" (change)="onStartDateChange()">
-      <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
-      <mat-datepicker #startPicker></mat-datepicker>
+      <mat-label>Start Time</mat-label>
+      <input matInput type="time" name="taskStartTime" [(ngModel)]="taskStartTime">
     </mat-form-field>
 
     <mat-form-field appearance="outline" style="flex:1">
-      <mat-label>End Date</mat-label>
-      <input matInput [matDatepicker]="endPicker" name="taskEndDate" [(ngModel)]="taskEndDateObj" (change)="onEndDateChange()">
-      <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
-      <mat-datepicker #endPicker></mat-datepicker>
+      <mat-label>Duration (minutes)</mat-label>
+      <input matInput type="number" name="taskDuration" [(ngModel)]="taskDuration" placeholder="60" min="1" max="480">
     </mat-form-field>
   </div>
 

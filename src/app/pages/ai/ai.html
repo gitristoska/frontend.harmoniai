@@ -1,58 +1,25 @@
 <div class="ai-page">
-  <mat-card class="header-card">
-    <h2>AI Recommendations</h2>
-    <p class="subtitle">Personalized insights to enhance your productivity and well-being</p>
-  </mat-card>
-
-  <mat-card class="analysis-banner">
-    <div class="banner-left">
-      <mat-icon>psychology</mat-icon>
-      <div>
-        <div class="banner-title">AI Analysis Complete</div>
-        <div class="banner-sub">Based on {{analysis.tasks}} tasks, {{analysis.habits}} habits, and {{analysis.entries}} journal entries</div>
+  <mat-card class="coming-soon-card">
+    <div class="coming-soon-content">
+      <mat-icon class="ai-icon">smart_toy</mat-icon>
+      <h2>AI Insights Coming Soon</h2>
+      <p class="subtitle">Real-time AI analysis of your productivity patterns is under development.</p>
+      
+      <div class="future-features">
+        <h3>Planned Features:</h3>
+        <ul>
+          <li>Peak productivity time analysis from your task completion history</li>
+          <li>Habit consistency tracking and streaks</li>
+          <li>Mood pattern detection from journal entries</li>
+          <li>Smart task scheduling recommendations</li>
+          <li>Personalized wellness insights</li>
+        </ul>
       </div>
+
+      <p class="note">
+        <mat-icon>info</mat-icon>
+        Your data is being collected. Once AI analysis is enabled, insights will appear here automatically.
+      </p>
     </div>
-    <div class="banner-actions">
-      <button mat-button class="view-btn">View Full Report</button>
-    </div>
-  </mat-card>
-
-  <mat-card class="quick-actions">
-    <h3>Quick Actions</h3>
-    <div class="actions-grid">
-      <div class="action" *ngFor="let a of quickActions">
-        <div class="icon-wrap"><mat-icon>{{a.icon}}</mat-icon></div>
-        <div class="label">{{a.label}}</div>
-      </div>
-    </div>
-  </mat-card>
-
-  <div class="sections">
-    <mat-card class="section-card" *ngFor="let s of sections">
-      <div class="section-head">
-        <mat-icon class="section-icon">analytics</mat-icon>
-        <h4>{{ s.title }}</h4>
-      </div>
-
-      <div class="section-body">
-        <div class="rec" *ngFor="let item of s.items">
-          <div class="rec-left" [ngClass]="item.priority"></div>
-          <div class="rec-mid">
-            <div class="rec-title">{{ item.title }}</div>
-            <div class="rec-text">{{ item.text }}</div>
-          </div>
-          <div class="rec-right">
-            <div [class]="priorityClass(item.priority)">{{ item.priority }}</div>
-          </div>
-        </div>
-      </div>
-    </mat-card>
-  </div>
-
-  <mat-card class="goals-card">
-    <h4>Suggested Weekly Goals</h4>
-    <ol>
-      <li *ngFor="let g of suggestedGoals">{{ g }}</li>
-    </ol>
   </mat-card>
 </div>

@@ -51,12 +51,9 @@ export class TasksComponent {
   }
 
   private loadTasks(): void {
-    this.plannerService.getTasksForMonth(2026, 1).subscribe({
-     next: (tasks) => {
-       console.log('Loaded tasks:', tasks);
-       this.tasks.set(tasks);
-     },
-     error: (err) => console.error(err) });
+    // TODO: Replace with getTasksForDay or getTasksForWeek
+    // This component is deprecated in favor of calendar.component
+    console.log('Tasks component - load tasks method (deprecated)');
   }
 
   addNewTask(): void {

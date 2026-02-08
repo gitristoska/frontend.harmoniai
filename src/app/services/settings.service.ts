@@ -1,22 +1,44 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../environments/environments';
-import { SettingsUpdateDto } from '../models/api';
+
+export interface SettingsData {
+  id: string;
+  userId: string;
+  darkMode: boolean;
+  locale: string;
+  timezone: string;
+  weekStartsOn: string;
+  enableEmailNotifications: boolean;
+  dailyReminderTime: string;
+  aiConsent: boolean;
+  allowAnalytics: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SettingsUpdate {
+  darkMode?: boolean;
+  locale?: string;
+  timezone?: string;
+  weekStartsOn?: string;
+  enableEmailNotifications?: boolean;
+  dailyReminderTime?: string;
+  aiConsent?: boolean;
+  allowAnalytics?: boolean;
+}
 
 @Injectable({ providedIn: 'root' })
 export class SettingsService {
-  private base = `${environment.apiBaseUrl}/api/v1/Settings`;
+  private base = 'https://localhost:44304/api/settings';
 
   constructor(private http: HttpClient) {}
 
-  // GET /api/v1/Settings
-  getSettings(): Observable<SettingsUpdateDto> {
-    return this.http.get<SettingsUpdateDto>(this.base);
+  getSettings(): Observable<SettingsData> {
+    return this.http.get<SettingsData>(this.base);
   }
 
-  // PUT /api/v1/Settings
-  updateSettings(dto: SettingsUpdateDto): Observable<SettingsUpdateDto> {
-    return this.http.put<SettingsUpdateDto>(this.base, dto);
+  updateSettings(settings: SettingsUpdate): Observable<SettingsData> {
+    return this.http.put<SettingsData>(this.base, settings);
   }
 }

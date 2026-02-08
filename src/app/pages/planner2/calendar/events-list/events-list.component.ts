@@ -13,7 +13,7 @@ import { CalendarEvent } from '../calendar.component';
   styleUrls: ['./events-list.component.scss']
 })
 export class EventsListComponent implements OnInit, OnChanges {
-  viewMode = input.required<'daily' | 'weekly' | 'monthly'>();
+  viewMode = input.required<'daily' | 'monthly'>();
   events = input.required<CalendarEvent[]>();
   categories = input.required<Array<{id: string; name: string; color: string}>>();
   
@@ -36,7 +36,6 @@ export class EventsListComponent implements OnInit, OnChanges {
   headerTitle = computed(() => {
     const mode = this.viewMode();
     if (mode === 'daily') return "Today's Events";
-    if (mode === 'weekly') return "This Week's Events";
     return "This Month's Events";
   });
 

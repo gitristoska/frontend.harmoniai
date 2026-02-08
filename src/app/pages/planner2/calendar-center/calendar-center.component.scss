@@ -1,0 +1,378 @@
+.calendar-center-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: #fff;
+  border-right: 1px solid #e0e0e0;
+  border-left: 1px solid #e0e0e0;
+}
+
+.calendar-header {
+  padding: 12px 16px;
+  background-color: #f5f5f5;
+  border-bottom: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    h2 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 600;
+      color: #333;
+      min-width: 150px;
+    }
+  }
+}
+
+mat-tab-group {
+  flex: 1;
+  overflow: hidden;
+}
+
+::ng-deep {
+  .mat-tab-body {
+    overflow: hidden !important;
+  }
+}
+
+// DAY VIEW
+.day-view {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.day-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid #e0e0e0;
+  background-color: #fafafa;
+
+  h3 {
+    margin: 0 0 8px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+  }
+
+  .day-stats {
+    display: flex;
+    gap: 12px;
+    font-size: 12px;
+    color: #666;
+
+    .stat {
+      &.completed {
+        color: #4caf50;
+        font-weight: 500;
+      }
+    }
+  }
+}
+
+.timeline {
+  flex: 1;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  gap: 0;
+  padding: 8px;
+
+  .time-slot {
+    display: contents;
+
+    .time-label {
+      padding: 8px;
+      font-size: 12px;
+      color: #999;
+      text-align: right;
+      border-bottom: 1px solid #f0f0f0;
+      background-color: #fafafa;
+      font-weight: 500;
+    }
+
+    .events-container {
+      padding: 8px;
+      border-bottom: 1px solid #f0f0f0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-height: 60px;
+    }
+  }
+}
+
+.event-item {
+  padding: 6px 8px;
+  border-radius: 3px;
+  color: white;
+  font-size: 12px;
+  overflow: hidden;
+
+  .event-title {
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .event-time {
+    font-size: 10px;
+    opacity: 0.8;
+  }
+}
+
+// WEEK VIEW
+.week-view {
+  padding: 12px;
+  overflow-y: auto;
+}
+
+.week-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+}
+
+.week-day {
+  background-color: #f5f5f5;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  min-height: 200px;
+
+  &:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-color: #2196f3;
+  }
+
+  &.today {
+    background-color: #e3f2fd;
+    border-color: #2196f3;
+  }
+
+  &.selected {
+    background-color: #bbdefb;
+    border-color: #1976d2;
+  }
+}
+
+.day-header-cell {
+  padding: 8px;
+  border-bottom: 1px solid #e0e0e0;
+  background-color: #fff;
+
+  .day-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: #666;
+  }
+
+  .day-number {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+  }
+}
+
+.tasks-summary {
+  flex: 1;
+  padding: 8px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  .mini-task {
+    font-size: 11px;
+    background-color: #fff;
+    padding: 4px 6px;
+    border-radius: 2px;
+    border-left: 3px solid #2196f3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .no-tasks {
+    color: #ccc;
+    text-align: center;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+  }
+
+  .task-count {
+    font-size: 10px;
+    color: #999;
+    margin-top: auto;
+    padding-top: 4px;
+    border-top: 1px solid #e0e0e0;
+    text-align: center;
+  }
+}
+
+// MONTH VIEW
+.month-view {
+  padding: 12px;
+  overflow-y: auto;
+}
+
+.weekday-headers {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-bottom: 8px;
+  padding: 0 4px;
+}
+
+.weekday-header {
+  text-align: center;
+  font-weight: 600;
+  color: #666;
+  font-size: 12px;
+  padding: 8px;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  grid-auto-rows: 120px;
+}
+
+.day-cell {
+  background-color: #f5f5f5;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  padding: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+
+  &:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  &.current-month {
+    background-color: #fff;
+
+    &.today {
+      background-color: #e3f2fd;
+      border-color: #2196f3;
+
+      .day-number {
+        color: #2196f3;
+        font-weight: 700;
+      }
+    }
+
+    &.selected {
+      background-color: #bbdefb;
+      border-color: #1976d2;
+    }
+  }
+
+  &.current-month {
+    color: #333;
+  }
+
+  &:not(.current-month) {
+    background-color: #fafafa;
+    color: #ccc;
+  }
+}
+
+.day-number {
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.completion-bar {
+  height: 2px;
+  margin: 4px 0;
+}
+
+.day-stats {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  font-size: 10px;
+
+  .task-dots {
+    display: flex;
+    gap: 3px;
+
+    .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background-color: #e0e0e0;
+
+      &.active {
+        background-color: #2196f3;
+      }
+    }
+  }
+
+  .task-count {
+    color: #666;
+    font-weight: 500;
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 1024px) {
+  .week-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .week-day {
+    min-height: 150px;
+  }
+
+  .calendar-grid {
+    grid-auto-rows: 100px;
+  }
+}
+
+@media (max-width: 768px) {
+  .calendar-center-container {
+    border-right: none;
+    border-left: none;
+  }
+
+  .week-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .calendar-grid {
+    grid-template-columns: repeat(4, 1fr);
+    grid-auto-rows: 80px;
+    gap: 2px;
+  }
+
+  .day-cell {
+    padding: 4px;
+  }
+
+  .day-number {
+    font-size: 12px;
+  }
+}

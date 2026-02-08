@@ -1,15 +1,443 @@
-<!-- <mat-toolbar color="primary">
-</mat-toolbar>
-
-<mat-tab-group [(selectedIndex)]="tabIndex">
- <mat-tab label="Tasks">
-    <app-tasks></app-tasks>
-  </mat-tab> 
-  <mat-tab label="Tasks2">
-    <app-tasks2></app-tasks2>
-  </mat-tab>
-  <mat-tab label="Calendar">
+<div class="planner-container">
+  <!-- HEADER -->
+  <div class="planner-header">
+    <div class="header-left">
+      <h1>📋 Planner</h1>
+      <p class="header-subtitle">Your AI-powered planning assistant</p>
+    </div>
     
-  </mat-tab>
-</mat-tab-group> -->
-<app-calendar></app-calendar>
+    <div class="header-right">
+      <div class="completion-badge">
+        <div class="completion-circle">
+          <svg viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="45" class="circle-bg"></circle>
+            <circle 
+              cx="50" 
+              cy="50" 
+              r="45" 
+              class="circle-progress"
+              [style.--percentage]="completionRate() + '%'"
+            ></circle>
+          </svg>
+          <span class="completion-text">{{ completionRate() }}%</span>
+        </div>
+        <span class="completion-label">Complete</span>
+      </div>
+      <mat-card class="kpi-card">
+        <div class="kpi-item">
+          <mat-icon>assignment_turned_in</mat-icon>
+          <span>{{ completedCount() }}/{{ totalCount() }}</span>
+        </div>
+        <div class="kpi-item" *ngIf="totalCallsEmails() > 0">
+          <mat-icon>phone</mat-icon>
+          <span>{{ completedCallsEmails() }}/{{ totalCallsEmails() }}</span>
+        </div>
+        <div class="kpi-item">
+          <mat-icon>mood</mat-icon>
+          <span>{{ moodRating() }}/10</span>
+        </div>
+      </mat-card>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <mat-tab-group [(selectedIndex)]="activeTab" (selectedIndexChange)="onTabChange($event)" class="planner-tabs">
+    <!-- ============================================ -->
+    <!-- DAILY VIEW TAB                              -->
+    <!-- ============================================ -->
+    <mat-tab label="📅 Today" [disabled]="dailyLoading()">
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">calendar_today</mat-icon>
+        <span>Daily</span>
+      </ng-template>
+
+      <div class="tab-content daily-view">
+        <!-- DATE NAVIGATION -->
+        <div class="date-navigation">
+          <button mat-icon-button (click)="previousDay()" matTooltip="Previous day">
+            <mat-icon>navigate_before</mat-icon>
+          </button>
+          <div class="date-display">
+            <h2>{{ getDateLabel(selectedDate()) }}</h2>
+            <p>{{ selectedDate() | date: 'EEEE, MMMM d, yyyy' }}</p>
+          </div>
+          <button mat-icon-button (click)="nextDay()" matTooltip="Next day">
+            <mat-icon>navigate_next</mat-icon>
+          </button>
+          <button mat-stroked-button (click)="todayClicked()" class="today-btn">
+            <mat-icon>today</mat-icon>
+            Today
+          </button>
+        </div>
+
+        <!-- LOADING STATE -->
+        <div *ngIf="dailyLoading()" class="loading-state">
+          <div class="spinner"></div>
+          <p>Loading tasks...</p>
+        </div>
+
+        <!-- ERROR STATE -->
+        <div *ngIf="error() && !dailyLoading()" class="error-state">
+          <mat-icon>error_outline</mat-icon>
+          <p>{{ error() }}</p>
+          <button mat-raised-button color="primary" (click)="loadTasksForDate(selectedDate())">
+            Try again
+          </button>
+        </div>
+
+        <!-- CONTENT -->
+        <div *ngIf="!dailyLoading() && !error()" class="daily-content">
+          <!-- DAILY SUMMARY BAR -->
+          <mat-card class="summary-bar">
+            <div class="summary-item">
+              <span class="label">Tasks:</span>
+              <span class="value">{{ completedCount() }}/{{ totalCount() }} ({{ completionRate() }}%)</span>
+            </div>
+            <div class="summary-divider"></div>
+            <div class="summary-item">
+              <span class="label">😊 Mood:</span>
+              <span class="value">{{ moodRating() }}/10</span>
+            </div>
+            <div class="summary-divider"></div>
+            <div class="summary-item">
+              <span class="label">⚡ Energy:</span>
+              <span class="value">{{ energyRating() }}/10</span>
+            </div>
+            <div class="summary-divider"></div>
+            <div class="summary-item">
+              <span class="label">💪 Health:</span>
+              <span class="value">{{ healthRating() }}/10</span>
+            </div>
+          </mat-card>
+
+          <!-- TASKS SECTION -->
+          <div class="section">
+            <div class="section-header">
+              <h3>🎯 Tasks for Today</h3>
+              <span class="task-count" *ngIf="tasksForToday().length > 0">
+                {{ tasksForToday().length }} task{{ tasksForToday().length !== 1 ? 's' : '' }}
+              </span>
+            </div>
+
+            <div *ngIf="tasksForToday().length === 0" class="empty-state">
+              <mat-icon>assignment</mat-icon>
+              <h4>No tasks for today</h4>
+              <p>Great! You're all caught up.</p>
+              <button mat-raised-button color="primary" (click)="openCreateTaskDialog()">
+                <mat-icon>add</mat-icon>
+                Add Task
+              </button>
+            </div>
+
+            <div *ngIf="tasksForToday().length > 0" class="tasks-list">
+              <mat-card *ngFor="let task of tasksForToday()" class="task-card" 
+                [class.done]="task.status === 2"
+                [class.in-progress]="task.status === 1">
+                
+                <!-- Task Status Checkbox -->
+                <div class="task-checkbox">
+                  <mat-checkbox 
+                    [checked]="task.status === 2"
+                    (change)="updateTaskStatus(task, task.status === 2 ? 0 : 2)"
+                    matTooltip="Mark complete">
+                  </mat-checkbox>
+                </div>
+
+                <!-- Task Info -->
+                <div class="task-info">
+                  <div class="task-header">
+                    <span class="task-time" *ngIf="task.startTime">{{ task.startTime }}</span>
+                    <h4 class="task-title">{{ task.title }}</h4>
+                    <span class="priority-badge" 
+                      [ngClass]="'priority-' + task.priority"
+                      matTooltip="Priority">
+                      {{ task.priority === 1 ? '🔴 High' : task.priority === 2 ? '🟡 Medium' : '🟢 Low' }}
+                    </span>
+                  </div>
+                  <p class="task-description" *ngIf="task.description">{{ task.description }}</p>
+                  <div class="task-meta">
+                    <span class="category" *ngIf="task.category">{{ task.category }}</span>
+                    <span class="duration" *ngIf="task.duration">⏱️ {{ task.duration }}m</span>
+                    <span class="reschedule-count" *ngIf="task.rescheduleCount && task.rescheduleCount > 0">
+                      ↻ {{ task.rescheduleCount }}x
+                    </span>
+                  </div>
+                  <div *ngIf="task.rescheduleCount && task.rescheduleCount >= 3" class="procrastination-warning">
+                    🚨 PROCRASTINATION RISK (rescheduled {{ task.rescheduleCount }}x)
+                  </div>
+                </div>
+
+                <!-- Task Actions -->
+                <div class="task-actions">
+                  <button mat-icon-button (click)="deleteTask(task)" matTooltip="Delete">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+              </mat-card>
+
+              <button mat-stroked-button class="add-task-btn" (click)="openCreateTaskDialog()" *ngIf="tasksForToday().length > 0">
+                <mat-icon>add</mat-icon>
+                Add Another Task
+              </button>
+            </div>
+          </div>
+
+          <!-- CALLS & EMAILS SECTION -->
+          <div class="section">
+            <div class="section-header">
+              <h3>📞 Calls & Emails</h3>
+              <span class="count-badge" *ngIf="totalCallsEmails() > 0">
+                {{ completedCallsEmails() }}/{{ totalCallsEmails() }}
+              </span>
+            </div>
+
+            <div class="calls-emails-list">
+              <div *ngFor="let item of callsAndEmails()" class="call-email-item" [class.done]="item.isDone">
+                <mat-checkbox 
+                  [checked]="item.isDone"
+                  (change)="toggleCallOrEmail(item)">
+                </mat-checkbox>
+                <span class="item-text">{{ item.text }}</span>
+                <button mat-icon-button 
+                  (click)="deleteCallOrEmail(item.id)" 
+                  matTooltip="Delete"
+                  class="delete-btn">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+
+              <div class="add-call-email">
+                <mat-form-field appearance="outline">
+                  <mat-label>Add call or email</mat-label>
+                  <input matInput 
+                    [(ngModel)]="newCallEmailText"
+                    (keyup.enter)="addCallOrEmail()"
+                    placeholder="E.g., Call Mom, Email boss">
+                </mat-form-field>
+                <button mat-icon-button (click)="addCallOrEmail()" color="primary">
+                  <mat-icon>add_circle</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- DAILY REFLECTION SECTION -->
+          <div class="section reflection-section">
+            <div class="section-header">
+              <h3>📝 Daily Reflection</h3>
+            </div>
+
+            <!-- Ratings Sliders -->
+            <div class="ratings-group">
+              <div class="rating-item">
+                <label>😊 Mood: <strong>{{ moodRating() }}/10</strong></label>
+                <input type="range" 
+                  min="1" max="10" step="1"
+                  [(ngModel)]="moodRating"
+                  class="mood-slider">
+              </div>
+              <div class="rating-item">
+                <label>⚡ Productivity: <strong>{{ energyRating() }}/10</strong></label>
+                <input type="range" 
+                  min="1" max="10" step="1"
+                  [(ngModel)]="energyRating"
+                  class="energy-slider">
+              </div>
+              <div class="rating-item">
+                <label>💪 Health: <strong>{{ healthRating() }}/10</strong></label>
+                <input type="range" 
+                  min="1" max="10" step="1"
+                  [(ngModel)]="healthRating"
+                  class="health-slider">
+              </div>
+            </div>
+
+            <!-- Reflection Notes -->
+            <div class="notes-group">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>I'm grateful for...</mat-label>
+                <textarea matInput 
+                  [(ngModel)]="gratefulFor"
+                  rows="3"
+                  placeholder="What are you thankful for today?">
+                </textarea>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>What inspired me...</mat-label>
+                <textarea matInput 
+                  [(ngModel)]="inspirationOrMotivation"
+                  rows="3"
+                  placeholder="What was your highlight or inspiration?">
+                </textarea>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Personal notes</mat-label>
+                <textarea matInput 
+                  [(ngModel)]="personalNotes"
+                  rows="3"
+                  placeholder="Any other thoughts or reflections...">
+                </textarea>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Notes for tomorrow</mat-label>
+                <textarea matInput 
+                  [(ngModel)]="notesForTomorrow"
+                  rows="3"
+                  placeholder="What should you focus on tomorrow?">
+                </textarea>
+              </mat-form-field>
+            </div>
+
+            <button mat-raised-button color="primary" (click)="saveDailyReflection()" class="save-btn"
+              [disabled]="reflectionSaving()">
+              <mat-icon *ngIf="!reflectionSaving()">save</mat-icon>
+              <mat-icon *ngIf="reflectionSaving()" class="spinner-icon">sync</mat-icon>
+              {{ reflectionSaving() ? 'Saving...' : 'Save Reflection' }}
+            </button>
+          </div>
+
+          <!-- AI ADVICE CARD -->
+          <div class="section" *ngIf="dailyAdvice()">
+            <div class="section-header">
+              <h3>💡 AI Daily Advice</h3>
+            </div>
+            <mat-card class="ai-advice-card">
+              <p>{{ dailyAdvice()?.advice }}</p>
+            </mat-card>
+          </div>
+
+          <!-- DAILY WELLNESS CARD -->
+          <div class="section" *ngIf="dailyWellness()">
+            <mat-card class="wellness-card">
+              <p>{{ dailyWellness()?.insights }}</p>
+            </mat-card>
+          </div>
+        </div>
+      </div>
+    </mat-tab>
+
+    <!-- ============================================ -->
+    <!-- WEEKLY VIEW TAB                             -->
+    <!-- ============================================ -->
+    <mat-tab label="📆 Week" [disabled]="weeklyLoading()">
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">date_range</mat-icon>
+        <span>Weekly</span>
+      </ng-template>
+
+      <div class="tab-content weekly-view">
+        <!-- LOADING STATE -->
+        <div *ngIf="weeklyLoading()" class="loading-state">
+          <div class="spinner"></div>
+          <p>Loading weekly tasks...</p>
+        </div>
+
+        <!-- WEEKLY SUMMARY CARD -->
+        <div *ngIf="!weeklyLoading()" class="weekly-summary">
+          <h3>Weekly Summary</h3>
+          <div class="summary-stats">
+            <div class="stat">
+              <span class="stat-label">Total Tasks</span>
+              <span class="stat-value">{{ totalCount() }}</span>
+            </div>
+            <div class="stat">
+              <span class="stat-label">Completed</span>
+              <span class="stat-value">{{ completedCount() }}</span>
+            </div>
+            <div class="stat">
+              <span class="stat-label">Completion Rate</span>
+              <span class="stat-value">{{ completionRate() }}%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- WEEKLY TASKS GRID -->
+        <div *ngIf="!weeklyLoading()" class="weekly-tasks">
+          <div class="day-column" *ngFor="let date of Object.keys(weeklyTasks()).sort()">
+            <div class="day-header">
+              <h4>{{ date | date: 'EEE, MMM d' }}</h4>
+              <span class="task-count">{{ weeklyTasks()[date].length }} tasks</span>
+            </div>
+            <div class="tasks-in-day">
+              <mat-card *ngFor="let task of weeklyTasks()[date]" class="weekly-task-card" [class.done]="task.status === 2">
+                <div class="task-time">{{ task.startTime || '—' }}</div>
+                <div class="task-details">
+                  <h5>{{ task.title }}</h5>
+                  <span class="priority" [ngClass]="'p' + task.priority">{{ task.priority === 1 ? 'High' : task.priority === 2 ? 'Med' : 'Low' }}</span>
+                </div>
+              </mat-card>
+            </div>
+          </div>
+        </div>
+      </div>
+    </mat-tab>
+
+    <!-- ============================================ -->
+    <!-- ANALYTICS TAB                               -->
+    <!-- ============================================ -->
+    <mat-tab label="📊 Analytics" [disabled]="analyticsLoading()">
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">insights</mat-icon>
+        <span>Analytics</span>
+      </ng-template>
+
+      <div class="tab-content analytics-view">
+        <!-- LOADING STATE -->
+        <div *ngIf="analyticsLoading()" class="loading-state">
+          <div class="spinner"></div>
+          <p>Loading analytics...</p>
+        </div>
+
+        <!-- ANALYTICS CONTENT -->
+        <div *ngIf="!analyticsLoading()" class="analytics-content">
+          <!-- AI INSIGHTS CARD -->
+          <div class="section" *ngIf="aiInsights()">
+            <div class="section-header">
+              <h3>💡 AI Insights</h3>
+            </div>
+            <mat-card class="ai-card">
+              <p>{{ aiInsights() }}</p>
+            </mat-card>
+          </div>
+
+          <!-- PRODUCTIVITY INSIGHTS CARD -->
+          <div class="section" *ngIf="productivityInsights()">
+            <div class="section-header">
+              <h3>📊 Productivity Analysis (4 weeks)</h3>
+            </div>
+            <mat-card class="productivity-card">
+              <pre>{{ productivityInsights() }}</pre>
+            </mat-card>
+          </div>
+
+          <!-- KEY METRICS -->
+          <div class="metrics-grid">
+            <mat-card class="metric-card">
+              <div class="metric-icon">✅</div>
+              <div class="metric-value">{{ completionRate() }}%</div>
+              <div class="metric-label">Completion Rate</div>
+            </mat-card>
+            <mat-card class="metric-card" *ngIf="procrastinationRisks().length > 0">
+              <div class="metric-icon">🚨</div>
+              <div class="metric-value">{{ procrastinationRisks().length }}</div>
+              <div class="metric-label">Procrastination Risks</div>
+            </mat-card>
+            <mat-card class="metric-card">
+              <div class="metric-icon">📋</div>
+              <div class="metric-value">{{ totalCount() }}</div>
+              <div class="metric-label">Total Tasks</div>
+            </mat-card>
+            <mat-card class="metric-card">
+              <div class="metric-icon">😊</div>
+              <div class="metric-value">{{ moodRating() }}/10</div>
+              <div class="metric-label">Avg Mood</div>
+            </mat-card>
+          </div>
+        </div>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>

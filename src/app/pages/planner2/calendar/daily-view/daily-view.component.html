@@ -21,7 +21,7 @@
         <!-- Items 1,2: Grateful For & Inspiration (nested) -->
         <div class="grid-subsection-reflections">
           <!-- 1: Grateful For -->
-          <mat-card class="notes-card grateful-for grid-item-1">
+          <mat-card class="notes-card grateful-for grid-item-1" *ngIf="dailyEntry()">
             <mat-card-header>
               <h3>Grateful For</h3>
             </mat-card-header>
@@ -33,7 +33,7 @@
           </mat-card>
 
           <!-- 2: Inspiration -->
-          <mat-card class="notes-card inspiration grid-item-2">
+          <mat-card class="notes-card inspiration grid-item-2" *ngIf="dailyEntry()">
             <mat-card-header>
               <h3>Inspiration</h3>
             </mat-card-header>
@@ -52,26 +52,25 @@
               <h2>{{ selectedDate() | date:'EEEE, MMMM d, yyyy' }}</h2>
             </mat-card-header>
 
-            <mat-card-content class="time-grid">
-              <div *ngFor="let slot of getTimeSlots()" class="time-slot">
-              <div class="time-label">{{ slot }}</div>
-              <div class="events-container" 
-                cdkDropList 
-                cdkDropListGroup="calendar-drop-group"
-                [cdkDropListData]="+slot.split(':')[0]"
-                (cdkDropListDropped)="drop($event)">
-                <div *ngFor="let event of getEventsByHour(+slot.split(':')[0])"
-                  class="event-item"
-                  [style.background-color]="getCategoryColor(event.category)"
-                  (click)="onEventClick(event)"
-                  cdkDrag
-                  [cdkDragData]="event">
-                  <span class="event-time">{{ event.time }}</span>
-                  <span class="event-title">{{ event.title }}</span>
+            <mat-card-content>
+              <!-- HOURLY SCHEDULE - Only shows tasks with specific times -->
+              <div class="time-grid">
+                <div *ngFor="let slot of getTimeSlots()" class="time-slot">
+                  <div class="time-label">{{ slot }}</div>
+                  <div class="events-container"
+                    cdkDropList
+                    cdkDropListGroup="calendar-drop-group"
+                    [cdkDropListData]="+slot.split(':')[0]"
+                    (cdkDropListDropped)="drop($event)">
+                    <div *ngFor="let event of getEventsByHour(+slot.split(':')[0])" class="event-item"
+                      [style.background-color]="getCategoryColor(event.category)"
+                      (click)="onEventClick(event)">
+                      <span class="event-title">{{ event.title }}</span>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </mat-card-content>
+            </mat-card-content>
         </mat-card>
       </div>
       </div>
@@ -95,7 +94,7 @@
                     <div class="priority-indicator" [style.background-color]="getCategoryColor(task.category)"></div>
                     <div class="priority-task-info">
                       <div class="priority-title">{{ task.title }}</div>
-                      <div class="priority-time">{{ task.time }}</div>
+                      <div class="priority-time">{{ task.startTime || 'No time' }}</div>
                     </div>
                   </div>
                 </div>
@@ -122,7 +121,7 @@
                       <div class="task-title">{{ task.title }}</div>
                       <div *ngIf="task.description" class="task-description">{{ task.description }}</div>
                       <div class="task-meta">
-                        <span class="task-time">{{ task.time }}</span>
+                        <span class="task-time">{{ task.startTime || 'No time' }}</span>
                         <span *ngIf="task.priority !== undefined && task.priority !== null" class="task-priority" [class]="'priority-' + getPriorityLabel(task.priority)">
                           {{ getPriorityLabel(task.priority) }}
                         </span>

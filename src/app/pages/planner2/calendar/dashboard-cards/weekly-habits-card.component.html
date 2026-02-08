@@ -22,18 +22,21 @@
         <div *ngFor="let habit of habits()" class="habit-card">
           <div class="habit-header">
             <h4 class="habit-name">{{ habit.name }}</h4>
-            <span class="habit-score">{{ getDaysDone(habit) }}<span class="total">/7</span></span>
+            <span class="habit-score">{{ getDaysDone(habit) }}<span class="total">/{{ getDaysScheduled(habit) }}</span></span>
           </div>
 
           <div class="days-grid">
             <button
               *ngFor="let day of dayLabels; let i = index"
               mat-icon-button
-              [class.completed]="habit.days[i]"
-              [matTooltip]="day"
+              [class.completed]="isDayCompleted(habit, i)"
+              [class.scheduled]="isDayScheduled(habit, i)"
+              [class.not-scheduled]="!isDayScheduled(habit, i)"
+              [disabled]="!isDayScheduled(habit, i)"
+              [matTooltip]="!isDayScheduled(habit, i) ? 'Not scheduled' : day"
               (click)="toggleDay(habit, i)"
               class="day-button">
-              <mat-icon class="day-icon">{{ habit.days[i] ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+              <mat-icon class="day-icon">{{ isDayCompleted(habit, i) ? 'check_circle' : isDayScheduled(habit, i) ? 'radio_button_unchecked' : 'block' }}</mat-icon>
               <span class="day-label">{{ day }}</span>
             </button>
           </div>

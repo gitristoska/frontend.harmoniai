@@ -25,7 +25,9 @@ export interface EditTaskData {
   description?: string;
   startDate?: string;
   endDate?: string;
-  time: string;
+  time?: string;
+  startTime?: string;
+  duration?: number;
   priority?: number;
   status?: TaskStatus;
   category: string;
@@ -48,6 +50,8 @@ export class EditTaskFormComponent {
   taskTitle = '';
   taskDescription = '';
   taskTime = '09:00';
+  taskStartTime = '';
+  taskDuration = 60;
   taskPriority = 1;
   taskStatus: TaskStatus = TaskStatus.NotStarted;
   taskCategory = 'study';
@@ -55,6 +59,7 @@ export class EditTaskFormComponent {
   taskEndDate = '';
   taskStartDateObj: Date | null = null;
   taskEndDateObj: Date | null = null;
+  hasTime = false;
 
   taskStatusOptions = [
     { value: TaskStatus.NotStarted, label: 'Not Started' },
@@ -69,6 +74,9 @@ export class EditTaskFormComponent {
       this.taskTitle = this.task.title || '';
       this.taskDescription = this.task.description || '';
       this.taskTime = this.task.time || '09:00';
+      this.taskStartTime = this.task.startTime || '';
+      this.taskDuration = this.task.duration || 60;
+      this.hasTime = !!(this.task.startTime && this.task.startTime !== '');
       this.taskPriority = this.task.priority ?? 1;
       this.taskStatus = this.task.status ?? TaskStatus.NotStarted;
       this.taskCategory = this.task.category || '';
@@ -128,6 +136,8 @@ export class EditTaskFormComponent {
         title: this.taskTitle,
         description: this.taskDescription,
         time: this.taskTime,
+        startTime: this.hasTime ? this.taskStartTime : undefined,
+        duration: this.hasTime ? this.taskDuration : undefined,
         priority: this.taskPriority,
         status: this.taskStatus,
         category: this.taskCategory,

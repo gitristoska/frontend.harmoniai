@@ -1,17 +1,12 @@
 <div class="calendar-container">
   <div class="top-controls">
     <div class="control-group">
-      <app-view-mode-selector 
-        [viewMode]="viewMode()" 
-        (viewModeChange)="setViewMode($event)">
-      </app-view-mode-selector>
-
       <div class="date-navigation">
-        <button mat-icon-button (click)="viewMode() === 'daily' ? previousDay() : viewMode() === 'weekly' ? previousWeek() : previousMonth()" title="Previous">
+        <button mat-icon-button (click)="previousDay()" title="Previous">
           <mat-icon>chevron_left</mat-icon>
         </button>
         <span class="date-label">{{ navigationLabel() }}</span>
-        <button mat-icon-button (click)="viewMode() === 'daily' ? nextDay() : viewMode() === 'weekly' ? nextWeek() : nextMonth()" title="Next">
+        <button mat-icon-button (click)="nextDay()" title="Next">
           <mat-icon>chevron_right</mat-icon>
         </button>
         <button mat-icon-button (click)="goToToday()" title="Today">
@@ -43,67 +38,9 @@
   </div>
 
   <div class="main-content">
-    <!-- LEFT SIDE: NOTES -->
-      <!-- This section can contain daily view notes if needed -->
-    <!-- <div class="notes-sidebar">
-     
-    </div> -->
-
-    <!-- SPIRAL DIVIDER -->
-    <!-- <div class="spiral-divider"></div> -->
-
-    <!-- CENTER: CALENDAR AND EVENTS (for weekly view) -->
-    <div class="calendar-and-events" *ngIf="viewMode() === 'weekly'">
-      <!-- CALENDAR COLUMN -->
-      <div class="calendar-column">
-        <!-- EVENT DETAIL -->
-        <app-event-detail
-          *ngIf="selectedEvent()"
-          [event]="selectedEvent()!"
-          [categories]="categories"
-          (eventUpdate)="onEventUpdate($event)"
-          (eventDelete)="onEventDelete()"
-          (eventClose)="onEventDetailClose()">
-        </app-event-detail>
-
-        <!-- WEEKLY CALENDAR -->
-        <app-calendar-weekly
-          [weekDays]="weekDays()"
-          [events]="filteredEvents()"
-          [categories]="categories"
-          (eventClick)="onEventClick($event)">
-        </app-calendar-weekly>
-      </div>
-
-      <!-- EVENTS COLUMN (next to calendar) -->
-      <!-- <div class="events-column">
-        <div class="events-header">
-          <h3>This Week's Events</h3>
-        </div> -->
-        <app-events-list
-          [events]="selectedPeriodEvents()"
-          [viewMode]="viewMode()"
-          [categories]="categories"
-          (eventClick)="onEventClick($event)">
-        </app-events-list>
-    </div>
-      <!-- </div>
-    </div> -->
-
-    <!-- CENTER: CALENDAR (for daily and monthly views) -->
-    <div class="calendar-column" [class.monthly-view]="viewMode() === 'monthly'" *ngIf="viewMode() !== 'weekly'">
-      <!-- EVENT DETAIL -->
-      <app-event-detail
-        *ngIf="selectedEvent()"
-        [event]="selectedEvent()!"
-        [categories]="categories"
-        (eventUpdate)="onEventUpdate($event)"
-        (eventDelete)="onEventDelete()"
-        (eventClose)="onEventDetailClose()">
-      </app-event-detail>
-
-      <!-- CALENDAR VIEWS -->
-      <app-calendar-daily *ngIf="viewMode() === 'daily'"
+    <!-- DAILY VIEW -->
+    <div class="calendar-column">
+      <app-calendar-daily
         [selectedDate]="selectedDate()"
         [events]="dailyEvents(selectedDate())"
         [categories]="categories"
@@ -111,66 +48,10 @@
         [endHour]="endHour"
         (eventClick)="onEventClick($event)">
       </app-calendar-daily>
-
-      <app-calendar-monthly *ngIf="viewMode() === 'monthly'"
-        [calendarDays]="calendarDays()"
-        [events]="filteredEvents()"
-        [selectedDay]="selectedMonthlyDay()"
-        [categories]="categories"
-        (eventClick)="onEventClick($event)"
-        (dayClick)="selectMonthlyDay($event)">
-      </app-calendar-monthly>
-    </div>
-
-    <!-- SPIRAL DIVIDER -->
-    <!-- <div class="spiral-divider"></div> -->
-
-    <!-- RIGHT SIDE: DASHBOARD CARDS (Weekly view only) -->
-    <div class="dashboard-sidebar" *ngIf="viewMode() === 'weekly'">
-      <!-- INSPIRATION CARD -->
-      <app-inspiration-card [currentDate]="selectedDate()"></app-inspiration-card>
-
-      <!-- MUST GET DONE CARD -->
-      <app-must-get-done-card 
-        [highPriorityEvents]="weeklyHighPriorityEvents()"
-        [categories]="categories">
-      </app-must-get-done-card>
-    </div>
-
-    <!-- RIGHT SIDE: MONTHLY VIEW CONTROLS AND EVENTS -->
-    <div class="events-sidebar" *ngIf="viewMode() === 'monthly'">
-      <!-- EVENTS LIST HEADER WITH SHOW ALL MONTH BUTTON (Monthly view only) -->
-      <div class="events-header-actions">
-        <h3 *ngIf="monthlyViewMode() === 'day'">{{ selectedMonthlyDay() | date:'EEEE, MMM d' }}</h3>
-        <h3 *ngIf="monthlyViewMode() === 'month'">{{ selectedDate() | date:'MMMM yyyy' }}</h3>
-        <div class="header-buttons">
-          <button mat-button (click)="showAllMonth()" class="show-all-btn" *ngIf="monthlyViewMode() === 'day'">
-            <mat-icon>calendar_month</mat-icon>
-            Show all month
-          </button>
-          <button mat-button (click)="navigateToMonthlyPlanning()" class="monthly-planning-btn" title="Open monthly planning">
-            <mat-icon>target</mat-icon>
-            Monthly Plan
-          </button>
-          <button mat-raised-button color="accent" (click)="navigateToReflection()" class="reflection-btn" title="Open monthly reflection">
-            <mat-icon>lightbulb</mat-icon>
-            Month Reflection
-          </button>
-        </div>
-      </div>
-
-      <!-- EVENTS LIST FOR MONTHLY VIEW -->
-      <app-events-list
-        [events]="selectedPeriodEvents()"
-        [viewMode]="viewMode()"
-        [categories]="categories"
-        (eventClick)="onEventClick($event)">
-      </app-events-list>
+      
+      <!-- DAILY REFLECTION -->
+      <app-daily-reflection
+        [selectedDate]="selectedDate()">
+      </app-daily-reflection>
     </div>
   </div>
-
-  <!-- WEEKLY HABITS ROW (Bottom of screen, full width) -->
-  <div class="weekly-habits-row" *ngIf="viewMode() === 'weekly'">
-    <app-weekly-habits-card></app-weekly-habits-card>
-  </div>
-</div>

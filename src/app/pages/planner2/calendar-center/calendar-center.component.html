@@ -1,0 +1,95 @@
+<div class="calendar-center-container">
+  <!-- Header with navigation -->
+  <div class="calendar-header">
+    <div class="header-left">
+      <button mat-icon-button (click)="previousMonth()" matTooltip="Previous">
+        <mat-icon>chevron_left</mat-icon>
+      </button>
+      <h2>{{ currentDate() | date: 'MMMM yyyy' }}</h2>
+      <button mat-icon-button (click)="nextMonth()" matTooltip="Next">
+        <mat-icon>chevron_right</mat-icon>
+      </button>
+    </div>
+    <button mat-stroked-button (click)="toToday()" matTooltip="Go to today">Today</button>
+  </div>
+
+  <!-- View Mode Tabs -->
+  <mat-tab-group [selectedIndex]="tabIndex()" (selectedIndexChange)="tabIndex.set($event); viewMode.set($event === 0 ? 'day' : $event === 1 ? 'week' : 'month')">
+    <!-- DAY VIEW -->
+    <mat-tab label="Day View">
+      <div class="day-view">
+        <div class="day-header">
+          <h3>{{ selectedDate | date: 'EEEE, MMMM d, yyyy' }}</h3>
+          <div class="day-stats">
+            <span class="stat">Total: {{ getDayTasks().length }} tasks</span>
+            <span class="stat completed">Done: {{ getDayCompletedCount() }}</span>
+          </div>
+        </div>
+
+        <div class="timeline">
+          <div *ngFor="let slot of getDayTimeSlots()" class="time-slot">
+            <div class="time-label">{{ slot }}</div>
+            <div class="events-container">
+              <div *ngFor="let task of getTasksForTimeSlot(+slot.split(':')[0])" class="event-item"
+                   [style.background-color]="getStatusColor(task.status)">
+                <div class="event-title">{{ task.title }}</div>
+                <div class="event-time">{{ task.startTime }}{{ task.duration ? ' (' + task.duration + 'm)' : '' }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </mat-tab>
+
+    <!-- WEEK VIEW -->
+    <mat-tab label="Week View">
+      <div class="week-view">
+        <div class="week-grid">
+          <div *ngFor="let day of getWeekDays()" class="week-day"
+               [class.today]="day.isToday"
+               [class.selected]="day.isSelected"
+               (click)="onDateClick(day.date)">
+            <div class="day-header-cell">
+              <div class="day-name">{{ day.dayName }}</div>
+              <div class="day-number">{{ day.dayOfMonth }}</div>
+            </div>
+            <div class="tasks-summary">
+              <div *ngFor="let task of day.tasks" class="mini-task" [title]="task.title">
+                {{ task.title | slice: 0: 20 }}{{ task.title.length > 20 ? '...' : '' }}
+              </div>
+              <div *ngIf="day.tasks.length === 0" class="no-tasks">—</div>
+              <div class="task-count">{{ day.tasks.length }} tasks</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </mat-tab>
+
+    <!-- MONTH VIEW -->
+    <mat-tab label="Month View">
+      <div class="month-view">
+        <div class="weekday-headers">
+          <div *ngFor="let day of ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']" class="weekday-header">
+            {{ day }}
+          </div>
+        </div>
+        <div class="calendar-grid">
+          <div *ngFor="let day of monthDays()" class="day-cell"
+               [class.current-month]="day.isCurrentMonth"
+               [class.today]="day.isToday"
+               [class.selected]="day.isSelected"
+               (click)="onDateClick(day.date)">
+            <div class="day-number">{{ day.dayOfMonth }}</div>
+            <mat-progress-bar *ngIf="day.tasksCount > 0" mode="determinate" [value]="getCompletionPercentage(day)" class="completion-bar"></mat-progress-bar>
+            <div class="day-stats" *ngIf="day.isCurrentMonth">
+              <div class="task-dots">
+                <span *ngFor="let i of [0, 1, 2]" class="dot" [class.active]="i < day.tasksCount"></span>
+              </div>
+              <span class="task-count">{{ day.tasksCount }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>

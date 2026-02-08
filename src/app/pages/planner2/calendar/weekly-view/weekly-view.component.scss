@@ -42,7 +42,7 @@
         color: #ffffff;
         letter-spacing: 0.3px;
       }
-
+    }
       .subtitle {
         margin: 4px 0 0;
         font-size: 12px;
@@ -287,6 +287,12 @@
                 overflow: hidden;
                 text-overflow: ellipsis;
               }
+
+              .event-duration {
+                font-size: 10px;
+                color: #9ca3af;
+                font-weight: 500;
+              }
             }
           }
         }
@@ -317,5 +323,65 @@
         }
       }
     }
+      // Removed extra closing brace
+}
+
+// ============================================
+// PHASE 4: CALENDAR INTEGRATION STYLES
+// ============================================
+
+.day-urgency-indicators {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  .urgent-badge {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 3px 6px;
+    border-radius: 4px;
+    background: #fee2e2;
+    color: #991b1b;
+    white-space: nowrap;
+  }
+
+  .deadline-badge {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 3px 6px;
+    border-radius: 4px;
+    background: #fef3c7;
+    color: #92400e;
+    white-space: nowrap;
+  }
+}
+
+.event-item-horizontal {
+  position: relative;
+  
+  // Urgent styling - due within 24 hours
+  &.urgent {
+    background-color: #fef3c7 !important;
+    border-left-color: #f59e0b !important;
+  }
+
+  // Overdue styling - past deadline
+  &.overdue {
+    background-color: #fee2e2 !important;
+    border-left-color: #ef4444 !important;
+  }
+
+  .event-urgency-label {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 4px;
+    border-radius: 3px;
+    background: rgba(0, 0, 0, 0.1);
+    color: #1f2937;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
   }
 }

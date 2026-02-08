@@ -56,14 +56,12 @@ export class Navbar implements OnInit {
   loadModuleSettings() {
     this.settingsService.getSettings().subscribe({
       next: (settings) => {
-        if (settings.modulesJson) {
-          try {
-            const parsed = JSON.parse(settings.modulesJson);
-            this.modules.set(parsed);
-          } catch (e) {
-            console.warn('Failed to parse modulesJson', e);
-          }
-        }
+        // All modules are enabled by default
+        this.modules.set({
+          planner: true,
+          journal: true,
+          habits: true
+        });
       },
       error: (err) => {
         console.warn('Failed to load module settings', err);

@@ -1,92 +1,359 @@
-<section class="journal-page page-container">
-  <!-- HEADER SECTION -->
-  <div class="header-section">
-    <div class="header-card">
-      <div class="header-content">
-        <div class="header-text">
-          <h1>
-            <mat-icon class="header-icon">edit_note</mat-icon>
-            Digital Journal
-          </h1>
-          <p class="subtitle">Record your thoughts and let AI help you understand your patterns</p>
-        </div>
-      </div>
-      <button mat-raised-button class="write-btn" (click)="createNewEntry()" *ngIf="!showForm">
-        <mat-icon>add</mat-icon>
-        Write Entry
+<div class="journal-container">
+  <!-- HEADER -->
+  <div class="journal-header">
+    <h1>Journal</h1>
+    <p class="subtitle">Capture your thoughts and emotions</p>
+  </div>
+
+  <!-- TIME RANGE SELECTION (BETTER THAN SINGLE DATE) -->
+  <div class="time-range-selector">
+    <div class="range-info">
+      <h3>{{ dateRangeLabel() }}</h3>
+      <span class="entry-count">{{ entriesInDateRange().length }} entries in this range</span>
+    </div>
+    
+    <div class="range-buttons">
+      <button 
+        mat-raised-button 
+        [color]="selectedTimeRange() === 'week' ? 'primary' : 'accent'"
+        (click)="setTimeRange('week')">
+        <mat-icon>calendar_today</mat-icon>
+        Last Week
+        <span class="badge">{{ timeRangeStats().week }}</span>
+      </button>
+      
+      <button 
+        mat-raised-button 
+        [color]="selectedTimeRange() === 'month' ? 'primary' : 'accent'"
+        (click)="setTimeRange('month')">
+        <mat-icon>calendar_month</mat-icon>
+        Last Month
+        <span class="badge">{{ timeRangeStats().month }}</span>
+      </button>
+      
+      <button 
+        mat-raised-button 
+        [color]="selectedTimeRange() === 'quarter' ? 'primary' : 'accent'"
+        (click)="setTimeRange('quarter')">
+        <mat-icon>date_range</mat-icon>
+        Last 90 Days
+        <span class="badge">{{ timeRangeStats().quarter }}</span>
+      </button>
+      
+      <button 
+        mat-raised-button 
+        [color]="selectedTimeRange() === 'all' ? 'primary' : 'accent'"
+        (click)="setTimeRange('all')">
+        <mat-icon>all_inclusive</mat-icon>
+        All Time
+        <span class="badge">{{ timeRangeStats().all }}</span>
       </button>
     </div>
   </div>
 
-  <!-- NEW ENTRY FORM -->
-  <div class="write-bar" *ngIf="showForm">
-    <mat-card class="new-entry-card">
-      <div class="entry-form-header">
-        <h3>New Journal Entry</h3>
-        <div class="entry-date">{{ todayDate }}</div>
+  <!-- CREATE BUTTON & FILTER TOGGLE -->
+  <div class="action-buttons">
+    <button mat-raised-button color="primary" (click)="openCreateForm()" *ngIf="!showForm()">
+      <mat-icon>add</mat-icon>
+      New Entry
+    </button>
+    <button mat-stroked-button (click)="showFilters.set(!showFilters())">
+      <mat-icon>{{ showFilters() ? 'filter_alt_off' : 'filter_alt' }}</mat-icon>
+      {{ showFilters() ? 'Hide Filters' : 'Show Filters' }}
+      <span *ngIf="hasActiveFilters()" class="filter-badge">●</span>
+    </button>
+    <button mat-stroked-button color="warn" (click)="clearAllFilters()" *ngIf="hasActiveFilters()">
+      <mat-icon>clear_all</mat-icon>
+      Clear Filters
+    </button>
+  </div>
+
+  <!-- FILTERS PANEL -->
+  <div class="filters-panel" *ngIf="showFilters()">
+    <!-- SENTIMENT FILTER -->
+    <div class="filter-section">
+      <h3 class="filter-title">Filter by Sentiment</h3>
+      <div class="sentiment-buttons">
+        <button 
+          *ngFor="let sentiment of sentiments"
+          [class.active]="isSentimentSelected(sentiment)"
+          (click)="toggleSentimentFilter(sentiment)"
+          class="sentiment-btn">
+          <span class="emoji">{{ sentimentEmojis[sentiment] }}</span>
+          <span class="label">{{ sentiment }}</span>
+          <span class="count">({{ sentimentCounts()[sentiment] }})</span>
+        </button>
       </div>
+    </div>
 
-      <div class="form-section">
-        <label class="ai-toggle-label">AI Analysis</label>
-        <mat-slide-toggle [(ngModel)]="useAiAnalysis" class="ai-toggle"></mat-slide-toggle>
+    <!-- MENTAL HEALTH FLAGS FILTER -->
+    <div class="filter-section">
+      <h3 class="filter-title">Mental Health Flags</h3>
+      <div class="flags-grid">
+        <label *ngFor="let flag of mentalHealthFlags" class="flag-checkbox">
+          <input 
+            type="checkbox" 
+            [checked]="isFlagSelected(flag)"
+            (change)="toggleFlagFilter(flag)">
+          <span class="flag-emoji-label">{{ mentalHealthFlagDetails[flag]?.emoji || '⚠️' }}</span>
+          <div class="flag-text">
+            <span class="flag-label">{{ mentalHealthFlagDetails[flag]?.description || (flag | titlecase) }}</span>
+            <span class="flag-count">({{ flagCounts()[flag] }})</span>
+          </div>
+        </label>
       </div>
+    </div>
 
-      <mat-form-field appearance="outline" class="textarea-field">
-        <textarea matInput rows="10" placeholder="How was your day? What are you thinking about?" [(ngModel)]="newEntryText"></textarea>
-      </mat-form-field>
-
-      <mat-card class="ai-note">
-        <mat-icon class="ai-icon">auto_awesome</mat-icon>
-        <div class="ai-message">AI will analyze your entry to detect emotional patterns and suggest helpful activities.</div>
-      </mat-card>
-
-      <div class="entry-actions">
-        <button mat-raised-button class="save-btn" (click)="saveEntry()">Save Entry</button>
-        <button mat-button class="cancel-btn" (click)="cancelEntry()">Cancel</button>
+    <!-- THEMES FILTER -->
+    <div class="filter-section" *ngIf="availableThemes().length > 0">
+      <h3 class="filter-title">Filter by Theme</h3>
+      <div class="themes-pills">
+        <button 
+          *ngFor="let theme of availableThemes()"
+          [class.active]="isThemeSelected(theme)"
+          (click)="toggleThemeFilter(theme)"
+          class="theme-pill">
+          {{ theme }}
+        </button>
       </div>
-    </mat-card>
+    </div>
+
+    <!-- FILTER ACTIONS: CLEAR & RESET -->
+    <div class="filter-actions" *ngIf="hasActiveFilters()">
+      <button mat-stroked-button color="warn" (click)="clearAllFilters()">
+        <mat-icon>filter_alt_off</mat-icon>
+        Clear All Filters
+      </button>
+    </div>
+  </div>
+
+  <!-- LOADING STATE -->
+  <div class="loading-state" *ngIf="isLoading()">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Loading entries...</p>
   </div>
 
   <!-- ENTRIES LIST -->
-  <div class="entries-section">
-    <div class="entries-header" *ngIf="entries.length > 0">
-      <div class="entries-title-group">
-        <mat-icon class="entries-icon">history</mat-icon>
-        <h3>Journal Entries</h3>
-      </div>
-      <div class="entries-count">{{ entries.length }}</div>
+  <div class="entries-list" *ngIf="!isLoading()">
+    <!-- CREATE FORM -->
+    <mat-card class="entry-form-card" *ngIf="showForm()">
+      <mat-card-header>
+        <mat-card-title>
+          {{ editingEntryId() ? '✏️ Edit Entry' : '✍️ New Entry' }}
+        </mat-card-title>
+      </mat-card-header>
+      
+      <mat-card-content>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Entry Text (min 10 characters)</mat-label>
+          <textarea 
+            matInput 
+            [(ngModel)]="formText" 
+            name="entryText"
+            rows="6"
+            placeholder="Write what's on your mind...">
+          </textarea>
+          <mat-hint>{{ formText().length }} / 10,000 characters</mat-hint>
+        </mat-form-field>
+
+        <div class="ai-toggle">
+          <mat-slide-toggle [(ngModel)]="enableAiAnalysis" name="enableAi" *ngIf="!editingEntryId()">
+            <span>Enable AI Analysis</span>
+          </mat-slide-toggle>
+          <span class="hint" *ngIf="!editingEntryId()">AI will analyze sentiment, themes, and patterns</span>
+        </div>
+      </mat-card-content>
+
+      <mat-card-actions>
+        <button 
+          mat-raised-button 
+          color="primary" 
+          (click)="editingEntryId() ? updateEntry() : createEntry()"
+          [disabled]="formText().trim().length < 10">
+          <mat-icon>{{ editingEntryId() ? 'edit' : 'check' }}</mat-icon>
+          {{ editingEntryId() ? 'Update' : 'Create' }} Entry
+        </button>
+        <button mat-button (click)="resetForm()">
+          <mat-icon>close</mat-icon>
+          Cancel
+        </button>
+      </mat-card-actions>
+    </mat-card>
+
+    <!-- NO ENTRIES STATE -->
+    <div class="empty-state" *ngIf="filteredEntries().length === 0 && !showForm()">
+      <mat-icon>note_add</mat-icon>
+      <p *ngIf="!hasActiveFilters()">No entries in {{ dateRangeLabel() }}</p>
+      <p *ngIf="hasActiveFilters()">No entries match your filters in {{ dateRangeLabel() }}</p>
+      <p class="hint">{{ hasActiveFilters() ? 'Try adjusting your filters or selecting a different date range' : 'Try a different time range or create your first entry' }}</p>
     </div>
 
-    <div class="entries">
-      <div *ngIf="entries.length === 0" class="empty-state">
-        <mat-icon class="empty-icon">article</mat-icon>
-        <p class="empty-title">No entries yet</p>
-        <p class="empty-message">Start writing your first journal entry to record your thoughts and patterns.</p>
-      </div>
-
-      <mat-card class="entry" *ngFor="let e of entries; let i = index">
-        <div class="entry-header">
-          <div class="entry-title-section">
-            <div class="entry-date">{{ e.date | date:'EEEE, MMM d, yyyy' }}</div>
-            <div class="sentiment-badge" *ngIf="e.sentiment" [attr.data-sentiment]="e.sentiment">
-              <mat-icon class="sentiment-icon">{{ getSentimentIcon(e.sentiment) }}</mat-icon>
-              <span class="sentiment-text">{{ e.sentiment }}</span>
+    <!-- ENTRIES CARDS -->
+    <mat-card class="entry-card" *ngFor="let entry of filteredEntries()">
+      <mat-card-header>
+        <div class="entry-header-info">
+          <div class="entry-meta">
+            <div class="date-time-section">
+              <span class="entry-date">{{ formatFullDate(entry.createdAt) }}</span>
+              <span class="entry-time">{{ formatTime(entry.createdAt) }}</span>
             </div>
+            <span class="sentiment-badge" *ngIf="entry.sentiment">
+              {{ getSentimentEmoji(entry.sentiment) }} {{ getSentimentLabel(entry.sentiment) }}
+            </span>
           </div>
-          <div class="entry-actions-icons">
-            <button mat-icon-button class="edit-btn" (click)="editEntry(e)" title="Edit">
-              <mat-icon>edit</mat-icon>
-            </button>
-            <button mat-icon-button class="delete-btn" color="warn" (click)="deleteEntry(e)" title="Delete">
-              <mat-icon>delete</mat-icon>
-            </button>
+        </div>
+      </mat-card-header>
+
+      <mat-card-content>
+        <!-- TEXT PREVIEW -->
+        <p class="entry-preview">{{ entry.textPreview }}</p>
+
+        <!-- KEY THEMES -->
+        <div class="themes-section" *ngIf="getThemeTags(entry.keyThemes).length > 0">
+          <span class="section-label">🏷️ Themes:</span>
+          <mat-chip-set>
+            <mat-chip *ngFor="let theme of getThemeTags(entry.keyThemes)">
+              {{ theme }}
+            </mat-chip>
+          </mat-chip-set>
+        </div>
+
+        <!-- MENTAL HEALTH FLAGS -->
+        <div class="flags-section" *ngIf="getThemeTags(entry.mentalHealthFlags).length > 0">
+          <span class="section-label">🚨 Flags:</span>
+          <div class="flags-emoji-row">
+            <span 
+              *ngFor="let flag of getFlagTags(entry.mentalHealthFlags)" 
+              class="flag-emoji"
+              [title]="mentalHealthFlagDetails[flag]?.description || flag | titlecase">
+              {{ mentalHealthFlagDetails[flag]?.emoji || '⚠️' }}
+            </span>
+          </div>
+        </div>
+      </mat-card-content>
+
+      <mat-card-actions>
+        <button mat-button (click)="triggerAnalysis(entry.id)" [disabled]="isAnalyzing()">
+          <mat-icon *ngIf="!isAnalyzing()">psychology</mat-icon>
+          <mat-spinner *ngIf="isAnalyzing()" diameter="20"></mat-spinner>
+          {{ isAnalyzing() ? 'Analyzing...' : 'Analyze ✨' }}
+        </button>
+        <button mat-button (click)="viewDetails(entry)">
+          <mat-icon>visibility</mat-icon>
+          View Full
+        </button>
+        <button mat-button (click)="editEntry(entry)">
+          <mat-icon>edit</mat-icon>
+          Edit
+        </button>
+        <button mat-button color="warn" (click)="deleteEntry(entry.id)">
+          <mat-icon>delete</mat-icon>
+          Delete
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+
+  <!-- DETAIL VIEW MODAL -->
+  <div class="detail-modal-overlay" *ngIf="showDetailView()" (click)="showDetailView.set(false)">
+    <mat-card class="detail-modal" *ngIf="selectedEntry()" (click)="$event.stopPropagation()">
+      <mat-card-header>
+        <mat-card-title>
+          📝 Journal Entry - {{ formatDate(selectedEntry()!.date) }}
+        </mat-card-title>
+        <button mat-icon-button (click)="showDetailView.set(false)" class="close-btn">
+          <mat-icon>close</mat-icon>
+        </button>
+      </mat-card-header>
+
+      <mat-card-content class="detail-content">
+        <!-- SENTIMENT & THEMES ROW -->
+        <div class="detail-row" *ngIf="selectedEntry()!.sentiment">
+          <div class="detail-item">
+            <span class="label">Sentiment:</span>
+            <span class="value">{{ getSentimentEmoji(selectedEntry()!.sentiment) }} {{ getSentimentLabel(selectedEntry()!.sentiment) }}</span>
           </div>
         </div>
 
-        <div class="entry-body">
-          <p class="entry-text">{{ e.text }}</p>
+        <!-- THEMES -->
+        <div class="detail-row" *ngIf="getThemeTags(selectedEntry()!.keyThemes).length > 0">
+          <span class="label">📚 Themes:</span>
+          <mat-chip-set>
+            <mat-chip *ngFor="let theme of getThemeTags(selectedEntry()!.keyThemes)">
+              {{ theme }}
+            </mat-chip>
+          </mat-chip-set>
         </div>
-      </mat-card>
-    </div>
+
+        <!-- SUGGESTED ACTIVITIES -->
+        <div class="detail-row" *ngIf="selectedEntry()!.suggestedActivities">
+          <span class="label">💡 Suggested Activities:</span>
+          <mat-chip-set>
+            <mat-chip *ngFor="let activity of getThemeTags(selectedEntry()!.suggestedActivities)">
+              {{ activity }}
+            </mat-chip>
+          </mat-chip-set>
+        </div>
+
+        <!-- MENTAL HEALTH FLAGS -->
+        <div class="detail-row" *ngIf="getThemeTags(selectedEntry()!.mentalHealthFlags).length > 0">
+          <span class="label">🚨 Mental Health Flags:</span>
+          <div class="flags-emoji-row detail">
+            <span 
+              *ngFor="let flag of getFlagTags(selectedEntry()!.mentalHealthFlags)" 
+              class="flag-emoji"
+              [title]="mentalHealthFlagDetails[flag]?.description || flag | titlecase">
+              {{ mentalHealthFlagDetails[flag]?.emoji || '⚠️' }}
+            </span>
+          </div>
+        </div>
+
+        <!-- EMOTIONAL PATTERNS -->
+        <div class="detail-row" *ngIf="getThemeTags(selectedEntry()!.emotionalPatterns).length > 0">
+          <span class="label">📈 Emotional Patterns:</span>
+          <mat-chip-set>
+            <mat-chip *ngFor="let pattern of getPatternTags(selectedEntry()!.emotionalPatterns)">
+              {{ pattern }}
+            </mat-chip>
+          </mat-chip-set>
+        </div>
+
+        <!-- FULL TEXT -->
+        <div class="full-text-section">
+          <p class="full-text">{{ selectedEntry()!.text }}</p>
+        </div>
+
+        <!-- AI ANALYSIS -->
+        <div class="analysis-section" *ngIf="selectedEntry()!.aiAnalysis">
+          <h3>📄 AI Analysis</h3>
+          <p class="analysis-text">{{ selectedEntry()!.aiAnalysis }}</p>
+        </div>
+
+        <!-- NO ANALYSIS STATE -->
+        <div class="no-analysis-state" *ngIf="!selectedEntry()!.aiAnalysis && selectedEntry()!.hasAiAnalysis">
+          <p>Analysis not yet available. Click "Analyze" to generate insights.</p>
+        </div>
+      </mat-card-content>
+
+      <mat-card-actions>
+        <button 
+          mat-raised-button 
+          color="primary" 
+          (click)="triggerAnalysis(selectedEntry()!.id)"
+          [disabled]="isAnalyzing()">
+          <mat-icon *ngIf="!isAnalyzing()">psychology</mat-icon>
+          <mat-spinner *ngIf="isAnalyzing()" diameter="20"></mat-spinner>
+          {{ isAnalyzing() ? 'Analyzing...' : 'Analyze' }}
+        </button>
+        <button mat-button (click)="editEntry(selectedEntry()!)">
+          <mat-icon>edit</mat-icon>
+          Edit
+        </button>
+        <button mat-button color="warn" (click)="deleteEntry(selectedEntry()!.id)">
+          <mat-icon>delete</mat-icon>
+          Delete
+        </button>
+      </mat-card-actions>
+    </mat-card>
   </div>
-</section>
+</div>

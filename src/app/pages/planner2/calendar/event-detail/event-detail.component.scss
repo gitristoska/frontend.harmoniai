@@ -190,6 +190,127 @@
   }
 }
 
+// NEW: Styles for time, deadline, and reschedule badge
+.time-duration,
+.deadline,
+.reschedule-badge {
+  font-weight: 500;
+  color: #374151;
+}
+
+.deadline {
+  color: #d97706; // Orange for deadline awareness
+  font-weight: 600;
+}
+
+.reschedule-badge {
+  background: #fef3c7;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  color: #92400e;
+}
+
+// NEW: Event tabs styling
+.event-tabs {
+  ::ng-deep .mat-mdc-tab-labels {
+    margin-bottom: 1rem;
+  }
+}
+
+// NEW: History view styles
+.history-view {
+  padding: 1rem 0;
+
+  .history-timeline {
+    position: relative;
+    padding: 1rem 0;
+
+    .history-item {
+      display: flex;
+      margin-bottom: 1.5rem;
+      position: relative;
+
+      .history-marker {
+        position: relative;
+        z-index: 2;
+        margin-right: 1rem;
+        flex-shrink: 0;
+
+        .history-icon {
+          width: 40px;
+          height: 40px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 50%;
+          background: #f3f4f6;
+          color: #374151;
+          font-size: 1.25rem;
+        }
+      }
+
+      .history-content {
+        padding: 0.5rem 0;
+        flex-grow: 1;
+
+        .history-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 0.5rem;
+
+          strong {
+            color: #111827;
+            font-weight: 600;
+            text-transform: capitalize;
+            font-size: 0.95rem;
+          }
+
+          .history-time {
+            font-size: 0.85rem;
+            color: #6b7280;
+          }
+        }
+
+        .history-description {
+          color: #374151;
+          font-size: 0.95rem;
+          margin-bottom: 0.5rem;
+          line-height: 1.4;
+        }
+
+        .history-details {
+          display: flex;
+          flex-direction: column;
+          gap: 0.25rem;
+          margin-top: 0.5rem;
+          padding-top: 0.5rem;
+          border-top: 1px solid #e5e7eb;
+
+          .detail-item {
+            font-size: 0.85rem;
+            color: #6b7280;
+          }
+        }
+      }
+
+      .history-line {
+        position: absolute;
+        left: 19px;
+        top: 40px;
+        bottom: -30px;
+        width: 2px;
+        background: linear-gradient(180deg, #d1d5db 0%, #e5e7eb 100%);
+      }
+
+      &:last-child .history-line {
+        display: none;
+      }
+    }
+  }
+}
+
 @keyframes slideIn {
   from {
     opacity: 0;
