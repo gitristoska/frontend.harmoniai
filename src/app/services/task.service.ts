@@ -5,15 +5,7 @@ import {
   PlannerTask,
   PlannerTaskCreateDto,
   PlannerTaskUpdateDto,
-  DailyEntry,
-  DailyEntryCreateDto,
-  DailyEntryUpdateDto,
-  DailyInsights,
-  ProductivityAnalysis,
-  ProcrastinationIndicator,
-  TaskCompleteRequest,
-  TaskRescheduleRequest,
-  ProcrastinationRisk as ApiProcrastinationRisk
+  taskStatusToString
 } from "../models/api";
 import {
   DailyPlannerReflection,
@@ -39,6 +31,22 @@ export class PlannerService {
   private readonly baseApiUrl = 'https://localhost:44304/api/planner';
 
   constructor(private http: HttpClient) {}
+
+  // ============================
+  // HELPER METHODS
+  // ============================
+
+  private convertStatusToString(status: any): string {
+    return taskStatusToString(status);
+  }
+
+  private normalizeTask(task: any): PlannerTask {
+    return {
+      ...task,
+      status: task.status as string, // Keep status as string from API response
+      priority: typeof task.priority === 'string' ? parseInt(task.priority) : task.priority
+    } as PlannerTask;
+  }
 
   // ============================
   // DAILY REFLECTION ENDPOINTS
@@ -105,19 +113,31 @@ export class PlannerService {
   }
 
   // ============================
+  // CHAT PLANNING
+  // ============================
+
+  generatePlanFromChat(userInput: string, date?: string): Observable<any> {
+    return this.http.post<any>(`${this.baseApiUrl}/chat/suggest`, {
+      userInput,
+      date: date || new Date().toISOString().split('T')[0]
+    });
+  }
+
+  // ============================
   // TASK MANAGEMENT
   // ============================
 
   getTasksForDay(date: string): Observable<PlannerTask[]> {
     return this.http.get<any>(`${this.baseApiUrl}/day?date=${date}`).pipe(
-      // Handle both array response and object response with tasks property
       map((response: any) => {
+        let tasks: any[] = [];
         if (Array.isArray(response)) {
-          return response;
+          tasks = response;
         } else if (response && response.tasks && Array.isArray(response.tasks)) {
-          return response.tasks;
+          tasks = response.tasks;
         }
-        return [];
+        // Normalize tasks: convert string status to enum
+        return tasks.map(task => this.normalizeTask(task));
       })
     );
   }
@@ -125,33 +145,46 @@ export class PlannerService {
   getTasksForWeek(startDate: string): Observable<PlannerTask[]> {
     return this.http.get<any>(`${this.baseApiUrl}/week?startDate=${startDate}`).pipe(
       map((response: any) => {
+        let tasks: any[] = [];
         if (Array.isArray(response)) {
-          return response;
+          tasks = response;
         } else if (response && response.tasksByDay) {
-          // Flatten tasksByDay object into array
-          const tasks: PlannerTask[] = [];
           Object.values(response.tasksByDay).forEach((dayTasks: any) => {
             if (Array.isArray(dayTasks)) {
               tasks.push(...dayTasks);
             }
           });
-          return tasks;
         }
-        return [];
+        // Normalize tasks: convert string status to enum
+        return tasks.map(task => this.normalizeTask(task));
       })
     );
   }
 
   getTaskById(id: string): Observable<PlannerTask> {
-    return this.http.get<PlannerTask>(`${this.baseApiUrl}/${id}`);
+    return this.http.get<any>(`${this.baseApiUrl}/${id}`).pipe(
+      map(task => this.normalizeTask(task))
+    );
   }
 
   addTask(task: PlannerTaskCreateDto): Observable<PlannerTask> {
-    return this.http.post<PlannerTask>(`${this.baseApiUrl}`, task);
+    const payload = {
+      ...task,
+      status: this.convertStatusToString(task.status)
+    };
+    return this.http.post<any>(`${this.baseApiUrl}`, payload).pipe(
+      map(response => this.normalizeTask(response))
+    );
   }
 
   updateTask(id: string | number, task: PlannerTaskUpdateDto): Observable<PlannerTask> {
-    return this.http.put<PlannerTask>(`${this.baseApiUrl}/${id}`, task);
+    const payload = {
+      ...task,
+      status: task.status !== undefined ? this.convertStatusToString(task.status) : undefined
+    };
+    return this.http.put<any>(`${this.baseApiUrl}/${id}`, payload).pipe(
+      map(response => this.normalizeTask(response))
+    );
   }
 
   deleteTask(id: string | number): Observable<void> {
@@ -162,36 +195,40 @@ export class PlannerService {
   // TASK COMPLETION & RESCHEDULING (Legacy)
   // ============================
 
-  completeTask(id: string | number, request: TaskCompleteRequest): Observable<PlannerTask> {
-    return this.http.patch<PlannerTask>(`${this.baseApiUrl}/tasks/${id}/complete`, request);
+  completeTask(id: string | number, request: any): Observable<PlannerTask> {
+    return this.http.patch<any>(`${this.baseApiUrl}/tasks/${id}/complete`, request).pipe(
+      map(response => this.normalizeTask(response))
+    );
   }
 
-  rescheduleTask(id: string | number, request: TaskRescheduleRequest): Observable<PlannerTask> {
-    return this.http.patch<PlannerTask>(`${this.baseApiUrl}/tasks/${id}/reschedule`, request);
+  rescheduleTask(id: string | number, request: any): Observable<PlannerTask> {
+    return this.http.patch<any>(`${this.baseApiUrl}/tasks/${id}/reschedule`, request).pipe(
+      map(response => this.normalizeTask(response))
+    );
   }
 
   // ============================
   // DAILY REFLECTION (Legacy)
   // ============================
 
-  getDailyEntry(date: string): Observable<DailyEntry> {
-    return this.http.get<DailyEntry>(`${this.baseApiUrl}/daily-entry?date=${date}`);
+  getDailyEntry(date: string): Observable<any> {
+    return this.http.get<any>(`${this.baseApiUrl}/daily-entry?date=${date}`);
   }
 
-  createDailyEntry(entry: DailyEntryCreateDto): Observable<DailyEntry> {
-    return this.http.post<DailyEntry>(`${this.baseApiUrl}/daily-entry`, entry);
+  createDailyEntry(entry: any): Observable<any> {
+    return this.http.post<any>(`${this.baseApiUrl}/daily-entry`, entry);
   }
 
-  updateDailyEntry(date: string, entry: DailyEntryUpdateDto): Observable<DailyEntry> {
-    return this.http.put<DailyEntry>(`${this.baseApiUrl}/daily-entry/${date}`, entry);
+  updateDailyEntry(date: string, entry: any): Observable<any> {
+    return this.http.put<any>(`${this.baseApiUrl}/daily-entry/${date}`, entry);
   }
 
-  addLifeBalanceItem(entryId: string, item: any): Observable<DailyEntry> {
-    return this.http.post<DailyEntry>(`${this.baseApiUrl}/daily-entry/${entryId}/life-balance`, item);
+  addLifeBalanceItem(entryId: string, item: any): Observable<any> {
+    return this.http.post<any>(`${this.baseApiUrl}/daily-entry/${entryId}/life-balance`, item);
   }
 
-  addCallAndEmailItem(entryId: string, item: any): Observable<DailyEntry> {
-    return this.http.post<DailyEntry>(`${this.baseApiUrl}/daily-entry/${entryId}/calls-emails`, item);
+  addCallAndEmailItem(entryId: string, item: any): Observable<any> {
+    return this.http.post<any>(`${this.baseApiUrl}/daily-entry/${entryId}/calls-emails`, item);
   }
 
   // ============================
@@ -228,15 +265,15 @@ export class PlannerService {
   // LEGACY AI INSIGHTS
   // ============================
 
-  getDailyInsights(date: string): Observable<DailyInsights> {
-    return this.http.get<DailyInsights>(`${this.baseApiUrl}/insights/daily?date=${date}`);
+  getDailyInsights(date: string): Observable<any> {
+    return this.http.get<any>(`${this.baseApiUrl}/insights/daily?date=${date}`);
   }
 
-  getProductivityAnalysis(): Observable<ProductivityAnalysis> {
-    return this.http.get<ProductivityAnalysis>(`${this.baseApiUrl}/insights/productivity`);
+  getProductivityAnalysis(): Observable<any> {
+    return this.http.get<any>(`${this.baseApiUrl}/insights/productivity`);
   }
 
-  getProcrastinationRisk(taskId: string): Observable<ProcrastinationIndicator> {
-    return this.http.get<ProcrastinationIndicator>(`${this.baseApiUrl}/insights/procrastination/${taskId}`);
+  getProcrastinationRisk(taskId: string): Observable<any> {
+    return this.http.get<any>(`${this.baseApiUrl}/insights/procrastination/${taskId}`);
   }
 }

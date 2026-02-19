@@ -8,7 +8,10 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatListModule } from '@angular/material/list';
 import { SettingsService } from '../../services/settings.service';
 import { PlannerService } from '../../services/task.service';
+import { TaskStatus } from '../../models/api';
 import { HabitService } from '../../services/habit.service';
+import { AuthService } from '../../services/auth.service';
+import { AiInsightsService } from '../../services/ai-insights.service';
 import type { Habit } from '../../models/habit.model';
 
 interface TaskItem { 
@@ -25,7 +28,7 @@ interface HabitItem {
   done?: boolean;
   days: (boolean | null)[];
 }
-interface AiRec { title: string; desc: string; icon: string }
+interface AiRec { title: string; description: string; icon: string }
 
 @Component({
   selector: 'app-homepage',
@@ -51,17 +54,31 @@ export class Homepage implements OnInit {
 
   protected readonly productivityDescription = signal<string>('');
 
-  protected readonly aiRecommendations = signal<AiRec[]>([
-    { title: 'Schedule optimization', desc: 'Consider tackling high-priority tasks during your peak productivity hours (9-11 AM).', icon: 'psychology' },
-    { title: 'Habit consistency', desc: "You're at 60% today. Keep up the momentum!", icon: 'local_fire_department' },
-    { title: 'Balance reminder', desc: "You have several work tasks. Don't forget to schedule breaks and personal time.", icon: 'trending_up' }
-  ]);
+  protected readonly aiRecommendations = signal<AiRec[]>([]);
+
+  protected readonly aiRecommendationsLoading = signal(false);
 
   constructor(
     private settingsService: SettingsService,
     private plannerService: PlannerService,
-    private habitService: HabitService
-  ) {}
+    private habitService: HabitService,
+    private authService: AuthService,
+    private aiInsightsService: AiInsightsService
+  ) {
+    this.updateGreetingWithUserName();
+  }
+
+  private updateGreetingWithUserName(): void {
+    const currentUser = this.authService.getCurrentUser();
+    if (currentUser) {
+      this.greeting.set(`Welcome back, ${currentUser.fullName}! 👋`);
+    }
+    this.authService.currentUser$.subscribe((user) => {
+      if (user) {
+        this.greeting.set(`Welcome back, ${user.fullName}! 👋`);
+      }
+    });
+  }
 
   ngOnInit(): void {
     this.setTodayDayIndex();
@@ -69,12 +86,14 @@ export class Homepage implements OnInit {
     this.loadSettings();
     this.loadTodaysTasks();
     this.loadHabits();
+    this.loadDailyRecommendations();
   }
 
   setTodayDayIndex() {
-    // Get today's day of week (0 = Sunday, 1 = Monday, ... 6 = Saturday)
+    // Convert JavaScript day (0=Sunday) to Monday-based index (0=Monday, 6=Sunday)
     const today = new Date().getDay();
-    this.todayDayIndex.set(today);
+    const mondayBasedIndex = (today + 6) % 7;
+    this.todayDayIndex.set(mondayBasedIndex);
   }
 
   setTodayDateString() {
@@ -92,8 +111,7 @@ export class Homepage implements OnInit {
   loadSettings() {
     this.settingsService.getSettings().subscribe({
       next: (settings) => {
-        const displayName = 'User';
-        this.greeting.set(`Welcome back, ${displayName}! 👋`);
+        // Settings loaded successfully
       },
       error: (err) => {
         console.warn('Failed to load settings', err);
@@ -110,14 +128,16 @@ export class Homepage implements OnInit {
           title: task.title || '',
           tag: task.category || undefined,
           priority: this.getPriorityLabel(task.priority),
-          done: task.status === 2 || task.isDone || false  // TaskStatus.Completed = 2
+          done: typeof task.status === 'string' ? task.status.toLowerCase() === 'done' : task.status === TaskStatus.Done || task.status === 2
         }));
         this.tasksToday.set(taskItems);
         
         // Calculate productivity
         const totalTasks = tasks.length;
         if (totalTasks > 0) {
-          const completedTasks = tasks.filter(t => t.status === 2 || t.isDone).length;
+          const completedTasks = tasks.filter(t => 
+            typeof t.status === 'string' ? t.status.toLowerCase() === 'done' : t.status === TaskStatus.Done || t.status === 2
+          ).length;
           const productivity = Math.round((completedTasks / totalTasks) * 100);
           this.productivityPercent.set(productivity);
           
@@ -147,12 +167,12 @@ export class Homepage implements OnInit {
     const diff = today.getDate() - dayOfWeek + 1; // Adjust to get Monday
     const weekStart = new Date(today.getFullYear(), today.getMonth(), diff);
     
-    this.habitService.getByWeek(weekStart).subscribe({
-      next: (habits) => {
-        // Get today's index in the week (0=Monday, 6=Sunday)
-        const dayIndex = ((today.getDay() + 6) % 7); // Convert Sunday=0 to Monday=0
+    this.habitService.getHabitsForWeek(weekStart, false).subscribe({
+      next: (response) => {
+        // Use consistent Monday-based day index (0=Monday, 6=Sunday)
+        const dayIndex = this.todayDayIndex();
         
-        const habitItems: HabitItem[] = habits
+        const habitItems: HabitItem[] = response.habits
           .filter(habit => habit.scheduledDays[dayIndex]) // Only show habits scheduled for today
           .map(habit => ({
             id: habit.id,
@@ -165,6 +185,23 @@ export class Homepage implements OnInit {
       error: (err) => {
         console.warn('Failed to load habits', err);
         this.habits.set([]);
+      }
+    });
+  }
+
+  loadDailyRecommendations() {
+    this.aiRecommendationsLoading.set(true);
+    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+    
+    this.aiInsightsService.getDailyRecommendations(today).subscribe({
+      next: (response) => {
+        this.aiRecommendations.set(response.recommendations);
+        this.aiRecommendationsLoading.set(false);
+      },
+      error: (err) => {
+        console.warn('Failed to load daily recommendations', err);
+        this.aiRecommendations.set([]);
+        this.aiRecommendationsLoading.set(false);
       }
     });
   }
@@ -290,5 +327,27 @@ export class Homepage implements OnInit {
     if (!h.length) return 0;
     const done = h.filter(x => x.done).length;
     return Math.round((done / h.length) * 100);
+  }
+
+  getCompletedTasks(): number {
+    return this.tasksToday().filter(t => t.done).length;
+  }
+
+  getCompletedHabits(): number {
+    return this.habits().filter(h => h.done).length;
+  }
+
+  getIconEmoji(iconName: string): string {
+    const iconMap: { [key: string]: string } = {
+      psychology: '🧠',
+      local_fire_department: '🔥',
+      trending_up: '📈',
+      mood: '😊',
+      fitness_center: '💪',
+      warning: '⚠️',
+      self_improvement: '📚',
+      schedule: '📅'
+    };
+    return iconMap[iconName] || '✨';
   }
 }

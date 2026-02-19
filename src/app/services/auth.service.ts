@@ -21,7 +21,7 @@ export interface AuthError {
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private apiUrl = 'https://localhost:44304/api/Auth';
+  private apiUrl = 'https://localhost:44304/api/auth';
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   currentUser$ = this.currentUserSubject.asObservable();
   private isLoadingSubject = new BehaviorSubject<boolean>(false);
@@ -93,6 +93,33 @@ export class AuthService {
    */
   getToken(): string | null {
     return localStorage.getItem('token');
+  }
+
+  /**
+   * Request password reset - sends reset code to email
+   */
+  requestPasswordReset(email: string): Observable<{ message: string }> {
+    this.isLoadingSubject.next(true);
+    return this.http.post<{ message: string }>(`${this.apiUrl}/forgot-password`, { email })
+      .pipe(
+        finalize(() => this.isLoadingSubject.next(false)),
+        catchError(err => this.handleError(err))
+      );
+  }
+
+  /**
+   * Reset password with new password and reset code
+   */
+  resetPassword(token: string, newPassword: string): Observable<{ message: string }> {
+    this.isLoadingSubject.next(true);
+    return this.http.post<{ message: string }>(`${this.apiUrl}/reset-password`, {
+      token,
+      newPassword
+    })
+      .pipe(
+        finalize(() => this.isLoadingSubject.next(false)),
+        catchError(err => this.handleError(err))
+      );
   }
 
   /**

@@ -89,6 +89,25 @@
         <div *ngIf="hasError('password')" class="error-message">
           {{ getPasswordErrorMessage() }}
         </div>
+
+        <!-- Password Requirements Checklist -->
+        <div class="password-requirements">
+          <p class="requirements-label">Password must contain:</p>
+          <ul>
+            <li [class.met]="!form.get('password')?.errors?.['weakPassword']?.hasMinLength && form.get('password')?.value">
+              <span class="requirement-check">✓</span> At least 8 characters
+            </li>
+            <li [class.met]="!form.get('password')?.errors?.['weakPassword']?.hasUpperCase && form.get('password')?.value">
+              <span class="requirement-check">✓</span> One uppercase letter (A-Z)
+            </li>
+            <li [class.met]="!form.get('password')?.errors?.['weakPassword']?.hasLowerCase && form.get('password')?.value">
+              <span class="requirement-check">✓</span> One lowercase letter (a-z)
+            </li>
+            <li [class.met]="!form.get('password')?.errors?.['weakPassword']?.hasNumeric && form.get('password')?.value">
+              <span class="requirement-check">✓</span> One number (0-9)
+            </li>
+          </ul>
+        </div>
       </div>
 
       <!-- Confirm Password Field -->

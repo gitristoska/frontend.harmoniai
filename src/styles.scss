@@ -38,6 +38,11 @@ body {
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 
+// Ensure timepicker popup appears above dialogs
+.ngx-material-timepicker-popup {
+  z-index: 2000 !important;
+}
+
 /* Page container utility used across pages to keep content centered with horizontal gutters */
 .page-container {
   max-width: 1100px;

@@ -1,74 +1,181 @@
 // src/app/models/api.ts
+
+// ===========================
+// TASK STATUS ENUM & HELPERS
+// ===========================
+
 export enum TaskStatus {
-  NotStarted = 0,
+  Todo = 0,
   InProgress = 1,
-  Completed = 2,
-  OnHold = 3,
-  Cancelled = 4
+  Done = 2
 }
 
-export interface TaskHistoryEvent {
-  action: 'created' | 'rescheduled' | 'statusChanged';
-  timestamp: string;          // ISO 8601
-  description: string;        // Human-readable description
-  oldStartDate?: string | null;
-  newStartDate?: string | null;
-  oldStartTime?: string | null;
-  newStartTime?: string | null;
-  oldDeadline?: string | null;
-  newDeadline?: string | null;
-  oldStatus?: TaskStatus | null;
-  newStatus?: TaskStatus | null;
+/**
+ * Convert backend string status to frontend enum
+ */
+export function stringToTaskStatus(status: string | TaskStatus): TaskStatus {
+  if (typeof status === 'number') {
+    return status;
+  }
+  
+  switch (status?.toLowerCase()) {
+    case 'todo':
+      return TaskStatus.Todo;
+    case 'inprogress':
+      return TaskStatus.InProgress;
+    case 'done':
+    case 'completed':
+      return TaskStatus.Done;
+    default:
+      return TaskStatus.Todo;
+  }
 }
+
+/**
+ * Convert frontend enum to backend string
+ */
+export function taskStatusToString(status: TaskStatus | number | string): string {
+  // Handle string input
+  if (typeof status === 'string') {
+    const lower = status.toLowerCase();
+    if (lower === 'inprogress' || lower === 'in progress') return 'InProgress';
+    if (lower === 'done') return 'Done';
+    return status; // Return as-is if already a valid string
+  }
+  
+  // Handle enum/number input
+  switch (status) {
+    case TaskStatus.Todo:
+      return 'Todo';
+    case TaskStatus.InProgress:
+      return 'InProgress';
+    case TaskStatus.Done:
+      return 'Done';
+    default:
+      return 'Todo';
+  }
+}
+
+// ===========================
+// PLANNER TASK MODELS
+// ===========================
 
 export interface PlannerTask {
-  id?: string | number;
+  id: string;
   title: string;
   description?: string;
-  startDate?: string;        // ISO string
-  endDate?: string;          // ISO string
-  startTime?: string;        // NEW: HH:mm format (24-hour), e.g., "14:30"
-  duration?: number;         // NEW: Duration in minutes, e.g., 120
-  deadline?: string;         // NEW: ISO 8601 DateTime, e.g., "2025-02-10T17:00:00Z"
-  priority: number;          // 0 = low, 1 = medium, 2 = high
-  status: TaskStatus;        // Task status
-  category?: string;
-  isDone?: boolean;
-  createdAt?: string;
-  updatedAt?: string;
-  accountId?: string;
-  dayPlanId?: string | null;
-  dayPlan?: any;
-  taskHistory?: TaskHistoryEvent[];  // NEW: Array of task events
-  rescheduleCount?: number;  // NEW: How many times rescheduled
-  statusChangeCount?: number; // NEW: How many times status changed
+  startDate?: string;           // ISO date string: "2026-02-18"
+  endDate?: string;             // ISO date string
+  startTime?: string;           // HH:mm format: "09:00"
+  duration?: number;            // Minutes
+  deadline?: string;            // ISO date string
+  priority: number;             // 0-3 (0=low, 1=high, 2=medium, 3=urgent)
+  status: string;               // "Todo" | "InProgress" | "Done"
+  category: string;             // "work" | "personal" | "health" | "other"
+  isFixedTime: boolean;         // ✅ NEW: Whether time can be rescheduled by AI
+  completedAt?: string;         // ✅ NEW: ISO timestamp when marked Done
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface PlannerTaskCreateDto {
-  title?: string;
+  title: string;
   description?: string;
-  startDate?: string;        // ISO string
-  endDate?: string;          // ISO string
-  startTime?: string;        // NEW: HH:mm format
-  duration?: number;         // NEW: Minutes
-  deadline?: string;         // NEW: ISO 8601 DateTime
-  priority?: number;         // 0 = low, 1 = medium, 2 = high
-  status?: TaskStatus;       // Task status
-  category?: string;
+  startDate?: string;           // ISO date: "2026-02-18"
+  endDate?: string;
+  startTime?: string;           // HH:mm: "14:30"
+  duration?: number;            // Minutes
+  deadline?: string;
+  priority?: number;            // 0-3
+  status?: TaskStatus | string;              // "Todo" | "InProgress" | "Done"
+  category?: string;            // Default: "personal"
+  isFixedTime?: boolean;        // ✅ NEW: Default: false
 }
 
 export interface PlannerTaskUpdateDto {
   title?: string;
   description?: string;
-  startDate?: string;        // ISO string
-  endDate?: string;          // ISO string
-  startTime?: string;        // NEW: HH:mm format
-  duration?: number;         // NEW: Minutes
-  deadline?: string;         // NEW: ISO 8601 DateTime
-  priority?: number;         // 0 = low, 1 = medium, 2 = high
-  status?: TaskStatus;       // Task status
+  startDate?: string;
+  endDate?: string;
+  startTime?: string;
+  duration?: number;
+  deadline?: string;
+  priority?: number;
+  status?: TaskStatus | string;              // "Todo" | "InProgress" | "Done"
   category?: string;
+  isFixedTime?: boolean;        // ✅ NEW
+  completedAt?: string;         // ✅ NEW: Auto-set when status="Done"
 }
+
+// ===========================
+// CHAT PLANNER MODELS
+// ===========================
+
+export interface ChatPlannerRequest {
+  userInput: string;            // Natural language: "I need to clean the house..."
+  date?: string;                // Optional: "2026-02-18" (defaults to today)
+}
+
+export interface SuggestedTask {
+  title: string;
+  description?: string;
+  category: string;             // "work" | "personal" | "health" | "other"
+  priority: number;             // 1=High, 2=Medium, 3=Low
+  startTime?: string;           // "09:00"
+  duration?: number;            // Minutes
+  isFixedTime: boolean;         // Whether AI suggested fixed time
+}
+
+export interface ChatPlannerResponse {
+  summary: string;              // "You have 4 tasks planned..."
+  suggestedTasks: SuggestedTask[];
+  recommendations?: string;     // "Consider adding breaks..."
+  generatedAt: string;          // ISO timestamp
+}
+
+// ===========================
+// DAILY VIEW RESPONSE
+// ===========================
+
+export interface DailyTasksResponse {
+  date: string;                 // "2026-02-18"
+  tasks: PlannerTask[];
+  taskCount: number;
+  completedCount: number;
+  message?: string;             // "No tasks for this day..."
+}
+
+// ===========================
+// WEEKLY VIEW RESPONSE
+// ===========================
+
+export interface WeeklyTasksResponse {
+  weekStart: string;            // "2026-02-17"
+  weekEnd: string;              // "2026-02-23"
+  tasksByDay: { [date: string]: PlannerTask[] };
+  totalTasks: number;
+  completedTasks: number;
+  completionRate: number;       // Percentage
+  message?: string;
+}
+
+// ===========================
+// TASK STATISTICS
+// ===========================
+
+export interface TaskStats {
+  totalTasks: number;
+  completedTasks: number;
+  inProgressTasks: number;
+  todoTasks: number;
+  completionRate: number;       // Percentage
+  tasksByCategory: { [category: string]: number };
+  tasksByPriority: { [priority: string]: number };
+}
+
+// ===========================
+// SETTINGS MODELS
+// ===========================
 
 export interface SettingsUpdateDto {
   id?: string;
@@ -76,244 +183,76 @@ export interface SettingsUpdateDto {
   displayName?: string;
   weekStartsOn?: 'Monday' | 'Sunday';
   aiConsent?: boolean;
-  modulesJson?: string; // JSON string like '{"planner": true, "journal": true, "habits": true}'
+  modulesJson?: string;
   enableNotifications?: boolean;
   createdAt?: string;
   updatedAt?: string;
 }
-export interface CallAndEmailItem {
-  id?: string;
-  text?: string;
-  isDone: boolean;
-}
 
-export interface LifeBalanceItem {
-  id?: string;
-  category?: string;
-  text?: string;
-  isDone: boolean;
-}
+// ===========================
+// REMOVED ENTITIES
+// ===========================
+// ❌ DailyEntry - Removed (too complex)
+// ❌ CallAndEmailItem - Removed
+// ❌ LifeBalanceItem - Removed
+// ❌ TaskHistoryEvent - Removed (simplified to CompletedAt)
+// ❌ WeeklyInspiration - Not in backend
+// ❌ MonthlyEntry - Not implemented yet
+// ❌ MonthlyGoal - Not implemented yet
+// ❌ MonthlyReflection - Not implemented yet
 
-export interface Rating {
-  productivity: number; // 1-5
-  mood: number;         // 1-5
-  health: number;       // 1-5
-}
+// ===========================
+// HELPER FUNCTIONS
+// ===========================
 
-export interface DailyEntry {
-  id: string;
-  date: string;
-  gratefulFor?: string;
-  inspirationOrMotivation?: string;
-  personalNotes?: string;
-  notesForTomorrow?: string;
-  lifeBalanceToDoList?: LifeBalanceItem[];
-  callsAndEmailsChecklist?: CallAndEmailItem[];
-  rating: Rating;
-}
-
-export interface DailyEntryCreateDto {
-  date: string;
-  gratefulFor?: string;
-  inspirationOrMotivation?: string;
-  personalNotes?: string;
-  notesForTomorrow?: string;
-  lifeBalanceToDoList?: LifeBalanceItem[];
-  callsAndEmailsChecklist?: CallAndEmailItem[];
-  rating: Rating;
-}
-
-export interface DailyEntryUpdateDto {
-  gratefulFor?: string;
-  inspirationOrMotivation?: string;
-  personalNotes?: string;
-  notesForTomorrow?: string;
-  lifeBalanceToDoList?: LifeBalanceItem[];
-  callsAndEmailsChecklist?: CallAndEmailItem[];
-  rating?: Rating;
-}
-
-export interface WeeklyInspiration {
-  id?: string;
-  weekStartDate: string;          // ISO date of Monday of that week
-  weekEndDate: string;            // ISO date of Sunday of that week
-  inspiration: string;            // The motivational text for the week
-  createdAt?: string;
-  updatedAt?: string;
-  accountId?: string;
-}
-
-export interface WeeklyInspirationCreateDto {
-  inspiration: string;
-}
-
-// Monthly Planning Models
 /**
- * MonthlyEntry: Container for all monthly planning data
- * Includes focus, goals, and optional reflection
+ * Convert PlannerTask from API to display format
  */
-export interface MonthlyEntry {
-  id: string;
-  month: string;                  // Format: YYYY-MM (e.g., "2025-01")
-  userId: string;
-  intentions: string;             // Focus intentions
-  moodWords: string;              // Mood or vibe words
-  notes: string;                  // General notes
-  goals: MonthlyGoal[];           // 0-3 goals
-  reflection?: MonthlyReflection;  // Optional reflection
-  createdAt?: string;
-  updatedAt?: string;
+export function mapTaskFromApi(task: any): PlannerTask {
+  return {
+    ...task,
+    status: task.status || 'Todo', // Keep as string
+  };
 }
 
 /**
- * MonthlyGoal: Individual goal within a monthly entry
+ * Convert CreateTaskDto for API submission
  */
-export interface MonthlyGoal {
-  id: string;
-  entryId: string;
-  title: string;
-  description: string;
-  progress: number;               // 0-100
-  order: number;                  // Sort order (0, 1, 2, etc.)
-  taskLinks: { taskId: string; taskTitle: string }[];  // Linked tasks
-  createdAt?: string;
-  updatedAt?: string;
+export function mapTaskForApi(task: PlannerTaskCreateDto): any {
+  return {
+    ...task,
+    status: typeof task.status === 'number' 
+      ? taskStatusToString(task.status) 
+      : task.status || 'Todo',
+    isFixedTime: task.isFixedTime ?? false,
+  };
 }
 
 /**
- * MonthlyReflection: Monthly reflection and learnings
+ * Convert UpdateTaskDto for API submission
  */
-export interface MonthlyReflection {
-  id: string;
-  entryId: string;
-  rating: number;                 // 1-10
-  wins: string;                   // Multiline text
-  challenges: string;             // Multiline text
-  lessons: string;                // Multiline text
-  nextMonthFocus: string;         // Focus for next month
-  createdAt?: string;
-  updatedAt?: string;
-}
-
-/**
- * DTOs for creating/updating monthly planning data
- */
-export interface MonthlyEntryCreateDto {
-  month: string;                  // Format: YYYY-MM
-  intentions: string;
-  moodWords: string;
-  notes: string;
-}
-
-export interface MonthlyGoalCreateDto {
-  title: string;
-  description: string;
-  order: number;
-}
-
-export interface MonthlyGoalUpdateDto {
-  title?: string;
-  description?: string;
-  progress?: number;
-  order?: number;
-}
-
-export interface MonthlyReflectionDto {
-  rating: number;                 // 1-10
-  wins: string;
-  challenges: string;
-  lessons: string;
-  nextMonthFocus: string;
-}
-
-// ===========================
-// WELLNESS & AI INSIGHTS
-// ===========================
-
-export interface DailyPlanningAdvice {
-  date: string;
-  advice: string;               // 3 planning tips combined into one string
-  generatedAt: string;          // ISO timestamp
-}
-
-export interface ProductivityInsights {
-  insights: string;             // Duration accuracy, best hours, procrastination stats
-  generatedAt: string;
-  period: string;               // "4 weeks"
-}
-
-export interface ProcrastinationRisk {
-  taskId: string;
-  taskTitle?: string;
-  isAtRisk: boolean;
-  checkedAt: string;
-  riskLevel?: 'low' | 'medium' | 'high';
-}
-
-export interface WellnessInsights {
-  insights: string;             // Mood trends, balance, overall wellness
-  generatedAt: string;
-  period: string;               // "4 weeks"
-}
-
-export interface MoodTrends {
-  trends: string;               // Average mood, trend direction, patterns
-  period: string;               // "30 days" etc
-  generatedAt: string;
-}
-
-export interface BalanceAnalysis {
-  analysis: string;             // Work/Personal/Health percentage breakdown
-  period: string;
-  generatedAt: string;
-}
-
-export interface WellnessWarnings {
-  hasWarnings: boolean;
-  period: string;               // "14 days"
-  status: string;               // "✓ Wellness is good" or warning message
-  checkedAt: string;
-  warnings?: string[];          // List of specific warnings if hasWarnings=true
-}
-
-// ===========================
-// PLANNER AI INSIGHTS
-// ===========================
-
-export interface DailyInsights {
-  date: string;
-  tips: string[];              // 3 planning tips based on patterns
-  totalTasks: number;
-  totalDurationMinutes: number;
-  workPercentage: number;
-  personalPercentage: number;
-  peakTime?: string;           // e.g., "9am-12pm"
-  procrastinationRisk?: boolean;
-}
-
-export interface ProductivityAnalysis {
-  averageDuration: number;     // Average task duration (minutes)
-  accuracyRate: number;        // % of tasks completed in estimated time
-  bestPractiveHours: string[]; // e.g., ["9am", "10am", "11am"]
-  averageRescheduleCount: number;
-  totalTasksCompleted: number;
-}
-
-export interface ProcrastinationIndicator {
-  taskId: string;
-  taskTitle: string;
-  rescheduleCount: number;
-  riskLevel: 'low' | 'medium' | 'high';
-  reason?: string;
-}
-
-export interface TaskCompleteRequest {
-  notes?: string;
-  actualDurationMinutes?: number;
-}
-
-export interface TaskRescheduleRequest {
-  newDate: string;             // YYYY-MM-DD
-  newTime: string;             // HH:mm
-  reason?: string;
+export function mapTaskUpdateForApi(task: PlannerTaskUpdateDto): any {
+  const payload: any = {};
+  
+  if (task.title !== undefined) payload.title = task.title;
+  if (task.description !== undefined) payload.description = task.description;
+  if (task.startDate !== undefined) payload.startDate = task.startDate;
+  if (task.endDate !== undefined) payload.endDate = task.endDate;
+  if (task.startTime !== undefined) payload.startTime = task.startTime;
+  if (task.duration !== undefined) payload.duration = task.duration;
+  if (task.deadline !== undefined) payload.deadline = task.deadline;
+  if (task.priority !== undefined) payload.priority = task.priority;
+  if (task.category !== undefined) payload.category = task.category;
+  if (task.isFixedTime !== undefined) payload.isFixedTime = task.isFixedTime;
+  
+  // Convert status to string
+  if (task.status !== undefined) {
+    payload.status = typeof task.status === 'number' 
+      ? taskStatusToString(task.status as TaskStatus)
+      : task.status;
+  }
+  
+  // Don't manually set completedAt - backend handles it
+  
+  return payload;
 }

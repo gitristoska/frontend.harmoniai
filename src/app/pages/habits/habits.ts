@@ -127,11 +127,26 @@ export class Habits implements OnInit {
   }
 
   /**
-   * Split suggestions string into array of numbered items
+   * Parse AI suggestions from JSON string and extract recommendations
    */
   getSuggestionsList(): string[] {
     if (!this.weeklyAiSuggestions) return [];
-    return this.weeklyAiSuggestions.split('\n').filter(s => s.trim());
+    
+    try {
+      const parsed = JSON.parse(this.weeklyAiSuggestions);
+      if (parsed.recommendations && Array.isArray(parsed.recommendations)) {
+        return parsed.recommendations.map((item: Record<string, string>) => {
+          // Each item has a numbered key (e.g., "1", "2", "3")
+          const key = Object.keys(item)[0];
+          return item[key];
+        });
+      }
+    } catch (e) {
+      // If JSON parsing fails, try the old format (newline-separated)
+      return this.weeklyAiSuggestions.split('\n').filter(s => s.trim());
+    }
+    
+    return [];
   }
 
   /**

@@ -1,13 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import {
-  DailyEntry,
-  DailyEntryCreateDto,
-  DailyEntryUpdateDto,
-  WeeklyInspiration,
-  WeeklyInspirationCreateDto
-} from '../models/api';
 
 @Injectable({ providedIn: 'root' })
 export class DailyEntryService {
@@ -19,30 +12,30 @@ export class DailyEntryService {
   // GET
   // ============================
 
-  getByDate(date: string): Observable<DailyEntry> {
-    return this.http.get<DailyEntry>(`${this.baseApiUrl}/date/${date}`);
+  getByDate(date: string): Observable<any> {
+    return this.http.get<any>(`${this.baseApiUrl}/date/${date}`);
   }
 
-  getById(id: string): Observable<DailyEntry> {
-    return this.http.get<DailyEntry>(`${this.baseApiUrl}/${id}`);
+  getById(id: string): Observable<any> {
+    return this.http.get<any>(`${this.baseApiUrl}/${id}`);
   }
 
-  getRange(startDate: string, endDate: string): Observable<DailyEntry[]> {
+  getRange(startDate: string, endDate: string): Observable<any[]> {
     const params = new HttpParams()
       .set('startDate', startDate)
       .set('endDate', endDate);
-    return this.http.get<DailyEntry[]>(`${this.baseApiUrl}/range`, { params });
+    return this.http.get<any[]>(`${this.baseApiUrl}/range`, { params });
   }
 
   // ============================
   // CREATE / UPDATE / DELETE
   // ============================
 
-  create(entry: DailyEntryCreateDto): Observable<DailyEntry> {
-    return this.http.post<DailyEntry>(`${this.baseApiUrl}`, entry);
+  create(entry: any): Observable<any> {
+    return this.http.post<any>(`${this.baseApiUrl}`, entry);
   }
 
-  update(id: string, entry: DailyEntryUpdateDto): Observable<void> {
+  update(id: string, entry: any): Observable<void> {
     return this.http.put<void>(`${this.baseApiUrl}/${id}`, entry);
   }
 
@@ -54,19 +47,19 @@ export class DailyEntryService {
   // WEEKLY INSPIRATION
   // ============================
 
-  getWeeklyInspiration(date: string): Observable<WeeklyInspiration> {
+  getWeeklyInspiration(date: string): Observable<any> {
     // Pass a date within the desired week, backend will calculate week boundaries
     const params = new HttpParams().set('date', date);
-    return this.http.get<WeeklyInspiration>(
+    return this.http.get<any>(
       `${this.baseApiUrl}/weekly-inspiration`,
       { params }
     );
   }
 
   createOrUpdateWeeklyInspiration(
-    inspiration: WeeklyInspirationCreateDto
-  ): Observable<WeeklyInspiration> {
-    return this.http.post<WeeklyInspiration>(
+    inspiration: any
+  ): Observable<any> {
+    return this.http.post<any>(
       `${this.baseApiUrl}/weekly-inspiration`,
       inspiration
     );

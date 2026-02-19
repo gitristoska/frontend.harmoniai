@@ -1,0 +1,50 @@
+<div class="insights-container">
+  <!-- HEADER -->
+  <div class="insights-header">
+    <h1>📊 YOUR PRODUCTIVITY PATTERNS</h1>
+    <button mat-raised-button (click)="goBack()">
+      <mat-icon>arrow_back</mat-icon> Back to Planner
+    </button>
+  </div>
+
+  <!-- LOADING STATE -->
+  <mat-progress-bar *ngIf="isLoading()" mode="indeterminate"></mat-progress-bar>
+
+  <!-- ERROR STATE -->
+  <div *ngIf="error()" class="error-banner">
+    <span>{{ error() }}</span>
+    <button mat-icon-button (click)="error.set(null)">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- NO DATA STATE -->
+  <div *ngIf="!isLoading() && !productivityInsights() && !error()" class="empty-state">
+    <p>📊 Not Enough Data Yet</p>
+    <p>AI can't generate insights yet. Continue tracking tasks and daily reflections. After 2 weeks, personalized productivity analysis will appear here.</p>
+    <button mat-raised-button color="primary" (click)="goBack()">Back to Planner</button>
+  </div>
+
+  <!-- AI INSIGHTS ONLY -->
+  <div *ngIf="!isLoading() && productivityInsights()" class="insights-content">
+    <section class="panel">
+      <div class="panel-header">
+        <h3>💡 AI PRODUCTIVITY ANALYSIS</h3>
+        <button mat-icon-button (click)="refreshInsights()" [disabled]="isLoading()"
+          matTooltip="Refresh">
+          <mat-icon>refresh</mat-icon>
+        </button>
+      </div>
+      
+      <div class="insights-text">
+        <ng-container *ngFor="let line of productivityInsights()!.insights.split('\n'); let i = index; trackBy: trackByIndex">
+          <div *ngIf="line.trim()" class="insight-line">{{ line }}</div>
+        </ng-container>
+      </div>
+
+      <div class="insights-meta">
+        <small>Generated: {{ productivityInsights()!.generatedAt | date: 'short' }}</small>
+      </div>
+    </section>
+  </div>
+</div>

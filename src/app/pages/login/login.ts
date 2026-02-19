@@ -4,13 +4,13 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { AuthService, AuthError } from '../../services/auth.service';
-import { Router, ActivatedRoute } from '@angular/router';
-import { emailValidator } from '../../core/validators';
+import { Router, ActivatedRoute, RouterModule } from '@angular/router';
+import { emailValidator, passwordStrengthValidator } from '../../core/validators';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MatIconModule, MatButtonModule],
+  imports: [CommonModule, ReactiveFormsModule, MatIconModule, MatButtonModule, RouterModule],
   providers: [AuthService],
   templateUrl: './login.html',
   styleUrls: ['./login.scss']
@@ -21,6 +21,9 @@ export class LoginComponent implements OnInit {
   isLoading = false;
   showPassword = false;
   returnUrl: string = '/';
+  loginAttempts = 0;
+  isLockedOut = false;
+  lockoutTimeRemaining = 0;
 
   constructor(
     private fb: FormBuilder,
@@ -33,11 +36,46 @@ export class LoginComponent implements OnInit {
     // Get return URL from route parameters or default to '/'
     this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
 
+    // Load login attempts from localStorage
+    const storedAttempts = localStorage.getItem('loginAttempts');
+    this.loginAttempts = storedAttempts ? parseInt(storedAttempts, 10) : 0;
+
+    // Check if user is locked out
+    const lockoutTime = localStorage.getItem('loginLockoutTime');
+    if (lockoutTime) {
+      const remainingTime = parseInt(lockoutTime, 10) - Date.now();
+      if (remainingTime > 0) {
+        this.isLockedOut = true;
+        this.lockoutTimeRemaining = Math.ceil(remainingTime / 1000);
+        this.startLockoutTimer();
+      } else {
+        localStorage.removeItem('loginLockoutTime');
+        localStorage.removeItem('loginAttempts');
+      }
+    }
+
     this.form = this.fb.group({
       email: ['', [Validators.required, Validators.email, emailValidator()]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
+      password: ['', [Validators.required, Validators.minLength(8), passwordStrengthValidator()]],
       rememberMe: [false]
     });
+  }
+
+  /**
+   * Start countdown timer for lockout
+   */
+  private startLockoutTimer(): void {
+    const interval = setInterval(() => {
+      this.lockoutTimeRemaining--;
+      if (this.lockoutTimeRemaining <= 0) {
+        clearInterval(interval);
+        this.isLockedOut = false;
+        this.loginAttempts = 0;
+        localStorage.removeItem('loginLockoutTime');
+        localStorage.removeItem('loginAttempts');
+        this.errorMessage = null;
+      }
+    }, 1000);
   }
 
   /**
@@ -67,7 +105,15 @@ export class LoginComponent implements OnInit {
       return 'Password is required';
     }
     if (passwordControl.hasError('minlength')) {
-      return 'Password must be at least 6 characters';
+      return 'Password must be at least 8 characters';
+    }
+    if (passwordControl.hasError('weakPassword')) {
+      const errors = passwordControl.getError('weakPassword');
+      const missing = [];
+      if (!errors.hasUpperCase) missing.push('uppercase letter');
+      if (!errors.hasLowerCase) missing.push('lowercase letter');
+      if (!errors.hasNumeric) missing.push('number');
+      return `Password needs: ${missing.join(', ')}`;
     }
     return 'Invalid password';
   }
@@ -83,6 +129,11 @@ export class LoginComponent implements OnInit {
    * Handle form submission
    */
   onSubmit(): void {
+    if (this.isLockedOut) {
+      this.errorMessage = `Account temporarily locked. Try again in ${this.lockoutTimeRemaining} seconds.`;
+      return;
+    }
+
     if (!this.form.valid) {
       this.errorMessage = 'Please fix the errors above';
       return;
@@ -95,6 +146,11 @@ export class LoginComponent implements OnInit {
 
     this.auth.login(email, password).subscribe({
       next: () => {
+        // Clear login attempts on successful login
+        localStorage.removeItem('loginAttempts');
+        localStorage.removeItem('loginLockoutTime');
+        this.loginAttempts = 0;
+
         if (rememberMe) {
           localStorage.setItem('rememberEmail', email);
         } else {
@@ -103,7 +159,22 @@ export class LoginComponent implements OnInit {
         this.router.navigateByUrl(this.returnUrl);
       },
       error: (err: AuthError) => {
-        this.errorMessage = err.message;
+        this.loginAttempts++;
+        localStorage.setItem('loginAttempts', this.loginAttempts.toString());
+
+        // Lock out after 5 failed attempts for 15 minutes
+        if (this.loginAttempts >= 5) {
+          const lockoutDuration = 15 * 60 * 1000; // 15 minutes
+          const lockoutTime = Date.now() + lockoutDuration;
+          localStorage.setItem('loginLockoutTime', lockoutTime.toString());
+          this.isLockedOut = true;
+          this.lockoutTimeRemaining = 15 * 60;
+          this.startLockoutTimer();
+          this.errorMessage = `Too many failed attempts. Account locked for 15 minutes. (Attempts: ${this.loginAttempts})`;
+        } else {
+          this.errorMessage = `${err.message} (Attempt ${this.loginAttempts}/5)`;
+        }
+
         this.isLoading = false;
       }
     });

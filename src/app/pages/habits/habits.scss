@@ -493,7 +493,7 @@
             /* Scheduled and completed */
             &.scheduled.completed {
               .done {
-                color: #10b981;
+                color: #f59e0b;
                 font-size: 20px;
               }
             }
@@ -518,7 +518,7 @@
             }
 
             .done {
-              color: #10b981;
+              color: #f59e0b;
               font-size: 20px;
             }
 
@@ -709,29 +709,45 @@
       padding: 24px;
 
       .ai-suggestions {
-        list-style: none;
-        margin: 0;
-        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
 
-        li {
-          padding: 12px;
-          margin-bottom: 12px;
-          background: #f9fafb;
-          border-left: 4px solid #f97316;
-          border-radius: 4px;
-          color: #0f172a;
-          font-size: 14px;
-          line-height: 1.6;
+        .suggestion-item {
+          display: flex;
+          gap: 16px;
+          padding: 16px;
+          background: linear-gradient(135deg, #fef3c7 0%, #fef9e7 100%);
+          border-left: 4px solid #f59e0b;
+          border-radius: 8px;
           transition: all 0.2s ease;
 
           &:hover {
-            background: #fff;
-            border-left-color: #f59e0b;
-            box-shadow: 0 2px 6px rgba(15, 23, 42, 0.05);
+            background: linear-gradient(135deg, #fef08a 0%, #fef3c7 100%);
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.15);
+            border-left-color: #d97706;
           }
 
-          &:last-child {
-            margin-bottom: 0;
+          .suggestion-number {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            width: 32px;
+            height: 32px;
+            background: #f59e0b;
+            color: #fff;
+            border-radius: 50%;
+            font-weight: 600;
+            font-size: 14px;
+          }
+
+          .suggestion-text {
+            flex: 1;
+            color: #1f2937;
+            font-size: 14px;
+            line-height: 1.6;
+            word-wrap: break-word;
           }
         }
       }

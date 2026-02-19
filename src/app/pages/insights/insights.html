@@ -1,0 +1,241 @@
+<div class="insights-container">
+  <div class="insights-header">
+    <div class="header-content">
+      <h1>
+        <mat-icon class="header-icon">insights</mat-icon>
+        AI Reflections & Insights
+      </h1>
+      <p class="subtitle">Daily recommendations and weekly reflections powered by AI analysis</p>
+    </div>
+  </div>
+
+  <mat-tab-group class="insights-tabs" [selectedIndex]="selectedTabIndex()">
+    <!-- DAILY TAB -->
+    <mat-tab label="Daily">
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">calendar_today</mat-icon>
+        Daily
+      </ng-template>
+
+      <div class="tab-content">
+        <!-- Date Navigation -->
+        <div class="date-navigation">
+          <button mat-icon-button (click)="selectDate(dailyDates()[0].date, 'daily')" title="Earlier days">
+            <mat-icon>chevron_left</mat-icon>
+          </button>
+          <div class="date-chips">
+            <button
+              *ngFor="let dateNav of dailyDates()"
+              mat-stroked-button
+              [class.active]="dateNav.isToday || dateNav.date === currentDate()"
+              (click)="selectDate(dateNav.date, 'daily')"
+              class="date-chip"
+            >
+              {{ dateNav.label }}
+              <span *ngIf="dateNav.isToday" class="today-badge">•</span>
+            </button>
+          </div>
+          <button mat-icon-button (click)="selectDate(dailyDates()[dailyDates().length - 1].date, 'daily')" title="Later days">
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+        </div>
+
+        <!-- Daily Reflection Section -->
+        <div class="section">
+          <div class="section-header">
+            <h2>
+              <mat-icon>note</mat-icon>
+              Daily Reflection
+            </h2>
+            <button
+              mat-raised-button
+              color="primary"
+              (click)="generateDailyReflection()"
+              [disabled]="generatingDaily()"
+              class="generate-btn"
+            >
+              <mat-icon *ngIf="!generatingDaily()">autorenew</mat-icon>
+              <mat-icon *ngIf="generatingDaily()" class="spinner">hourglass_empty</mat-icon>
+              {{ generatingDaily() ? 'Generating...' : 'Generate Reflection' }}
+            </button>
+          </div>
+
+          <div *ngIf="dailyReflectionLoading()" class="loading">
+            <mat-icon class="spinner">hourglass_empty</mat-icon>
+            <p>Loading reflection...</p>
+          </div>
+
+          <div *ngIf="!dailyReflectionLoading() && dailyReflection() as reflection; else noReflection" class="reflection-card">
+            <!-- Stats Row -->
+            <div class="reflection-stats">
+              <div class="stat-item">
+                <span class="stat-label">Tasks</span>
+                <span class="stat-value">{{ reflection.tasksCompleted }}/{{ reflection.tasksTotal }}</span>
+              </div>
+              <mat-divider [vertical]="true"></mat-divider>
+              <div class="stat-item">
+                <span class="stat-label">Habits</span>
+                <span class="stat-value">{{ reflection.habitsCompleted }}/{{ reflection.habitsTotal }}</span>
+              </div>
+              <mat-divider [vertical]="true"></mat-divider>
+              <div class="stat-item">
+                <span class="stat-label">Mood</span>
+                <span class="stat-value mood-badge" [class]="'mood-' + reflection.moodTrend">
+                  {{ reflection.moodTrend }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Summary -->
+            <div class="reflection-section">
+              <h3>Summary</h3>
+              <p>{{ reflection.summary }}</p>
+            </div>
+
+            <!-- Highlights -->
+            <div class="reflection-section">
+              <h3><mat-icon class="small-icon">favorite</mat-icon> Highlights</h3>
+              <p>{{ reflection.highlights }}</p>
+            </div>
+
+            <!-- Improvements -->
+            <div class="reflection-section">
+              <h3><mat-icon class="small-icon">trending_up</mat-icon> Areas to Improve</h3>
+              <p>{{ reflection.improvements }}</p>
+            </div>
+
+            <!-- Tomorrow's Advice -->
+            <div class="reflection-section tomorrow">
+              <h3><mat-icon class="small-icon">rocket_launch</mat-icon> Tomorrow's Strategy</h3>
+              <p>{{ reflection.tomorrowAdvice }}</p>
+            </div>
+
+            <p class="generated-at">Generated at {{ reflection.generatedAt | date: 'MMM d, yyyy h:mm a' }}</p>
+          </div>
+
+          <ng-template #noReflection>
+            <div class="empty-state">
+              <mat-icon>edit_note</mat-icon>
+              <p>No reflection yet for this date.</p>
+              <p class="empty-hint">Click "Generate Reflection" to create one.</p>
+            </div>
+          </ng-template>
+        </div>
+      </div>
+    </mat-tab>
+
+    <!-- WEEKLY TAB -->
+    <mat-tab label="Weekly">
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">date_range</mat-icon>
+        Weekly
+      </ng-template>
+
+      <div class="tab-content">
+        <!-- Week Navigation -->
+        <div class="date-navigation">
+          <button mat-icon-button (click)="selectDate(weeklyDates()[0].date, 'weekly')" title="Earlier weeks">
+            <mat-icon>chevron_left</mat-icon>
+          </button>
+          <div class="week-chips">
+            <button
+              *ngFor="let weekNav of weeklyDates()"
+              mat-stroked-button
+              [class.active]="weekNav.isToday || weekNav.date === currentWeekStart()"
+              (click)="selectDate(weekNav.date, 'weekly')"
+              class="week-chip"
+            >
+              {{ weekNav.label }}
+              <span *ngIf="weekNav.isToday" class="today-badge">•</span>
+            </button>
+          </div>
+          <button mat-icon-button (click)="selectDate(weeklyDates()[weeklyDates().length - 1].date, 'weekly')" title="Later weeks">
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+        </div>
+
+        <!-- Weekly Reflection Section -->
+        <div class="section">
+          <div class="section-header">
+            <h2>
+              <mat-icon>summarize</mat-icon>
+              Weekly Reflection
+            </h2>
+            <button
+              mat-raised-button
+              color="primary"
+              (click)="generateWeeklyReflection()"
+              [disabled]="generatingWeekly()"
+              class="generate-btn"
+            >
+              <mat-icon *ngIf="!generatingWeekly()">autorenew</mat-icon>
+              <mat-icon *ngIf="generatingWeekly()" class="spinner">hourglass_empty</mat-icon>
+              {{ generatingWeekly() ? 'Generating...' : 'Generate Reflection' }}
+            </button>
+          </div>
+
+          <div *ngIf="weeklyReflectionLoading()" class="loading">
+            <mat-icon class="spinner">hourglass_empty</mat-icon>
+            <p>Loading reflection...</p>
+          </div>
+
+          <div *ngIf="!weeklyReflectionLoading() && weeklyReflection() as reflection; else noWeeklyReflection" class="reflection-card">
+            <!-- Stats Row -->
+            <div class="reflection-stats">
+              <div class="stat-item">
+                <span class="stat-label">Tasks</span>
+                <span class="stat-value">{{ reflection.tasksCompleted }}/{{ reflection.tasksTotal }}</span>
+              </div>
+              <mat-divider [vertical]="true"></mat-divider>
+              <div class="stat-item">
+                <span class="stat-label">Habits</span>
+                <span class="stat-value">{{ reflection.habitsCompleted }}/{{ reflection.habitsTotal }}</span>
+              </div>
+              <mat-divider [vertical]="true"></mat-divider>
+              <div class="stat-item">
+                <span class="stat-label">Mood Trend</span>
+                <span class="stat-value mood-badge" [class]="'mood-' + reflection.moodTrend">
+                  {{ reflection.moodTrend }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Summary -->
+            <div class="reflection-section">
+              <h3>Weekly Summary</h3>
+              <p>{{ reflection.summary }}</p>
+            </div>
+
+            <!-- Highlights -->
+            <div class="reflection-section">
+              <h3><mat-icon class="small-icon">favorite</mat-icon> Week's Highlights</h3>
+              <p>{{ reflection.highlights }}</p>
+            </div>
+
+            <!-- Improvements -->
+            <div class="reflection-section">
+              <h3><mat-icon class="small-icon">trending_up</mat-icon> Key Areas to Focus</h3>
+              <p>{{ reflection.improvements }}</p>
+            </div>
+
+            <!-- Next Week Advice -->
+            <div class="reflection-section tomorrow">
+              <h3><mat-icon class="small-icon">rocket_launch</mat-icon> Next Week's Focus</h3>
+              <p>{{ reflection.tomorrowAdvice }}</p>
+            </div>
+
+            <p class="generated-at">Generated at {{ reflection.generatedAt | date: 'MMM d, yyyy h:mm a' }}</p>
+          </div>
+
+          <ng-template #noWeeklyReflection>
+            <div class="empty-state">
+              <mat-icon>event_note</mat-icon>
+              <p>No weekly reflection yet for this period.</p>
+              <p class="empty-hint">Click "Generate Reflection" to create one.</p>
+            </div>
+          </ng-template>
+        </div>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>

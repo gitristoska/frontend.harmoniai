@@ -207,29 +207,6 @@
       <mat-card-content>
         <!-- TEXT PREVIEW -->
         <p class="entry-preview">{{ entry.textPreview }}</p>
-
-        <!-- KEY THEMES -->
-        <div class="themes-section" *ngIf="getThemeTags(entry.keyThemes).length > 0">
-          <span class="section-label">🏷️ Themes:</span>
-          <mat-chip-set>
-            <mat-chip *ngFor="let theme of getThemeTags(entry.keyThemes)">
-              {{ theme }}
-            </mat-chip>
-          </mat-chip-set>
-        </div>
-
-        <!-- MENTAL HEALTH FLAGS -->
-        <div class="flags-section" *ngIf="getThemeTags(entry.mentalHealthFlags).length > 0">
-          <span class="section-label">🚨 Flags:</span>
-          <div class="flags-emoji-row">
-            <span 
-              *ngFor="let flag of getFlagTags(entry.mentalHealthFlags)" 
-              class="flag-emoji"
-              [title]="mentalHealthFlagDetails[flag]?.description || flag | titlecase">
-              {{ mentalHealthFlagDetails[flag]?.emoji || '⚠️' }}
-            </span>
-          </div>
-        </div>
       </mat-card-content>
 
       <mat-card-actions>

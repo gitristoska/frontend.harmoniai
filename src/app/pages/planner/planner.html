@@ -1,0 +1,494 @@
+<div class="planner-container">
+  <!-- HEADER -->
+  <div class="planner-header">
+    <div class="header-content">
+      <h1 class="planner-title">
+        <mat-icon class="calendar-icon">calendar_today</mat-icon>
+        {{ formatDateForDisplay(currentDate()) }}
+      </h1>
+      
+      <!-- DATE NAVIGATION -->
+      <div class="date-nav">
+        <button mat-icon-button (click)="previousDay()" matTooltip="Yesterday" class="nav-btn">
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+        <button mat-stroked-button (click)="goToToday()" [disabled]="isToday()" class="today-btn">
+          Today
+        </button>
+        <button mat-icon-button (click)="nextDay()" matTooltip="Tomorrow" class="nav-btn">
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <!-- PRIMARY ACTION BUTTONS -->
+    <div class="header-actions">
+      <button mat-raised-button color="accent" (click)="openChatPlanner()" class="chat-btn">
+        <mat-icon>smart_toy</mat-icon>
+        <span>Plan with AI</span>
+      </button>
+      <button mat-icon-button (click)="openTaskModal()" matTooltip="Add Task" class="add-task-fab">
+        <mat-icon>add</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- LOADING SPINNER -->
+  <mat-progress-bar *ngIf="isLoading()" mode="indeterminate"></mat-progress-bar>
+
+  <!-- ERROR MESSAGE -->
+  <div *ngIf="error()" class="error-banner">
+    <mat-icon>error_outline</mat-icon>
+    <span>{{ error() }}</span>
+    <button mat-icon-button (click)="error.set(null)">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <div class="planner-content">
+    <!-- EMPTY STATE - No Tasks -->
+    <div *ngIf="tasks().length === 0" class="empty-state-container">
+      <div class="empty-state">
+        <div class="empty-icon">✨</div>
+        <h2>Your day is clear</h2>
+        <p>Start planning your day with AI or create tasks manually</p>
+        
+        <div class="empty-actions">
+          <button mat-raised-button color="accent" (click)="openChatPlanner()" class="primary-action">
+            <mat-icon>smart_toy</mat-icon>
+            Plan with AI
+          </button>
+          <button mat-stroked-button (click)="openTaskModal()" class="secondary-action">
+            <mat-icon>add</mat-icon>
+            Add Task
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TASKS TIMELINE -->
+    <div *ngIf="tasks().length > 0" class="timeline-container">
+      <!-- TIMELINE HEADER -->
+      <div class="timeline-header">
+        <div class="header-top">
+          <h2>Your Tasks</h2>
+          <div class="task-stats">
+            <span class="stat">{{ getCompletedTasksCount() }} done / {{ getRemainingTasksCount() }} remaining</span>
+            <div class="progress-bar-small">
+              <div class="progress-fill" [style.width.%]="getCompletionPercentage()"></div>
+            </div>
+          </div>
+
+          <!-- VIEW MODE DROPDOWN -->
+          <div class="view-mode-selector">
+            <button mat-icon-button [matMenuTriggerFor]="viewMenu" class="view-mode-btn" matTooltip="Switch view">
+              <mat-icon>{{ viewModeIcon() }}</mat-icon>
+            </button>
+            <mat-menu #viewMenu="matMenu">
+              <button mat-menu-item 
+                (click)="changeViewMode('list')"
+                [class.active]="viewMode() === 'list'">
+                <mat-icon>view_list</mat-icon>
+                <span>List View</span>
+              </button>
+              <button mat-menu-item 
+                (click)="changeViewMode('kanban')"
+                [class.active]="viewMode() === 'kanban'">
+                <mat-icon>dashboard</mat-icon>
+                <span>Kanban Board</span>
+              </button>
+              <button mat-menu-item 
+                (click)="changeViewMode('agenda')"
+                [class.active]="viewMode() === 'agenda'">
+                <mat-icon>schedule</mat-icon>
+                <span>Agenda (Timeline)</span>
+              </button>
+            </mat-menu>
+          </div>
+
+          <!-- TOGGLE FILTERS BUTTON -->
+          <button mat-icon-button
+            (click)="toggleFiltersVisibility()"
+            matTooltip="Toggle filters"
+            class="toggle-filters-btn">
+            <mat-icon>{{ filtersVisible() ? 'expand_less' : 'expand_more' }}</mat-icon>
+          </button>
+        </div>
+
+        <!-- SEARCH AND FILTERS -->
+        <div class="search-filters-section" [class.collapsed]="!filtersVisible()">
+          <mat-form-field appearance="outline" class="search-field">
+            <mat-label>Search tasks...</mat-label>
+            <input matInput 
+              [value]="searchTerm()"
+              (keyup)="updateSearchTerm($event.target.value)"
+              placeholder="Title or description">
+            <mat-icon matSuffix>search</mat-icon>
+          </mat-form-field>
+
+          <!-- CATEGORY FILTERS -->
+          <div class="filter-chips">
+            <span class="filter-label">Category:</span>
+            <button *ngFor="let category of getUniqueCategoriesFromTasks()"
+              mat-stroked-button
+              class="filter-chip"
+              [class.active]="selectedCategory()?.toLowerCase() === category.toLowerCase()"
+              [style.--category-color]="getCategoryColor(category)"
+              (click)="toggleCategoryFilter(category)">
+              {{ category | titlecase }}
+            </button>
+          </div>
+
+          <!-- PRIORITY FILTERS -->
+          <div class="filter-chips">
+            <span class="filter-label">Priority:</span>
+            <button mat-stroked-button
+              class="filter-chip"
+              [class.active]="selectedPriority() === 0"
+              (click)="togglePriorityFilter(0)">
+              🟢 Low
+            </button>
+            <button mat-stroked-button
+              class="filter-chip"
+              [class.active]="selectedPriority() === 1"
+              (click)="togglePriorityFilter(1)">
+              🟡 Medium
+            </button>
+            <button mat-stroked-button
+              class="filter-chip"
+              [class.active]="selectedPriority() === 2"
+              (click)="togglePriorityFilter(2)">
+              🔴 High
+            </button>
+          </div>
+
+          <!-- CLEAR FILTERS BUTTON -->
+          <button *ngIf="hasActiveFilters()"
+            mat-icon-button
+            (click)="clearAllFilters()"
+            matTooltip="Clear all filters"
+            class="clear-filters-btn">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <!-- SWITCH VIEW TEMPLATES -->
+      <ng-container [ngSwitch]="viewMode()">
+        <!-- LIST VIEW (DEFAULT) -->
+        <ng-container *ngSwitchCase="'list'">
+          <!-- SCHEDULED TASKS SECTION -->
+          <div class="timeline-section" *ngIf="getFixedTimeTasks().length > 0">
+            <h3 class="section-title">⏲️ Scheduled</h3>
+            <div class="tasks-list">
+              <div *ngFor="let task of getFixedTimeTasks(); trackBy: trackByTaskId"
+                class="task-card"
+                [class.completed]="isTaskDone(task.status)"
+                [class.in-progress]="isTaskInProgress(task.status)"
+              >
+                
+                <!-- Time Badge -->
+                <div class="task-time-badge" [class.empty]="!task.startTime">
+                  {{ task.startTime || '' }}
+                </div>
+
+                <!-- Task Content -->
+                <div class="task-body">
+                  <div class="task-header">
+                    <button mat-icon-button 
+                      class="task-status-btn"
+                      [matTooltip]="'Click to cycle: ' + getStatusLabel(task.status) + ' → Next'"
+                      (click)="toggleTaskStatus(task)"
+                      [ngClass]="'status-' + task.status">
+                      {{ getStatusIcon(task.status) }}
+                    </button>
+                    <h3 class="task-title">{{ task.title }}</h3>
+                    <span *ngIf="task.isFixedTime" class="fixed-badge" matTooltip="AI cannot reschedule this task">📌 FIXED TIME</span>
+                    <span *ngIf="!task.isFixedTime" class="flexible-badge" matTooltip="AI can reschedule this task">⏰ FLEXIBLE</span>
+                  </div>
+
+                  <p *ngIf="task.description" class="task-description">
+                    {{ task.description }}
+                  </p>
+
+                  <div class="task-metadata">
+                    <span class="meta-item category-badge">{{ task.category }}</span>
+                    <span class="meta-item" [ngClass]="'priority-' + getPriorityLabel(task.priority).toLowerCase()">
+                      {{ getPriorityLabel(task.priority) }}
+                    </span>
+                    <span class="meta-item status-badge" [ngClass]="'status-' + task.status">
+                      {{ getStatusLabel(task.status) }}
+                    </span>
+                    <span *ngIf="task.duration" class="meta-item duration">
+                      ⏱ {{ task.duration }}min
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="task-actions">
+                  <button mat-icon-button (click)="openTaskModal(task)" matTooltip="Edit">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button mat-icon-button (click)="deleteTask(task.id)" matTooltip="Delete">
+                    <mat-icon>delete_outline</mat-icon>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ANYTIME TASKS SECTION -->
+          <div class="timeline-section" *ngIf="getFlexibleTasks().length > 0">
+            <h3 class="section-title">📋 Anytime</h3>
+            <div class="tasks-list">
+              <div *ngFor="let task of getFlexibleTasks(); trackBy: trackByTaskId"
+                class="task-card"
+                [class.completed]="isTaskDone(task.status)"
+                [class.in-progress]="isTaskInProgress(task.status)"
+              >
+                
+                <!-- Time Badge -->
+                <div class="task-time-badge" [class.empty]="!task.startTime">
+                  {{ task.startTime || '' }}
+                </div>
+
+                <!-- Task Content -->
+                <div class="task-body">
+                  <div class="task-header">
+                    <button mat-icon-button 
+                      class="task-status-btn"
+                      [matTooltip]="'Click to cycle: ' + getStatusLabel(task.status) + ' → Next'"
+                      (click)="toggleTaskStatus(task)"
+                      [ngClass]="'status-' + task.status">
+                      {{ getStatusIcon(task.status) }}
+                    </button>
+                    <h3 class="task-title">{{ task.title }}</h3>
+                    <span *ngIf="task.isFixedTime" class="fixed-badge" matTooltip="AI cannot reschedule this task">📌 FIXED TIME</span>
+                    <span *ngIf="!task.isFixedTime" class="flexible-badge" matTooltip="AI can reschedule this task">⏰ FLEXIBLE</span>
+                  </div>
+
+                  <p *ngIf="task.description" class="task-description">
+                    {{ task.description }}
+                  </p>
+
+                  <div class="task-metadata">
+                    <span class="meta-item category-badge">{{ task.category }}</span>
+                    <span class="meta-item" [ngClass]="'priority-' + getPriorityLabel(task.priority).toLowerCase()">
+                      {{ getPriorityLabel(task.priority) }}
+                    </span>
+                    <span class="meta-item status-badge" [ngClass]="'status-' + task.status">
+                      {{ getStatusLabel(task.status) }}
+                    </span>
+                    <span *ngIf="task.duration" class="meta-item duration">
+                      ⏱ {{ task.duration }}min
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="task-actions">
+                  <button mat-icon-button (click)="openTaskModal(task)" matTooltip="Edit">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button mat-icon-button (click)="deleteTask(task.id)" matTooltip="Delete">
+                    <mat-icon>delete_outline</mat-icon>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+
+        <!-- KANBAN VIEW -->
+        <ng-container *ngSwitchCase="'kanban'">
+          <div class="kanban-board">
+            <!-- TODO COLUMN -->
+            <div class="kanban-column">
+              <h3 class="kanban-header">📝 To Do</h3>
+              <div class="kanban-tasks">
+                <div *ngFor="let task of getTasksByStatus('Todo'); trackBy: trackByTaskId"
+                  class="kanban-card"
+                  (click)="openTaskModal(task)">
+                  <div class="kanban-card-header">
+                    <h4>{{ task.title }}</h4>
+                    <button mat-icon-button 
+                      (click)="deleteTask(task.id); $event.stopPropagation()"
+                      matTooltip="Delete"
+                      class="delete-btn">
+                      <mat-icon>close</mat-icon>
+                    </button>
+                  </div>
+                  <p *ngIf="task.description" class="kanban-description">{{ task.description }}</p>
+                  <div class="kanban-card-badges">
+                    <span class="badge category">{{ task.category }}</span>
+                    <span class="badge priority" [ngClass]="'priority-' + getPriorityLabel(task.priority).toLowerCase()">
+                      {{ getPriorityLabel(task.priority) }}
+                    </span>
+                    <span *ngIf="task.startTime" class="badge time">⏰ {{ task.startTime }}</span>
+                    <span *ngIf="task.duration" class="badge duration">⏱ {{ task.duration }}min</span>
+                  </div>
+                  <button mat-mini-fab 
+                    (click)="toggleTaskStatus(task); $event.stopPropagation()"
+                    color="primary"
+                    class="move-btn"
+                    matTooltip="Move to In Progress">
+                    <mat-icon>arrow_forward</mat-icon>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- IN PROGRESS COLUMN -->
+            <div class="kanban-column">
+              <h3 class="kanban-header">🔄 In Progress</h3>
+              <div class="kanban-tasks">
+                <div *ngFor="let task of getTasksByStatus('InProgress'); trackBy: trackByTaskId"
+                  class="kanban-card"
+                  (click)="openTaskModal(task)">
+                  <div class="kanban-card-header">
+                    <h4>{{ task.title }}</h4>
+                    <button mat-icon-button 
+                      (click)="deleteTask(task.id); $event.stopPropagation()"
+                      matTooltip="Delete"
+                      class="delete-btn">
+                      <mat-icon>close</mat-icon>
+                    </button>
+                  </div>
+                  <p *ngIf="task.description" class="kanban-description">{{ task.description }}</p>
+                  <div class="kanban-card-badges">
+                    <span class="badge category">{{ task.category }}</span>
+                    <span class="badge priority" [ngClass]="'priority-' + getPriorityLabel(task.priority).toLowerCase()">
+                      {{ getPriorityLabel(task.priority) }}
+                    </span>
+                    <span *ngIf="task.startTime" class="badge time">⏰ {{ task.startTime }}</span>
+                    <span *ngIf="task.duration" class="badge duration">⏱ {{ task.duration }}min</span>
+                  </div>
+                  <button mat-mini-fab 
+                    (click)="toggleTaskStatus(task); $event.stopPropagation()"
+                    color="accent"
+                    class="move-btn"
+                    matTooltip="Move to Done">
+                    <mat-icon>check</mat-icon>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- DONE COLUMN -->
+            <div class="kanban-column">
+              <h3 class="kanban-header">✅ Done</h3>
+              <div class="kanban-tasks">
+                <div *ngFor="let task of getTasksByStatus('Done'); trackBy: trackByTaskId"
+                  class="kanban-card completed"
+                  (click)="openTaskModal(task)">
+                  <div class="kanban-card-header">
+                    <h4>{{ task.title }}</h4>
+                    <button mat-icon-button 
+                      (click)="deleteTask(task.id); $event.stopPropagation()"
+                      matTooltip="Delete"
+                      class="delete-btn">
+                      <mat-icon>close</mat-icon>
+                    </button>
+                  </div>
+                  <p *ngIf="task.description" class="kanban-description">{{ task.description }}</p>
+                  <div class="kanban-card-badges">
+                    <span class="badge category">{{ task.category }}</span>
+                    <span class="badge priority" [ngClass]="'priority-' + getPriorityLabel(task.priority).toLowerCase()">
+                      {{ getPriorityLabel(task.priority) }}
+                    </span>
+                    <span *ngIf="task.startTime" class="badge time">⏰ {{ task.startTime }}</span>
+                    <span *ngIf="task.duration" class="badge duration">⏱ {{ task.duration }}min</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+
+        <!-- AGENDA VIEW (HOURLY TIMELINE) -->
+        <ng-container *ngSwitchCase="'agenda'">
+          <div class="agenda-timeline">
+            <!-- SCHEDULED TASKS TIMELINE -->
+            <div class="agenda-section" *ngIf="getFixedTimeTasks().length > 0">
+              <h3 class="agenda-title">⏲️ Scheduled Tasks</h3>
+              <div class="time-slots">
+                <div *ngFor="let hour of getHourSlots()" 
+                  class="time-slot"
+                  [class.has-tasks]="getTasksForHour(hour).length > 0">
+                  <div class="time-label">{{ hour }}:00</div>
+                  <div class="slot-tasks">
+                    <div *ngFor="let task of getTasksForHour(hour); trackBy: trackByTaskId"
+                      class="agenda-task-card"
+                      [class.completed]="isTaskDone(task.status)"
+                      (click)="openTaskModal(task)">
+                      <div class="agenda-task-header">
+                        <button mat-icon-button 
+                          class="task-status-btn"
+                          [ngClass]="'status-' + task.status"
+                          (click)="toggleTaskStatus(task); $event.stopPropagation()">
+                          {{ getStatusIcon(task.status) }}
+                        </button>
+                        <div class="agenda-task-main">
+                          <span class="task-time-compact">{{ task.startTime }}</span>
+                          <h4 class="task-title-compact">{{ task.title }}</h4>
+                        </div>
+                        <button mat-icon-button 
+                          (click)="deleteTask(task.id); $event.stopPropagation()"
+                          matTooltip="Delete"
+                          class="delete-btn">
+                          <mat-icon>close</mat-icon>
+                        </button>
+                      </div>
+                      <p *ngIf="task.description" class="agenda-description">{{ task.description }}</p>
+                      <div class="agenda-task-badges">
+                        <span class="badge category">{{ task.category }}</span>
+                        <span class="badge priority" [ngClass]="'priority-' + getPriorityLabel(task.priority).toLowerCase()">
+                          {{ getPriorityLabel(task.priority) }}
+                        </span>
+                        <span *ngIf="task.duration" class="badge duration">⏱ {{ task.duration }}min</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- FLEXIBLE/ANYTIME TASKS SIDEBAR -->
+            <div class="agenda-sidebar">
+              <h3 class="agenda-title">📋 Flexible Tasks</h3>
+              
+              <!-- Tasks List -->
+              <div class="flexible-tasks" *ngIf="getFlexibleTasks().length > 0">
+                <div *ngFor="let task of getFlexibleTasks(); trackBy: trackByTaskId"
+                  class="agenda-task-sidebar"
+                  [class.completed]="isTaskDone(task.status)"
+                  (click)="openTaskModal(task)">
+                  <button mat-icon-button 
+                    class="task-status-btn"
+                    [ngClass]="'status-' + task.status"
+                    (click)="toggleTaskStatus(task); $event.stopPropagation()">
+                    {{ getStatusIcon(task.status) }}
+                  </button>
+                  <div class="task-info">
+                    <span class="task-title-agenda">{{ task.title }}</span>
+                    <span class="priority-badge" [ngClass]="'priority-' + getPriorityLabel(task.priority).toLowerCase()">
+                      {{ getPriorityLabel(task.priority) }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Empty State -->
+              <div class="flexible-tasks-empty" *ngIf="getFlexibleTasks().length === 0">
+                <div class="empty-icon">📭</div>
+                <p class="empty-message">Flexible tasks list is empty</p>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+      </ng-container>
+    </div>
+  </div>
+</div>

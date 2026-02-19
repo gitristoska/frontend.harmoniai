@@ -138,10 +138,11 @@ export class SignupComponent implements OnInit {
     if (control.hasError('weakPassword')) {
       const errors = control.getError('weakPassword');
       const missing = [];
+      if (!errors.hasMinLength) missing.push('8+ characters');
       if (!errors.hasUpperCase) missing.push('uppercase letter');
       if (!errors.hasLowerCase) missing.push('lowercase letter');
       if (!errors.hasNumeric) missing.push('number');
-      return `Password needs: ${missing.join(', ')}`;
+      return `Password must contain: ${missing.join(', ')}`;
     }
     return 'Invalid password';
   }

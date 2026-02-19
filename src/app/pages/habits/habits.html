@@ -193,9 +193,12 @@
       </div>
       
       <!-- Suggestions list -->
-      <ul class="ai-suggestions" *ngIf="getSuggestionsList().length > 0 && !aiSuggestionsInitialLoading">
-        <li *ngFor="let suggestion of getSuggestionsList()">{{ suggestion }}</li>
-      </ul>
+      <div class="ai-suggestions" *ngIf="getSuggestionsList().length > 0 && !aiSuggestionsInitialLoading">
+        <div *ngFor="let suggestion of getSuggestionsList(); let i = index" class="suggestion-item">
+          <div class="suggestion-number">{{ i + 1 }}</div>
+          <div class="suggestion-text">{{ suggestion }}</div>
+        </div>
+      </div>
       
       <!-- Empty state -->
       <div class="empty-suggestions" *ngIf="getSuggestionsList().length === 0 && !aiSuggestionsInitialLoading && !suggestionsLoading">

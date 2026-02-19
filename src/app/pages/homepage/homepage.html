@@ -1,65 +1,136 @@
 <section class="homepage page-container">
-  <mat-card class="welcome-card">
-    <div class="welcome-left">
+  <!-- WELCOME HEADER -->
+  <div class="planner-header">
+    <div class="welcome-card">
       <h2>{{ greeting() }}</h2>
-      <p class="subtitle">Here's your overview for {{ todayDateString() }}</p>
+      <p class="subtitle">{{ todayDateString() }}</p>
     </div>
-  </mat-card>
-
-  <div class="overview-cards">
-    <mat-card class="overview small blue">
-      <div class="card-top"><div>Tasks Today</div><mat-icon>check_circle</mat-icon></div>
-      <div class="card-body"><div class="big">{{ 2 - tasksCount }}</div><div class="sub">1 / 3 completed</div></div>
-    </mat-card>
-
-    <mat-card class="overview small purple">
-      <div class="card-top"><div>Habits</div><mat-icon>local_fire_department</mat-icon></div>
-      <div class="card-body"><div class="big">{{ habitCompletionPercent }}%</div><div class="sub">completion rate</div></div>
-    </mat-card>
-
-    <mat-card class="overview small pink">
-      <div class="card-top"><div>Productivity</div><mat-icon>trending_up</mat-icon></div>
-      <div class="card-body"><div class="big">{{ productivityLabel() }}</div><div class="sub"></div></div>
-    </mat-card>
   </div>
 
-  <mat-card class="tasks-card">
-    <h3>Today's Tasks</h3>
-    <div class="task-list">
-      <div *ngFor="let t of tasksToday(); let i = index" class="task-item">
-        <button mat-icon-button (click)="toggleTaskDone(i)">
-          <mat-icon *ngIf="t.done">check_circle</mat-icon>
-          <mat-icon *ngIf="!t.done">radio_button_unchecked</mat-icon>
-        </button>
-        <div class="task-main">
-          <div class="task-title">{{ t.title }}</div>
-          <div class="task-meta">{{ t.time }} • {{ t.tag }}</div>
+  <!-- OVERVIEW STATS -->
+  <div class="stats-container">
+    <div class="stat-card tasks-stat">
+      <div class="stat-top">
+        <span class="stat-label">Tasks Today</span>
+        <mat-icon>check_circle</mat-icon>
+      </div>
+      <div class="stat-value">{{ tasksToday().length }}</div>
+      <div class="stat-detail">{{ getCompletedTasks() }} completed</div>
+    </div>
+
+    <div class="stat-card habits-stat">
+      <div class="stat-top">
+        <span class="stat-label">Habits Today</span>
+        <mat-icon>local_fire_department</mat-icon>
+      </div>
+      <div class="stat-value">{{ habitCompletionPercent }}%</div>
+      <div class="stat-detail">{{ getCompletedHabits() }}/{{ habits().length }} done</div>
+    </div>
+
+    <div class="stat-card productivity-stat">
+      <div class="stat-top">
+        <span class="stat-label">Productivity</span>
+        <mat-icon>trending_up</mat-icon>
+      </div>
+      <div class="stat-value">{{ productivityLabel() }}</div>
+      <div class="stat-detail">{{ productivityPercent() }}% tasks complete</div>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT AREA - Tasks and Habits Side by Side -->
+  <div class="content-area">
+    <!-- FOCUS MODE - Today's Tasks -->
+    <div class="focus-mode-container">
+      <div class="focus-header">
+        <h3 class="focus-title">🎯 Focus Mode</h3>
+        <p class="focus-subtitle">Your tasks for today</p>
+      </div>
+
+      <div *ngIf="tasksToday().length === 0" class="empty-state">
+        <div class="empty-icon">✨</div>
+        <p>No tasks for today. Great job!</p>
+      </div>
+
+      <div *ngIf="tasksToday().length > 0" class="focus-tasks">
+        <div *ngFor="let task of tasksToday(); let i = index"
+          class="focus-task-card"
+          [class.completed]="task.done">
+          
+          <button mat-icon-button
+            class="task-status-btn"
+            [class.done]="task.done"
+            (click)="toggleTaskDone(i)">
+            <mat-icon>{{ task.done ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+          </button>
+
+          <div class="task-content">
+            <div class="task-title" [class.done]="task.done">{{ task.title }}</div>
+            <div class="task-meta">
+              <span *ngIf="task.tag" class="task-tag">{{ task.tag }}</span>
+              <span class="priority-badge" [class]="task.priority">{{ task.priority }}</span>
+            </div>
+          </div>
         </div>
-        <div class="task-badge" [class.high]="t.priority==='high'" [class.medium]="t.priority==='medium'">{{ t.priority }}</div>
       </div>
     </div>
-  </mat-card>
 
-  <mat-card class="habit-progress">
-    <h3>Habit Progress</h3>
-    <div class="habit-grid">
-      <div *ngFor="let h of habits(); let i = index" class="habit-row">
-        <button mat-icon-button (click)="toggleHabit(i)"><mat-icon *ngIf="h.done">check_circle</mat-icon><mat-icon *ngIf="!h.done">radio_button_unchecked</mat-icon></button>
-        <div class="habit-name">{{ h.name }}</div>
+    <!-- TODAY'S HABITS -->
+    <div class="habits-container">
+      <div class="habits-header">
+        <h3 class="habits-title">🔥 Today's Habits</h3>
+        <p class="habits-subtitle">Build momentum</p>
+      </div>
+
+      <div *ngIf="habits().length === 0" class="empty-state">
+        <div class="empty-icon">📅</div>
+        <p>No habits scheduled for today</p>
+      </div>
+
+      <div *ngIf="habits().length > 0" class="habits-list">
+        <div *ngFor="let habit of habits(); let i = index"
+          class="habit-card"
+          [class.completed]="habit.done">
+          
+          <button mat-icon-button
+            class="habit-status-btn"
+            [class.done]="habit.done"
+            (click)="toggleHabit(i)">
+            <mat-icon>{{ habit.done ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+          </button>
+
+          <div class="habit-name" [class.done]="habit.done">
+            {{ habit.name }}
+          </div>
+        </div>
       </div>
     </div>
-  </mat-card>
+  </div>
 
-  <mat-card class="ai-recs">
-    <h3>AI Recommendations</h3>
-    <div class="rec-list">
-      <div *ngFor="let r of aiRecommendations()" class="rec-item">
-        <div class="rec-icon"><mat-icon>{{ r.icon }}</mat-icon></div>
-        <div class="rec-body">
+  <!-- AI RECOMMENDATIONS -->
+  <div class="ai-recommendations-container">
+    <div class="ai-header">
+      <h3>💡 AI Insights</h3>
+    </div>
+
+    <div *ngIf="aiRecommendationsLoading()" class="loading-state">
+      <mat-icon class="spinner">hourglass_empty</mat-icon>
+      <p>Loading insights...</p>
+    </div>
+
+    <div *ngIf="!aiRecommendationsLoading() && aiRecommendations().length > 0; else noRecommendations" class="rec-list">
+      <div *ngFor="let r of aiRecommendations()" class="rec-card">
+        <div class="rec-icon">{{ getIconEmoji(r.icon) }}</div>
+        <div class="rec-content">
           <div class="rec-title">{{ r.title }}</div>
-          <div class="rec-desc">{{ r.desc }}</div>
+          <div class="rec-desc">{{ r.description }}</div>
         </div>
       </div>
     </div>
-  </mat-card>
+
+    <ng-template #noRecommendations>
+      <div class="empty-recommendations">
+        <p>No insights available right now.</p>
+      </div>
+    </ng-template>
+  </div>
 </section>

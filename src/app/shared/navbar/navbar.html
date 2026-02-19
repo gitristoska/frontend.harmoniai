@@ -24,6 +24,10 @@
         <mat-icon>check_circle</mat-icon>
         <span>Habits</span>
       </a>
+      <a mat-list-item routerLink="/insights" routerLinkActive="active" (click)="toggleSidenav()">
+        <mat-icon>insights</mat-icon>
+        <span>Reflections</span>
+      </a>
       <a mat-list-item routerLink="/settings" routerLinkActive="active" (click)="toggleSidenav()">
         <mat-icon>settings</mat-icon>
         <span>Settings</span>
@@ -68,6 +72,10 @@
       <button mat-button routerLink="/habits" routerLinkActive="active" [disabled]="!modules().habits">
         <mat-icon>check_circle</mat-icon>
         Habits
+      </button>
+      <button mat-button routerLink="/insights" routerLinkActive="active">
+        <mat-icon>insights</mat-icon>
+        Reflections
       </button>
       <button mat-button routerLink="/settings" routerLinkActive="active">
         <mat-icon>settings</mat-icon>
