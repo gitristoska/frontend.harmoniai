@@ -1,12 +1,10 @@
 <div class="insights-container">
   <div class="insights-header">
-    <div class="header-content">
-      <h1>
-        <mat-icon class="header-icon">insights</mat-icon>
-        AI Reflections & Insights
-      </h1>
-      <p class="subtitle">Daily recommendations and weekly reflections powered by AI analysis</p>
-    </div>
+    <h1>
+      <mat-icon class="header-icon">insights</mat-icon>
+      AI Reflections & Insights
+    </h1>
+    <p class="subtitle">Daily recommendations and weekly reflections powered by AI analysis</p>
   </div>
 
   <mat-tab-group class="insights-tabs" [selectedIndex]="selectedTabIndex()">
@@ -26,7 +24,6 @@
           <div class="date-chips">
             <button
               *ngFor="let dateNav of dailyDates()"
-              mat-stroked-button
               [class.active]="dateNav.isToday || dateNav.date === currentDate()"
               (click)="selectDate(dateNav.date, 'daily')"
               class="date-chip"
@@ -48,11 +45,9 @@
               Daily Reflection
             </h2>
             <button
-              mat-raised-button
-              color="primary"
+              class="generate-btn"
               (click)="generateDailyReflection()"
               [disabled]="generatingDaily()"
-              class="generate-btn"
             >
               <mat-icon *ngIf="!generatingDaily()">autorenew</mat-icon>
               <mat-icon *ngIf="generatingDaily()" class="spinner">hourglass_empty</mat-icon>
@@ -140,7 +135,6 @@
           <div class="week-chips">
             <button
               *ngFor="let weekNav of weeklyDates()"
-              mat-stroked-button
               [class.active]="weekNav.isToday || weekNav.date === currentWeekStart()"
               (click)="selectDate(weekNav.date, 'weekly')"
               class="week-chip"
@@ -162,11 +156,9 @@
               Weekly Reflection
             </h2>
             <button
-              mat-raised-button
-              color="primary"
+              class="generate-btn"
               (click)="generateWeeklyReflection()"
               [disabled]="generatingWeekly()"
-              class="generate-btn"
             >
               <mat-icon *ngIf="!generatingWeekly()">autorenew</mat-icon>
               <mat-icon *ngIf="generatingWeekly()" class="spinner">hourglass_empty</mat-icon>

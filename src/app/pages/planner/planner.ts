@@ -196,7 +196,9 @@ export class PlannerComponent implements OnInit {
 
   openTaskModal(task?: PlannerTask): void {
     const dialogRef = this.dialog.open(TaskModalComponent, {
-      width: '600px',
+      width: '95vw',
+      maxWidth: '1200px',
+      maxHeight: '90vh',
       data: { task: task || null, currentDate: this.currentDate() }
     });
 
@@ -608,114 +610,93 @@ export class PlannerComponent implements OnInit {
   selector: 'app-task-modal',
   template: `
     <h2 mat-dialog-title>{{ data.task ? 'Edit Task' : 'Create Task' }}</h2>
-    <mat-dialog-content>
-      <form [formGroup]="form">
-        <!-- REQUIRED FIELDS -->
-        <div class="form-section">
-          <h3 class="section-header">📋 Task Details</h3>
-          
-          <!-- Title (Required) -->
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Title *</mat-label>
-            <input matInput formControlName="title" placeholder="Task name" maxlength="200">
-            <mat-hint align="end">{{ form.get('title')?.value?.length || 0 }}/200</mat-hint>
-            <mat-error>Title is required</mat-error>
-          </mat-form-field>
+    <mat-dialog-content class="compact-form">
+      <form [formGroup]="form" class="form-grid">
+        <!-- Title (Required) - Full width -->
+        <mat-form-field appearance="outline" class="grid-col-2">
+          <mat-label>Title *</mat-label>
+          <input matInput formControlName="title" placeholder="Task name" maxlength="200">
+          <mat-hint align="end">{{ form.get('title')?.value?.length || 0 }}/200</mat-hint>
+          <mat-error>Title is required</mat-error>
+        </mat-form-field>
 
-          <!-- Description (Optional) -->
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Description</mat-label>
-            <textarea matInput formControlName="description" rows="3" 
-              placeholder="Brief description (optional)" maxlength="1000"></textarea>
-            <mat-hint align="end">{{ form.get('description')?.value?.length || 0 }}/1000</mat-hint>
-          </mat-form-field>
+        <!-- Description - Full width -->
+        <mat-form-field appearance="outline" class="grid-col-2">
+          <mat-label>Description</mat-label>
+          <textarea matInput formControlName="description" rows="2" 
+            placeholder="Brief description (optional)" maxlength="1000"></textarea>
+          <mat-hint align="end">{{ form.get('description')?.value?.length || 0 }}/1000</mat-hint>
+        </mat-form-field>
 
-          <!-- Category (Dropdown) -->
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Category</mat-label>
-            <mat-select formControlName="category">
-              <mat-option value="work">💼 Work</mat-option>
-              <mat-option value="personal">👤 Personal</mat-option>
-              <mat-option value="health">🏥 Health</mat-option>
-              <mat-option value="finance">💰 Finance</mat-option>
-              <mat-option value="social">👥 Social</mat-option>
-              <mat-option value="other">📌 Other</mat-option>
-            </mat-select>
-          </mat-form-field>
+        <!-- Category - 1 column -->
+        <mat-form-field appearance="outline" class="grid-col-1">
+          <mat-label>Category</mat-label>
+          <mat-select formControlName="category">
+            <mat-option value="work">💼 Work</mat-option>
+            <mat-option value="personal">👤 Personal</mat-option>
+            <mat-option value="health">🏥 Health</mat-option>
+            <mat-option value="finance">💰 Finance</mat-option>
+            <mat-option value="social">👥 Social</mat-option>
+            <mat-option value="other">📌 Other</mat-option>
+          </mat-select>
+        </mat-form-field>
 
-          <!-- Priority (Radio Buttons) -->
-          <div class="priority-group">
-            <label class="group-label">Priority:</label>
-            <mat-radio-group formControlName="priority" class="radio-group">
-              <label class="radio-option">
-                <mat-radio-button value="1"></mat-radio-button>
-                <span>🔴 High</span>
-              </label>
-              <label class="radio-option">
-                <mat-radio-button value="2"></mat-radio-button>
-                <span>🟡 Medium</span>
-              </label>
-              <label class="radio-option">
-                <mat-radio-button value="3"></mat-radio-button>
-                <span>🟢 Low</span>
-              </label>
-            </mat-radio-group>
-          </div>
+        <!-- Start Date - 1 column -->
+        <mat-form-field appearance="outline" class="grid-col-1">
+          <mat-label>Start Date *</mat-label>
+          <input matInput [matDatepicker]="datePicker" formControlName="startDate" required readonly>
+          <mat-datepicker-toggle matIconSuffix [for]="datePicker"></mat-datepicker-toggle>
+          <mat-datepicker #datePicker></mat-datepicker>
+        </mat-form-field>
+
+        <!-- Start Time - 1 column -->
+        <mat-form-field appearance="outline" class="grid-col-1">
+          <mat-label>Start Time</mat-label>
+          <input matInput type="time" formControlName="startTime" placeholder="09:00">
+          <mat-hint>Optional</mat-hint>
+        </mat-form-field>
+
+        <!-- Duration - 1 column -->
+        <mat-form-field appearance="outline" class="grid-col-1">
+          <mat-label>Duration (min)</mat-label>
+          <input matInput type="number" formControlName="duration" placeholder="60" min="1" max="1440">
+        </mat-form-field>
+
+        <!-- Priority - Full width horizontal -->
+        <div class="priority-group grid-col-2">
+          <label class="group-label">Priority:</label>
+          <mat-radio-group formControlName="priority" class="radio-group-horizontal">
+            <label class="radio-option">
+              <mat-radio-button value="1"></mat-radio-button>
+              <span>🔴 High</span>
+            </label>
+            <label class="radio-option">
+              <mat-radio-button value="2"></mat-radio-button>
+              <span>🟡 Medium</span>
+            </label>
+            <label class="radio-option">
+              <mat-radio-button value="3"></mat-radio-button>
+              <span>🟢 Low</span>
+            </label>
+          </mat-radio-group>
         </div>
 
-        <!-- SCHEDULING SECTION -->
-        <div class="form-section">
-          <h3 class="section-header">⏰ Scheduling</h3>
-
-          <!-- Start Date (Required) -->
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Start Date *</mat-label>
-            <input matInput [matDatepicker]="datePicker" formControlName="startDate" required readonly>
-            <mat-datepicker-toggle matIconSuffix [for]="datePicker"></mat-datepicker-toggle>
-            <mat-datepicker #datePicker></mat-datepicker>
-          </mat-form-field>
-
-          <!-- Start Time + Duration -->
-          <div class="two-column">
-            <mat-form-field appearance="outline" class="half-width">
-              <mat-label>Start Time</mat-label>
-              <input matInput 
-                type="time"
-                formControlName="startTime" 
-                placeholder="09:00">
-              <mat-hint>Optional - leave blank for flexible timing</mat-hint>
-            </mat-form-field>
-
-            <mat-form-field appearance="outline" class="half-width">
-              <mat-label>Duration</mat-label>
-              <input matInput type="number" formControlName="duration" 
-                placeholder="60" min="1" max="1440">
-              <mat-hint>Minutes (optional)</mat-hint>
-            </mat-form-field>
-          </div>
-
-          <!-- Fixed Time Checkbox -->
-          <div class="checkbox-group">
-            <mat-checkbox formControlName="isFixedTime">
-              <span class="checkbox-label">📌 Fixed time (can't be rescheduled by AI)</span>
-            </mat-checkbox>
-            <mat-hint class="checkbox-hint">Check this for appointments/meetings with specific times</mat-hint>
-          </div>
+        <!-- Fixed Time Checkbox - Full width -->
+        <div class="checkbox-group grid-col-2">
+          <mat-checkbox formControlName="isFixedTime" class="checkbox-inline">
+            <span class="checkbox-label">📌 Fixed time (can't be rescheduled by AI)</span>
+          </mat-checkbox>
         </div>
 
-        <!-- STATUS (Edit mode only) -->
-        <div class="form-section" *ngIf="data.task">
-          <h3 class="section-header">✅ Status</h3>
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Status</mat-label>
-            <mat-select formControlName="status">
-              <mat-option value="Todo">⭕ To Do</mat-option>
-              <mat-option value="InProgress">🔄 In Progress</mat-option>
-              <mat-option value="Done">✅ Done</mat-option>
-            </mat-select>
-          </mat-form-field>
-        </div>
-
+        <!-- Status (Edit mode only) - 1 column -->
+        <mat-form-field appearance="outline" class="grid-col-1" *ngIf="data.task">
+          <mat-label>Status</mat-label>
+          <mat-select formControlName="status">
+            <mat-option value="Todo">⭕ To Do</mat-option>
+            <mat-option value="InProgress">🔄 In Progress</mat-option>
+            <mat-option value="Done">✅ Done</mat-option>
+          </mat-select>
+        </mat-form-field>
       </form>
     </mat-dialog-content>
     <mat-dialog-actions align="end">
@@ -726,83 +707,90 @@ export class PlannerComponent implements OnInit {
     </mat-dialog-actions>
   `,
   styles: [`
-    .full-width { width: 100%; margin-bottom: 16px; }
-    .two-column { display: flex; gap: 16px; }
-    .half-width { flex: 1; }
-    
-    .form-section {
-      margin-bottom: 28px;
-      padding-bottom: 16px;
-      border-bottom: 1px solid #eee;
-      
-      &:last-child {
-        border-bottom: none;
-      }
+    .compact-form {
+      max-height: calc(90vh - 200px);
+      overflow-y: auto;
+      padding: 12px 16px;
     }
-    
-    .section-header {
-      font-size: 14px;
-      font-weight: 700;
-      color: #667eea;
-      margin: 0 0 16px 0;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
     }
-    
+
+    .grid-col-1 {
+      grid-column: span 1;
+    }
+
+    .grid-col-2 {
+      grid-column: span 2;
+    }
+
+    mat-form-field {
+      width: 100%;
+      margin-bottom: 4px;
+    }
+
     .priority-group {
-      margin: 16px 0;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 0;
     }
-    
+
     .group-label {
-      display: block;
       font-weight: 600;
       color: #333;
-      margin-bottom: 12px;
-      font-size: 14px;
+      font-size: 13px;
+      min-width: 60px;
+      margin: 0;
+      flex-shrink: 0;
     }
-    
-    .radio-group {
+
+    .radio-group-horizontal {
       display: flex;
-      gap: 20px;
+      gap: 16px;
       flex-wrap: wrap;
+      flex: 1;
     }
-    
+
     .radio-option {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       cursor: pointer;
-      font-size: 14px;
+      font-size: 13px;
       
       &:hover {
         color: #667eea;
       }
     }
-    
+
     .checkbox-group {
-      margin: 16px 0;
+      display: flex;
+      align-items: center;
+      padding: 8px 0;
+      gap: 8px;
     }
-    
+
+    .checkbox-inline {
+      margin: 0 !important;
+    }
+
     .checkbox-label {
-      font-size: 14px;
+      font-size: 13px;
       color: #333;
       font-weight: 500;
     }
-    
-    .checkbox-hint {
-      display: block;
-      font-size: 12px;
-      color: #999;
-      margin-top: 4px;
-      margin-left: 32px;
-    }
 
-    .timepicker-toggle {
-      cursor: pointer !important;
-      color: #667eea;
-      
-      &:hover {
-        opacity: 0.8;
+    @media (max-width: 768px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .grid-col-2 {
+        grid-column: span 1;
       }
     }
   `],
